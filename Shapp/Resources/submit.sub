@@ -1,0 +1,9 @@
+cmd=batch.py
+InitialDir=sim_0
+log=sim.log
+Transfer_Input_Files=simdata
+Transfer_Output_Files=powers
+when_to_transfer_output = ON_EXIT
+Should_Transfer_Files = YES
+Args=simdata
+Queue

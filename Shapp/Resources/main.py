@@ -1,0 +1,51 @@
+import classad
+import htcondor
+import os
+import random
+
+
+def perform_log():
+    schedd = htcondor.Schedd(htcondor.Collector().locate(htcondor.DaemonTypes.Schedd, "masterubuntu"))
+    # for history in schedd.history(classad.ExprTree("1"), ["ClusterId", "ProcId"], 10):
+    #     print "{}.{}".format(history["ClusterId"], history["ProcId"])
+    #     print "Attribs no: ", len(history)
+    jobs = schedd.query("1", ["ClusterId", "JobStatus", "LastRemoteHost"])
+    for job in jobs:
+        print ("Cluster: ", job["ClusterId"], "Status:", job["JobStatus"], "Host:", job["LastRemoteHost"])
+
+
+def prepare_work(work_no):
+    dir_name = "sim_{}".format(work_no)
+    if not os.path.exists(dir_name):
+        os.makedirs(dir_name)
+    data_file_path = os.path.join(dir_name, "simdata")
+
+    with open(data_file_path, "w") as f:
+        for i in range(10):
+            f.write(str(random.uniform(1.0, 20.0)))
+            f.write("\n")
+
+
+def perform_submit(work_no):
+    this_path = os.path.dirname(os.path.realpath(__file__))
+    initial_dir = os.path.join(this_path, "sim_{}".format(work_no))
+    work = dict(
+        Cmd=os.path.join(this_path, "batch.py"),
+        Iwd=initial_dir,
+        UserLog="sim.log",
+        UserOutput="sim.out",
+        TransferInput="simdata",
+        Err="sim.err",
+        Arguments="simdata",
+        ShouldTransferFiles="YES"
+    )
+    work_descriptor = classad.ClassAd(work)
+    cluster_id = htcondor.Schedd().submit(work_descriptor)
+    return cluster_id
+
+
+if __name__ == "__main__":
+    for i in range(10):
+        prepare_work(i)
+        print (perform_submit(i))
+    perform_log()

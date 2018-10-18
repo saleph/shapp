@@ -10,7 +10,7 @@ namespace Shapp
     {
         public string Elo()
         {
-            return "elo";
+            return Properties.Resources.parameters.ToString();
         }
     }
 }
