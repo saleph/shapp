@@ -4,13 +4,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ExampleProject
+namespace Shapp
 {
-    class Program
+    public class ShappAPI
     {
-        static void Main(string[] args)
+        public string Elo()
         {
-            System.Console.Out.WriteLine(new Shapp.ShappAPI().Elo());
+            return "elo";
         }
     }
 }

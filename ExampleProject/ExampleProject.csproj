@@ -51,7 +51,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Shapp\Shapp.csproj">
-      <Project>{6e536851-4e04-4bdd-afd5-93d167adf812}</Project>
+      <Project>{dbda5028-fa72-4aa1-868d-fbb1a9f0ab67}</Project>
       <Name>Shapp</Name>
     </ProjectReference>
   </ItemGroup>

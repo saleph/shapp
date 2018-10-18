@@ -3,9 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.28010.2046
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shapp", "Shapp\Shapp.csproj", "{6E536851-4E04-4BDD-AFD5-93D167ADF812}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExampleProject", "ExampleProject\ExampleProject.csproj", "{5250A809-B201-4986-9F8A-673809ADAB0D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shapp", "Shapp\Shapp.csproj", "{DBDA5028-FA72-4AA1-868D-FBB1A9F0AB67}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -13,14 +13,14 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{6E536851-4E04-4BDD-AFD5-93D167ADF812}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{6E536851-4E04-4BDD-AFD5-93D167ADF812}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{6E536851-4E04-4BDD-AFD5-93D167ADF812}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{6E536851-4E04-4BDD-AFD5-93D167ADF812}.Release|Any CPU.Build.0 = Release|Any CPU
 		{5250A809-B201-4986-9F8A-673809ADAB0D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{5250A809-B201-4986-9F8A-673809ADAB0D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5250A809-B201-4986-9F8A-673809ADAB0D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5250A809-B201-4986-9F8A-673809ADAB0D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DBDA5028-FA72-4AA1-868D-FBB1A9F0AB67}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DBDA5028-FA72-4AA1-868D-FBB1A9F0AB67}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DBDA5028-FA72-4AA1-868D-FBB1A9F0AB67}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DBDA5028-FA72-4AA1-868D-FBB1A9F0AB67}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
