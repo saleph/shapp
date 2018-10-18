@@ -61,12 +61,24 @@ namespace Shapp.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized resource of type System.Byte[].
+        ///   Looks up a localized string similar to import classad
+        ///import htcondor
+        ///import os
+        ///import random
+        ///
+        ///
+        ///def perform_log():
+        ///    schedd = htcondor.Schedd(htcondor.Collector().locate(htcondor.DaemonTypes.Schedd, &quot;masterubuntu&quot;))
+        ///    # for history in schedd.history(classad.ExprTree(&quot;1&quot;), [&quot;ClusterId&quot;, &quot;ProcId&quot;], 10):
+        ///    #     print &quot;{}.{}&quot;.format(history[&quot;ClusterId&quot;], history[&quot;ProcId&quot;])
+        ///    #     print &quot;Attribs no: &quot;, len(history)
+        ///    jobs = schedd.query(&quot;1&quot;, [&quot;ClusterId&quot;, &quot;JobStatus&quot;, &quot;LastRemoteHost&quot;])
+        ///    for job in jobs:
+        ///        print (&quot;Cl [rest of string was truncated]&quot;;.
         /// </summary>
-        internal static byte[] main {
+        internal static string main {
             get {
-                object obj = ResourceManager.GetObject("main", resourceCulture);
-                return ((byte[])(obj));
+                return ResourceManager.GetString("main", resourceCulture);
             }
         }
         
@@ -105,6 +117,22 @@ namespace Shapp.Properties {
             get {
                 object obj = ResourceManager.GetObject("submit", resourceCulture);
                 return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to import os
+        ///import random
+        ///
+        ///myVar = &quot;elo myvar&quot;
+        ///
+        ///def myadd(first, second):
+        ///	return first+second
+        ///.
+        /// </summary>
+        internal static string test {
+            get {
+                return ResourceManager.GetString("test", resourceCulture);
             }
         }
     }
