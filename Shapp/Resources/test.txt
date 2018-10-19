@@ -1,2 +1,0 @@
-def myadd(first, second):
-	return first+second

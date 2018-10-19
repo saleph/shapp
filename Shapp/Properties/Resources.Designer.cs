@@ -121,18 +121,12 @@ namespace Shapp.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to import os
-        ///import random
-        ///
-        ///myVar = &quot;elo myvar&quot;
-        ///
-        ///def myadd(first, second):
-        ///	return first+second
-        ///.
+        ///   Looks up a localized resource of type System.Byte[].
         /// </summary>
-        internal static string test {
+        internal static byte[] test {
             get {
-                return ResourceManager.GetString("test", resourceCulture);
+                object obj = ResourceManager.GetObject("test", resourceCulture);
+                return ((byte[])(obj));
             }
         }
     }
