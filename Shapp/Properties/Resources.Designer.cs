@@ -123,9 +123,9 @@ namespace Shapp.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Byte[].
         /// </summary>
-        internal static byte[] test {
+        internal static byte[] testscript {
             get {
-                object obj = ResourceManager.GetObject("test", resourceCulture);
+                object obj = ResourceManager.GetObject("testscript", resourceCulture);
                 return ((byte[])(obj));
             }
         }

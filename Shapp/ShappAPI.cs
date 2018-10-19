@@ -17,9 +17,7 @@ namespace Shapp
         public int Elo()
         {
             string RunningPath = AppDomain.CurrentDomain.BaseDirectory;
-            string FileName = string.Format("{0}Resources\\test.py", Path.GetFullPath(Path.Combine(RunningPath, @"..\..\")));
-            Console.Out.WriteLine(FileName);
-            run_cmd(FileName, "");
+            run_cmd("testscript", "");
             return 0;
         }
 
@@ -27,9 +25,19 @@ namespace Shapp
         {
             ProcessStartInfo start = new ProcessStartInfo();
             start.FileName = @"C:\Python27\python.exe";
-            start.Arguments = string.Format("\"{0}\" {1}", cmd, args);
+            start.Arguments = string.Format("-m \"{0}\" {1}", cmd, args);
+            Console.Out.WriteLine(start.Arguments);
             start.UseShellExecute = false;
             start.RedirectStandardOutput = true;
+            string RunningPath = AppDomain.CurrentDomain.BaseDirectory;
+            string FileName = string.Format("{0}Resources\\", Path.GetFullPath(Path.Combine(RunningPath, @"..\..\..\Shapp\")));
+            start.EnvironmentVariables["PYTHONPATH"] = string.Format("{0};{1}", start.EnvironmentVariables["PYTHONPATH"], FileName);
+
+            foreach(string val in start.EnvironmentVariables.Keys)
+            {
+                Console.Out.WriteLine(val +": "+ start.EnvironmentVariables[val]);
+            }
+            Console.Out.WriteLine(start.EnvironmentVariables.Values.ToString());
             using (Process process = Process.Start(start))
             {
                 using (StreamReader reader = process.StandardOutput)
