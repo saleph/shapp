@@ -18,7 +18,8 @@ namespace Shapp
         {
             string RunningPath = AppDomain.CurrentDomain.BaseDirectory;
             string FileName = string.Format("{0}Resources\\test.py", Path.GetFullPath(Path.Combine(RunningPath, @"..\..\")));
-            run_cmd(@"C:\batch.py", "");
+            Console.Out.WriteLine(FileName);
+            run_cmd(FileName, "");
             return 0;
         }
 
@@ -26,7 +27,7 @@ namespace Shapp
         {
             ProcessStartInfo start = new ProcessStartInfo();
             start.FileName = @"C:\Python27\python.exe";
-            start.Arguments = string.Format("{0} {1}", cmd, args);
+            start.Arguments = string.Format("\"{0}\" {1}", cmd, args);
             start.UseShellExecute = false;
             start.RedirectStandardOutput = true;
             using (Process process = Process.Start(start))
