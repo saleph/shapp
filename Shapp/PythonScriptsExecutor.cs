@@ -13,44 +13,40 @@ using Microsoft.Scripting.Hosting;
 
 namespace Shapp
 {
-    public class ShappAPI
+    public class PythonScriptsExecutor
     {
-        public int Elo()
-        {
-            string RunningPath = AppDomain.CurrentDomain.BaseDirectory;
-            run_cmd(Properties.Resources.testscript, "");
-            return 0;
-        }
-
-        private void run_cmd(string cmd, string args)
+        public string Execute(string script)
         {
             ProcessStartInfo start = new ProcessStartInfo();
-            start.FileName = @"C:\Python27\python.exe";
-            //start.Arguments = string.Format("{0}\" {1}", cmd, args);
+            start.FileName = GetPythonInterpreterPath();
             Console.Out.WriteLine(start.Arguments);
             start.UseShellExecute = false;
             start.RedirectStandardOutput = true;
             start.RedirectStandardInput = true;
-            //string FileName = GetScriptsPath();
-
-            //start.EnvironmentVariables[name] = value;
 
             using (Process process = Process.Start(start))
             {
                 using (StreamWriter writer = process.StandardInput)
                 {
-                    writer.Write(cmd);
+                    writer.Write(script);
                 }
                 using (StreamReader reader = process.StandardOutput)
                 {
                     string result = reader.ReadToEnd();
-                    Console.Write(result);
+                    return result;
                 }
             }
         }
 
-        private static void SetEnvironmentVariable(ProcessStartInfo start, string name, string value)
+        private static string GetPythonInterpreterPath()
         {
+            ProcessStartInfo start = new ProcessStartInfo();
+            start.FileName = 
+            Console.Out.WriteLine(start.Arguments);
+            start.UseShellExecute = false;
+            start.RedirectStandardOutput = true;
+            start.RedirectStandardInput = true;
+            return @"C:\Python27\python.exe";
         }
     }
 }

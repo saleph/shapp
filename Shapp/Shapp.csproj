@@ -52,12 +52,14 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="JobId.cs" />
+    <Compile Include="NewJobSubmitter.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
-    <Compile Include="ShappAPI.cs" />
+    <Compile Include="PythonScriptsExecutor.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -71,7 +73,7 @@
     <None Include="Resources\submit.sub" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Resources\SubmitNewJob.txt" />
+    <Content Include="Resources\SubmitNewJobScript.txt" />
     <Content Include="Resources\testscript.txt" />
     <Content Include="Resources\main.txt" />
   </ItemGroup>

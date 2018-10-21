@@ -121,6 +121,38 @@ namespace Shapp.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to import classad
+        ///import htcondor
+        ///import os
+        ///import random
+        ///
+        ///
+        ///work = dict(
+        ///    Cmd={0},
+        ///    Iwd={1},
+        ///    UserLog={2},
+        ///    UserOutput={3},
+        ///    TransferInput={4},
+        ///    Err={5},
+        ///    Arguments={6},
+        ///    #ShouldTransferFiles=&quot;YES&quot;
+        ///	ShouldTransferFiles={7}
+        ///)
+        ///sub = htcondor.Submit(work)
+        ///schedd = htcondor.Schedd()
+        ///with schedd.transaction() as txn:
+        ///	cluster_id = sub.queue(txn)
+        ///	print(cluster_id)
+        ///
+        ///.
+        /// </summary>
+        internal static string SubmitNewJobScript {
+            get {
+                return ResourceManager.GetString("SubmitNewJobScript", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to #!/usr/bin/env python
         ///import sys
         ///import os

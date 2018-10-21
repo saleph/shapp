@@ -9,11 +9,12 @@ work = dict(
     Iwd={1},
     UserLog={2},
     UserOutput={3},
-    TransferInput={4},
-    Err={5},
-    Arguments={6},
+    Err={4},
+    UserInput={5},
+    TransferInput={6},
+    Arguments={7},
     #ShouldTransferFiles="YES"
-	ShouldTransferFiles={7}
+	ShouldTransferFiles={8}
 )
 sub = htcondor.Submit(work)
 schedd = htcondor.Schedd()
