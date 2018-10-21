@@ -121,12 +121,20 @@ namespace Shapp.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized resource of type System.Byte[].
+        ///   Looks up a localized string similar to #!/usr/bin/env python
+        ///import sys
+        ///import os
+        ///import htcondor
+        ///
+        ///def myadd(first, second):
+        ///	return first+second
+        ///
+        ///print(myadd(2,4))
+        ///.
         /// </summary>
-        internal static byte[] testscript {
+        internal static string testscript {
             get {
-                object obj = ResourceManager.GetObject("testscript", resourceCulture);
-                return ((byte[])(obj));
+                return ResourceManager.GetString("testscript", resourceCulture);
             }
         }
     }

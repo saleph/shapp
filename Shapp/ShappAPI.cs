@@ -10,6 +10,7 @@ using IronPython.Runtime;
 using Microsoft.Scripting;
 using Microsoft.Scripting.Hosting;
 
+
 namespace Shapp
 {
     public class ShappAPI
@@ -17,7 +18,7 @@ namespace Shapp
         public int Elo()
         {
             string RunningPath = AppDomain.CurrentDomain.BaseDirectory;
-            run_cmd("testscript", "");
+            run_cmd(Properties.Resources.testscript, "");
             return 0;
         }
 
@@ -25,27 +26,31 @@ namespace Shapp
         {
             ProcessStartInfo start = new ProcessStartInfo();
             start.FileName = @"C:\Python27\python.exe";
-            start.Arguments = string.Format("-m \"{0}\" {1}", cmd, args);
+            //start.Arguments = string.Format("{0}\" {1}", cmd, args);
             Console.Out.WriteLine(start.Arguments);
             start.UseShellExecute = false;
             start.RedirectStandardOutput = true;
-            string RunningPath = AppDomain.CurrentDomain.BaseDirectory;
-            string FileName = string.Format("{0}Resources\\", Path.GetFullPath(Path.Combine(RunningPath, @"..\..\..\Shapp\")));
-            start.EnvironmentVariables["PYTHONPATH"] = string.Format("{0};{1}", start.EnvironmentVariables["PYTHONPATH"], FileName);
+            start.RedirectStandardInput = true;
+            //string FileName = GetScriptsPath();
 
-            foreach(string val in start.EnvironmentVariables.Keys)
-            {
-                Console.Out.WriteLine(val +": "+ start.EnvironmentVariables[val]);
-            }
-            Console.Out.WriteLine(start.EnvironmentVariables.Values.ToString());
+            //start.EnvironmentVariables[name] = value;
+
             using (Process process = Process.Start(start))
             {
+                using (StreamWriter writer = process.StandardInput)
+                {
+                    writer.Write(cmd);
+                }
                 using (StreamReader reader = process.StandardOutput)
                 {
                     string result = reader.ReadToEnd();
                     Console.Write(result);
                 }
             }
+        }
+
+        private static void SetEnvironmentVariable(ProcessStartInfo start, string name, string value)
+        {
         }
     }
 }

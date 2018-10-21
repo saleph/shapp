@@ -1,0 +1,23 @@
+import classad
+import htcondor
+import os
+import random
+
+
+work = dict(
+    Cmd={0},
+    Iwd={1},
+    UserLog={2},
+    UserOutput={3},
+    TransferInput={4},
+    Err={5},
+    Arguments={6},
+    #ShouldTransferFiles="YES"
+	ShouldTransferFiles={7}
+)
+sub = htcondor.Submit(work)
+schedd = htcondor.Schedd()
+with schedd.transaction() as txn:
+	cluster_id = sub.queue(txn)
+	print(cluster_id)
+

@@ -25,7 +25,6 @@ def prepare_work(work_no):
             f.write(str(random.uniform(1.0, 20.0)))
             f.write("\n")
 
-
 def perform_submit(work_no):
     this_path = os.path.dirname(os.path.realpath(__file__))
     initial_dir = os.path.join(this_path, "sim_{}".format(work_no))
