@@ -10,7 +10,11 @@ namespace ExampleProject
     {
         static void Main(string[] args)
         {
-            System.Console.Out.WriteLine(new Shapp.NewJobSubmitter().SubmitNewJob());
+            Shapp.NewJobSubmitter newJobSubmitter = new Shapp.NewJobSubmitter();
+            newJobSubmitter.Command = "batch.py";
+            newJobSubmitter.LogFileName = "logjob.log";
+            newJobSubmitter.UserStandardOutputFileName = "output.out";
+            System.Console.Out.WriteLine(newJobSubmitter.SubmitNewJob());
         }
     }
 }

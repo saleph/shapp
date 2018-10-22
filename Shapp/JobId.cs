@@ -18,7 +18,7 @@ namespace Shapp
         {
             string[] split = jobIdAsString.Split('.');
             if (split.Length != 2)
-                throw ShappException(string.Format("'{0}' is not a valid JobId", jobIdAsString));
+                throw new ShappException(string.Format("'{0}' is not a valid JobId", jobIdAsString));
             try
             {
                 ClusterId = int.Parse(split[0]);
@@ -26,13 +26,8 @@ namespace Shapp
             }
             catch (FormatException e)
             {
-                throw ShappException(string.Format("'{0}' parse failed: {1}", jobIdAsString, e.Message));
+                throw new ShappException(string.Format("'{0}' parse failed: {1}", jobIdAsString, e.Message));
             }
-        }
-
-        private Exception ShappException(string v)
-        {
-            throw new NotImplementedException();
         }
 
         public override string ToString()

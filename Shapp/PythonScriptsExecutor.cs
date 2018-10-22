@@ -16,27 +16,45 @@ namespace Shapp
 {
     public class PythonScriptsExecutor
     {
-        public string Execute(string script)
-        {
-            ProcessStartInfo start = new ProcessStartInfo();
-            start.FileName = GetPythonInterpreterPath();
-            Console.Out.WriteLine(start.Arguments);
-            start.UseShellExecute = false;
-            start.RedirectStandardOutput = true;
-            start.RedirectStandardInput = true;
+        private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+        private readonly string ScriptToExecute;
 
-            using (Process process = Process.Start(start))
+        public string Response { get; private set; }
+        public string Errors { get; private set; }
+
+        public PythonScriptsExecutor(string scriptToExecute)
+        {
+            ScriptToExecute = scriptToExecute;
+        }
+
+        public void Execute()
+        {
+            ProcessStartInfo processStartInfo = BuildProcessStartInfo();
+            LaunchScriptAndGatherResponse(processStartInfo);
+            if (Errors.Length != 0)
+                throw new ShappException("Error during python script execution");
+        }
+
+        private void LaunchScriptAndGatherResponse(ProcessStartInfo processStartInfo)
+        {
+            using (Process process = Process.Start(processStartInfo))
             {
-                using (StreamWriter writer = process.StandardInput)
-                {
-                    writer.Write(script);
-                }
-                using (StreamReader reader = process.StandardOutput)
-                {
-                    string result = reader.ReadToEnd();
-                    return result;
-                }
+                WriteScriptToStandardInput(process);
+                ReadFromStandarOutput(process);
+                ReadFromStandarError(process);
             }
+        }
+
+        private static ProcessStartInfo BuildProcessStartInfo()
+        {
+            return new ProcessStartInfo
+            {
+                FileName = GetPythonInterpreterPath(),
+                UseShellExecute = false,
+                RedirectStandardOutput = true,
+                RedirectStandardInput = true,
+                RedirectStandardError = true
+            };
         }
 
         private static string GetPythonInterpreterPath()
@@ -45,6 +63,33 @@ namespace Shapp
             if (isWindows)
                 return @"C:\Python27\python.exe";
             return @"/usr/bin/python2";
+        }
+
+        private void WriteScriptToStandardInput(Process process)
+        {
+            using (StreamWriter writer = process.StandardInput)
+            {
+                log.DebugFormat("Python script about to execute:\n{0}", ScriptToExecute);
+                writer.Write(ScriptToExecute);
+            }
+        }
+
+        private void ReadFromStandarOutput(Process process)
+        {
+            using (StreamReader reader = process.StandardOutput)
+            {
+                Response = reader.ReadToEnd();
+                log.DebugFormat("Python script result:\n{0}", Response);
+            }
+        }
+
+        private void ReadFromStandarError(Process process)
+        {
+            using (StreamReader reader = process.StandardError)
+            {
+                Errors = reader.ReadToEnd();
+                log.DebugFormat("Python script errors:\n{0}", Errors);
+            }
         }
     }
 }
