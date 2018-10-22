@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Shapp
 {
-    class NewJobSubmitter
+    public class NewJobSubmitter
     {
         public string Command = "";
         public string WorkingDirectory = System.Reflection.Assembly.GetExecutingAssembly().Location;
@@ -14,27 +14,28 @@ namespace Shapp
         public string UserStandardOutputFileName = "";
         public string StandardErrorFileName = "";
         public string UserStandardInputFileName = "";
-        // space separated
-        public string InputFilesToTransfer = "";
+        public string InputFilesToTransferSpaceSeparated = "";
         public string CommandCliArguments = "";
         public string ShouldTransferFiles = "YES";
 
         public JobId SubmitNewJob()
         {
             string pythonScirpt = ConstructPythonScript();
+            Console.Out.WriteLine(pythonScirpt);
+            return new JobId();
         }
 
         private string ConstructPythonScript()
         {
             string pythonScript = Properties.Resources.SubmitNewJobScript;
             return string.Format(pythonScript,
-                    Command,
+                Command,
                 WorkingDirectory,
                 LogFileName,
                 UserStandardOutputFileName,
                 StandardErrorFileName,
                 UserStandardInputFileName,
-                InputFilesToTransfer,
+                InputFilesToTransferSpaceSeparated,
                 CommandCliArguments,
                 ShouldTransferFiles);
         }

@@ -41,8 +41,8 @@ namespace Shapp
         private static string GetPythonInterpreterPath()
         {
             ProcessStartInfo start = new ProcessStartInfo();
-            start.FileName = 
-            Console.Out.WriteLine(start.Arguments);
+            //start.FileName = 
+            //Console.Out.WriteLine(start.Arguments);
             start.UseShellExecute = false;
             start.RedirectStandardOutput = true;
             start.RedirectStandardInput = true;

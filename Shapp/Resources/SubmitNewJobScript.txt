@@ -5,20 +5,21 @@ import random
 
 
 work = dict(
-    Cmd={0},
-    Iwd={1},
-    UserLog={2},
-    UserOutput={3},
-    Err={4},
-    UserInput={5},
-    TransferInput={6},
-    Arguments={7},
+    Cmd="{0}",
+    Iwd="{1}",
+    UserLog="{2}",
+    UserOutput="{3}",
+    Err="{4}",
+    UserInput="{5}",
+    TransferInput="{6}",
+    Arguments="{7}",
     #ShouldTransferFiles="YES"
-	ShouldTransferFiles={8}
+    ShouldTransferFiles="{8}"
 )
 sub = htcondor.Submit(work)
 schedd = htcondor.Schedd()
 with schedd.transaction() as txn:
-	cluster_id = sub.queue(txn)
-	print(cluster_id)
+    cluster_id = sub.queue(txn, 1)
+    # first submitted job has process number as 0 (as CLUSTER.PROC_NO)
+    print(cluster_id + ".0")
 

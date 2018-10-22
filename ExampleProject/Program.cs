@@ -10,7 +10,7 @@ namespace ExampleProject
     {
         static void Main(string[] args)
         {
-            System.Console.Out.WriteLine(new Shapp.PythonScriptsExecutor().Elo());
+            System.Console.Out.WriteLine(new Shapp.NewJobSubmitter().SubmitNewJob());
         }
     }
 }
