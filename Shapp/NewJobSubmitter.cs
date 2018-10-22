@@ -8,6 +8,8 @@ namespace Shapp
 {
     public class NewJobSubmitter
     {
+        private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+
         public string Command = "";
         public string WorkingDirectory = System.Reflection.Assembly.GetExecutingAssembly().Location;
         public string LogFileName = "";
@@ -21,7 +23,7 @@ namespace Shapp
         public JobId SubmitNewJob()
         {
             string pythonScirpt = ConstructPythonScript();
-            Console.Out.WriteLine(pythonScirpt);
+            log.DebugFormat("Python script about to execute:\n{0}", pythonScirpt);
             return new JobId();
         }
 

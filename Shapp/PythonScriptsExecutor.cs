@@ -9,6 +9,7 @@ using IronPython.Hosting;
 using IronPython.Runtime;
 using Microsoft.Scripting;
 using Microsoft.Scripting.Hosting;
+using System.Runtime.InteropServices;
 
 
 namespace Shapp
@@ -40,13 +41,10 @@ namespace Shapp
 
         private static string GetPythonInterpreterPath()
         {
-            ProcessStartInfo start = new ProcessStartInfo();
-            //start.FileName = 
-            //Console.Out.WriteLine(start.Arguments);
-            start.UseShellExecute = false;
-            start.RedirectStandardOutput = true;
-            start.RedirectStandardInput = true;
-            return @"C:\Python27\python.exe";
+            bool isWindows = Environment.OSVersion.ToString().Contains("Windows");
+            if (isWindows)
+                return @"C:\Python27\python.exe";
+            return @"/usr/bin/python2";
         }
     }
 }
