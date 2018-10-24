@@ -8,20 +8,20 @@ using System.Threading.Tasks;
 
 namespace Shapp
 {
-    class JobDescriptor
+    public class JobDescriptor
     {
-        public JobId JobId = null;
+        private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+
+        public readonly JobId JobId;
+        private JobState state;
         public JobState State
         {
-            get
-            {
-                return State;
-            }
+            get => state;
             set
             {
-                JobState previous = State;
-                State = value;
-                StateListener?.Invoke(previous, State);
+                JobState previous = state;
+                state = value;
+                StateListener?.Invoke(previous, state);
             }
         }
         public ManualResetEvent JobStarted = new ManualResetEvent(false);
@@ -31,9 +31,11 @@ namespace Shapp
         private delegate void JobStateChanged(JobState previous, JobState current);
         private event JobStateChanged StateListener;
 
-        public JobDescriptor()
+        public JobDescriptor(JobId jobId)
         {
+            JobId = jobId;
             StateListener += JobDescriptorEventLauncher;
+            StateListener += JobDescriptorStateChangeLogger;
         }
 
         private void JobDescriptorEventLauncher(JobState previous, JobState current)
@@ -47,6 +49,11 @@ namespace Shapp
                     JobCompleted.Set();
                     break;
             }
+        }
+
+        private void JobDescriptorStateChangeLogger(JobState previous, JobState current)
+        {
+            log.InfoFormat("Job {0} state has changed from {1} to {2}", JobId, previous, current);
         }
     }
 }
