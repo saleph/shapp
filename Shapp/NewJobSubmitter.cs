@@ -20,6 +20,7 @@ namespace Shapp
         public string InputFilesToTransferSpaceSeparated = "";
         public string CommandCliArguments = "";
         public string ShouldTransferFiles = "YES";
+        public string EnvironmentalVariables = "";
 
         public JobId SubmitNewJob()
         {
@@ -39,7 +40,6 @@ namespace Shapp
 
         private string ConstructPythonScript()
         {
-            
             string pythonScript = Properties.Resources.SubmitNewJobScript;
             return string.Format(pythonScript,
                 Command,
@@ -50,7 +50,8 @@ namespace Shapp
                 UserStandardInputFileName,
                 InputFilesToTransferSpaceSeparated,
                 CommandCliArguments,
-                ShouldTransferFiles);
+                ShouldTransferFiles,
+                EnvironmentalVariables);
         }
     }
 }
