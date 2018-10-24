@@ -7,11 +7,15 @@ namespace Shapp
         public int ClusterId;
         public int ProcessId;
 
-        public JobId() { }
-
         public JobId(string jobIdAsString)
         {
             ParseJobId(jobIdAsString);
+        }
+
+        public JobId(int clusterId, int processId)
+        {
+            ClusterId = clusterId;
+            ProcessId = processId;
         }
 
         private void ParseJobId(string jobIdAsString)
