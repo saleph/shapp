@@ -1,0 +1,18 @@
+#!/usr/bin/env python2
+# -*- coding: utf-8 -*-
+import htcondor
+import json
+
+job_statuses = dict()
+schedd = htcondor.Schedd()
+for job in schedd.xquery(projection=['ClusterId', 'ProcId', 'JobStatus']):
+    job_id = str(job.get('ClusterId')) + "." + str(job.get('ProcId'))
+    job_statuses[job_id] = dict()
+    job_statuses[job_id]['JobStatus'] = job.get('JobStatus')
+
+for job in schedd.history('true', ['ProcId', 'ClusterId', 'JobStatus', 'WallDuration'], {0}):
+    job_id = str(job.get('ClusterId')) + "." + str(job.get('ProcId')) 
+    job_statuses[job_id] = dict()
+    job_statuses[job_id]['JobStatus'] = job.get('JobStatus')
+
+print json.dumps(job_statuses)

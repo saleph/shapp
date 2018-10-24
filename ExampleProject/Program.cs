@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Shapp;
 
 namespace ExampleProject
 {
@@ -10,17 +11,19 @@ namespace ExampleProject
     {
         static void Main(string[] args)
         {
-            Shapp.NewJobSubmitter newJobSubmitter = new Shapp.NewJobSubmitter
+            //NewJobSubmitter newJobSubmitter = new Shapp.NewJobSubmitter
+            //{
+            //    Command = "batch.py",
+            //    LogFileName = "logjob.log",
+            //    UserStandardOutputFileName = "output.out"
+            //};
+            //JobId id = newJobSubmitter.SubmitNewJob();
+            JobDescriptor jobDescriptor = new JobDescriptor(new JobId("1.0"))
             {
-                Command = "batch.py",
-                LogFileName = "logjob.log",
-                UserStandardOutputFileName = "output.out"
+                State = JobState.RUNNING
             };
-            Console.Out.WriteLine(newJobSubmitter.SubmitNewJob());
-            Shapp.JobDescriptor jobDescriptor = new Shapp.JobDescriptor(new Shapp.JobId("1.0"))
-            {
-                State = Shapp.JobState.RUNNING
-            };
+            JobStateFetcher jobStateFetcher = new JobStateFetcher();
+            jobDescriptor.State = jobStateFetcher.GetJobState(new JobId(19, 0));
         }
     }
 }

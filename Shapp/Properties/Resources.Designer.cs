@@ -61,6 +61,27 @@ namespace Shapp.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to #!/usr/bin/env python2
+        ///# -*- coding: utf-8 -*-
+        ///import classad
+        ///import htcondor
+        ///import os
+        ///import random
+        ///
+        ///
+        ///schedd = htcondor.Schedd()
+        ///for job in schedd.xquery(projection=[&apos;ClusterId&apos;, &apos;ProcId&apos;, &apos;JobStatus&apos;]):
+        ///    print job.__repr__()
+        ///
+        ///.
+        /// </summary>
+        internal static string GetJobStatusScript {
+            get {
+                return ResourceManager.GetString("GetJobStatusScript", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to import classad
         ///import htcondor
         ///import os
@@ -121,30 +142,31 @@ namespace Shapp.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to import classad
+        ///   Looks up a localized string similar to #!/usr/bin/env python2
+        ///# -*- coding: utf-8 -*-
+        ///import classad
         ///import htcondor
         ///import os
         ///import random
         ///
         ///
         ///work = dict(
-        ///    Cmd={0},
-        ///    Iwd={1},
-        ///    UserLog={2},
-        ///    UserOutput={3},
-        ///    TransferInput={4},
-        ///    Err={5},
-        ///    Arguments={6},
-        ///    #ShouldTransferFiles=&quot;YES&quot;
-        ///	ShouldTransferFiles={7}
+        ///    Cmd=r&quot;{0}&quot;,
+        ///    Iwd=r&quot;{1}&quot;,
+        ///    UserLog=r&quot;{2}&quot;,
+        ///    Output=r&quot;{3}&quot;,
+        ///    Err=r&quot;{4}&quot;,
+        ///    Input=r&quot;{5}&quot;,
+        ///    TransferInput=r&quot;{6}&quot;,
+        ///    Arguments=r&quot;{7}&quot;,
+        ///    ShouldTransferFiles=r&quot;{8}&quot;,
+        ///    Env=r&quot;{9}&quot;
         ///)
+        ///work = dict((k, v) for k, v in work.iteritems() if v)
         ///sub = htcondor.Submit(work)
         ///schedd = htcondor.Schedd()
         ///with schedd.transaction() as txn:
-        ///	cluster_id = sub.queue(txn)
-        ///	print(cluster_id)
-        ///
-        ///.
+        ///    cluster_id = sub.queue [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string SubmitNewJobScript {
             get {
