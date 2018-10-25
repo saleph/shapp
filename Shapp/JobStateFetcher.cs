@@ -7,7 +7,7 @@ using Newtonsoft.Json;
 
 namespace Shapp
 {
-    public class JobStateFetcher
+    class JobStateFetcher
     {
         private const string JOB_STATUS_PROPERTY_LABEL = "JobStatus";
         private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);

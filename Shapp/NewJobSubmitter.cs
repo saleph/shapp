@@ -22,14 +22,15 @@ namespace Shapp
         public string ShouldTransferFiles = "YES";
         public string EnvironmentalVariables = "";
 
-        public JobId SubmitNewJob()
+        public JobDescriptor SubmitNewJob()
         {
             ValidateParameters();
             string pythonScirpt = ConstructPythonScript();
             PythonScriptsExecutor executor = new PythonScriptsExecutor(pythonScirpt);
             executor.Execute();
             string jobIdAsString = executor.Response;
-            return new JobId(jobIdAsString);
+            JobId jobId = new JobId(jobIdAsString);
+            return new JobDescriptor(jobId);
         }
 
         private void ValidateParameters()

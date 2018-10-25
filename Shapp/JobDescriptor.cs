@@ -10,34 +10,55 @@ namespace Shapp
 {
     public class JobDescriptor
     {
+        private const int JOB_STATE_REFRESH_INTERVAL_MS = 2000;
         private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
+        #region PublicProperties
         public readonly JobId JobId;
-        private JobState state;
         public JobState State
         {
-            get => state;
-            set
+            get
             {
-                if (value == state)
-                    return;
-                JobState previous = state;
-                state = value;
-                StateListener?.Invoke(previous, state);
+                lock (stateLock)
+                {
+                    return state;
+                }
+            }
+            private set
+            {
+                JobState previous;
+                JobState current;
+                lock (stateLock)
+                {
+                    previous = state;
+                    current = value;
+                    state = current;
+                }
+                StateListener?.Invoke(previous, current);
             }
         }
         public ManualResetEvent JobStarted = new ManualResetEvent(false);
         public ManualResetEvent JobCompleted = new ManualResetEvent(false);
+        public ManualResetEvent JobRemoved = new ManualResetEvent(false);
         public IPAddress WorkerIpAddress = null;
+        #endregion
 
+        private readonly object stateLock;
+        private JobState state;
         private delegate void JobStateChanged(JobState previous, JobState current);
         private event JobStateChanged StateListener;
+        private readonly JobStateFetcher JobStateFetcher;
+        private System.Timers.Timer Timer;
+
 
         public JobDescriptor(JobId jobId)
         {
             JobId = jobId;
             StateListener += JobDescriptorEventLauncher;
             StateListener += JobDescriptorStateChangeLogger;
+            JobStateFetcher = new JobStateFetcher(jobId);
+            Timer = new System.Timers.Timer(JOB_STATE_REFRESH_INTERVAL_MS);
+            Timer.Elapsed += RefreshJobState;
         }
 
         private void JobDescriptorEventLauncher(JobState previous, JobState current)
@@ -50,12 +71,23 @@ namespace Shapp
                 case JobState.COMPLETED:
                     JobCompleted.Set();
                     break;
+                case JobState.REMOVED:
+                    JobRemoved.Set();
+                    break;
             }
         }
 
         private void JobDescriptorStateChangeLogger(JobState previous, JobState current)
         {
             log.InfoFormat("Job {0} state has changed from {1} to {2}", JobId, previous, current);
+        }
+
+        private void RefreshJobState(object sender, System.Timers.ElapsedEventArgs e)
+        {
+            JobState readState = JobStateFetcher.GetJobState();
+            if (readState == state)
+                return;
+            State = readState;
         }
     }
 }

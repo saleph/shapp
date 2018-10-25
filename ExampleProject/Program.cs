@@ -11,19 +11,18 @@ namespace ExampleProject
     {
         static void Main(string[] args)
         {
-            //NewJobSubmitter newJobSubmitter = new Shapp.NewJobSubmitter
-            //{
-            //    Command = "batch.py",
-            //    LogFileName = "logjob.log",
-            //    UserStandardOutputFileName = "output.out"
-            //};
-            //JobId id = newJobSubmitter.SubmitNewJob();
-            JobDescriptor jobDescriptor = new JobDescriptor(new JobId("1.0"))
+            NewJobSubmitter newJobSubmitter = new Shapp.NewJobSubmitter
             {
-                State = JobState.RUNNING
+                Command = "batch.py",
+                LogFileName = "logjob.log",
+                UserStandardOutputFileName = "output.out"
             };
-            JobStateFetcher jobStateFetcher = new JobStateFetcher(new JobId(19, 0));
-            jobDescriptor.State = jobStateFetcher.GetJobState();
+            JobDescriptor jobDescriptor = newJobSubmitter.SubmitNewJob();
+            Console.Out.WriteLine(">>>>>>>>>>>>>>>>>>> Job submitted");
+            jobDescriptor.JobStarted.WaitOne();
+            Console.Out.WriteLine(">>>>>>>>>>>>>>>>>>> Job started");
+            jobDescriptor.JobCompleted.WaitOne();
+            Console.Out.WriteLine(">>>>>>>>>>>>>>>>>>> Job completed");
         }
     }
 }
