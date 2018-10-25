@@ -9,49 +9,48 @@ namespace Shapp
 {
     public class JobStateFetcher
     {
-        // this should probably be tuned during the program - with e.g. counting how many jobs were submitted so far (times 2 e.g.)
-        private const int MAX_HISTORY_ENTRIES_TO_QUERY = 1000;
         private const string JOB_STATUS_PROPERTY_LABEL = "JobStatus";
         private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+        
+        private readonly JobId JobId;
+        private readonly string PythonScriptWithFetcher;
+        private readonly PythonScriptsExecutor pythonScriptExecutor;
 
-        private Dictionary<string, Dictionary<string, string>> jobStatesCache = null;
-
-        public JobState GetJobState(JobId jobId)
+        public JobStateFetcher(JobId jobId)
         {
-            UpdateCache();
-            Dictionary<string, string> jobProperties = GetPropertiesOfTheJob(jobId);
-            int jobStateId = GetJobStateId(jobProperties);
-            return (JobState)jobStateId;
+            JobId = jobId;
+            PythonScriptWithFetcher = ConstructPythonScript(jobId);
+            pythonScriptExecutor = new PythonScriptsExecutor(PythonScriptWithFetcher);
         }
 
-        private void UpdateCache()
+        public JobState GetJobState()
         {
-            string pythonScirpt = ConstructPythonScript();
-            PythonScriptsExecutor executor = new PythonScriptsExecutor(pythonScirpt);
-            executor.Execute();
-            string jobStatuses = executor.Response;
-            jobStatesCache = JsonConvert.DeserializeObject<Dictionary<string, Dictionary<string, string>>>(jobStatuses);
+            pythonScriptExecutor.Execute();
+            string jobProperties = pythonScriptExecutor.Response;
+            Dictionary<string, string> jobStatesCache = JsonConvert.DeserializeObject<Dictionary<string, string>>(jobProperties);
+            int jobStateId = GetJobStateId(jobStatesCache);
+            JobState jobState = (JobState)jobStateId;
+            log.InfoFormat("Got job state info about job {0}: {1}", JobId, jobState);
+            return jobState;
         }
 
-        private string ConstructPythonScript()
+        private string ConstructPythonScript(JobId jobId)
         {
             string pythonScript = Properties.Resources.GetJobStatusScript;
-            return string.Format(pythonScript, MAX_HISTORY_ENTRIES_TO_QUERY);
+            return string.Format(pythonScript, 
+                jobId.ClusterId, 
+                jobId.ProcessId);
         }
 
-        private Dictionary<string, string> GetPropertiesOfTheJob(JobId jobId)
+        private int GetJobStateId(Dictionary<string, string> jobProperties)
         {
-            if (!jobStatesCache.TryGetValue(jobId.ToString(), out Dictionary<string, string> jobProperties))
+            try
             {
-                throw new ShappException(string.Format("Attempt to get state of not existing JobId {0}", jobId));
+                return int.Parse(jobProperties[JOB_STATUS_PROPERTY_LABEL]);
+            } catch (KeyNotFoundException)
+            {
+                throw new ShappException(string.Format("Attempt to get status of the job {0} - it doesn't exists", JobId));
             }
-
-            return jobProperties;
-        }
-
-        private static int GetJobStateId(Dictionary<string, string> jobProperties)
-        {
-            return int.Parse(jobProperties[JOB_STATUS_PROPERTY_LABEL]);
         }
     }
 }

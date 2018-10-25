@@ -3,16 +3,16 @@
 import htcondor
 import json
 
-job_statuses = dict()
+job_status = dict()
 schedd = htcondor.Schedd()
-for job in schedd.xquery(projection=['ClusterId', 'ProcId', 'JobStatus']):
-    job_id = str(job.get('ClusterId')) + "." + str(job.get('ProcId'))
-    job_statuses[job_id] = dict()
-    job_statuses[job_id]['JobStatus'] = job.get('JobStatus')
+for job in schedd.xquery(requirements = 'ClusterId == {0} && ProcId == {1}',projection=['ClusterId', 'ProcId', 'JobStatus']):
+    if job.get('ClusterId') != {0} or job.get('ProcId') != {1}:
+        raise ValueError('Invalid collection - requested for job {0}.{1}, got different one')
+    job_status['JobStatus'] = job.get('JobStatus')
 
-for job in schedd.history('true', ['ProcId', 'ClusterId', 'JobStatus', 'WallDuration'], {0}):
-    job_id = str(job.get('ClusterId')) + "." + str(job.get('ProcId')) 
-    job_statuses[job_id] = dict()
-    job_statuses[job_id]['JobStatus'] = job.get('JobStatus')
+for job in schedd.history('ClusterId == {0} && ProcId == {1}', ['ProcId', 'ClusterId', 'JobStatus'], 1):
+    if job.get('ClusterId') != {0} or job.get('ProcId') != {1}:
+        raise ValueError('Invalid collection - requested for job {0}.{1}, got different one')
+    job_status['JobStatus'] = job.get('JobStatus')
 
-print json.dumps(job_statuses)
+print json.dumps(job_status)

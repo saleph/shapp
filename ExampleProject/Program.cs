@@ -22,8 +22,8 @@ namespace ExampleProject
             {
                 State = JobState.RUNNING
             };
-            JobStateFetcher jobStateFetcher = new JobStateFetcher();
-            jobDescriptor.State = jobStateFetcher.GetJobState(new JobId(19, 0));
+            JobStateFetcher jobStateFetcher = new JobStateFetcher(new JobId(19, 0));
+            jobDescriptor.State = jobStateFetcher.GetJobState();
         }
     }
 }
