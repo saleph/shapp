@@ -19,6 +19,8 @@ namespace Shapp
             get => state;
             set
             {
+                if (value == state)
+                    return;
                 JobState previous = state;
                 state = value;
                 StateListener?.Invoke(previous, state);
