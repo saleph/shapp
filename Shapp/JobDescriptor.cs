@@ -10,7 +10,7 @@ namespace Shapp
 {
     public class JobDescriptor
     {
-        private const int JOB_STATE_REFRESH_INTERVAL_MS = 2000;
+        private const int JOB_STATE_REFRESH_INTERVAL_MS = 1000;
         private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
         #region PublicProperties
@@ -43,13 +43,12 @@ namespace Shapp
         public IPAddress WorkerIpAddress = null;
         #endregion
 
-        private readonly object stateLock;
-        private JobState state;
+        private readonly object stateLock = new object();
+        private JobState state = JobState.IDLE;
         private delegate void JobStateChanged(JobState previous, JobState current);
         private event JobStateChanged StateListener;
         private readonly JobStateFetcher JobStateFetcher;
-        private System.Timers.Timer Timer;
-
+        private System.Timers.Timer Timer = new System.Timers.Timer(JOB_STATE_REFRESH_INTERVAL_MS);
 
         public JobDescriptor(JobId jobId)
         {
@@ -57,8 +56,9 @@ namespace Shapp
             StateListener += JobDescriptorEventLauncher;
             StateListener += JobDescriptorStateChangeLogger;
             JobStateFetcher = new JobStateFetcher(jobId);
-            Timer = new System.Timers.Timer(JOB_STATE_REFRESH_INTERVAL_MS);
             Timer.Elapsed += RefreshJobState;
+            Timer.Interval = JOB_STATE_REFRESH_INTERVAL_MS;
+            Timer.Enabled = true;
         }
 
         private void JobDescriptorEventLauncher(JobState previous, JobState current)
