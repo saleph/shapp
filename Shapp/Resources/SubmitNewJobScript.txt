@@ -15,9 +15,8 @@ work = dict(
     Input=r"{5}",
     TransferInput=r"{6}",
     Arguments=r"{7}",
-    ShouldTransferFiles=r"{8}",
-    Env=r"{9}",
-    Requirements=r"{10}"
+    Env=r"{8}",
+    Requirements=r"{9}"
 )
 work = dict((k, v) for k, v in work.iteritems() if v)
 sub = htcondor.Submit(work)
