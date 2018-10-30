@@ -20,7 +20,6 @@ namespace Shapp
                 Command = Path.GetFileName(GetExecutableLocation()),
                 InputFilesToTransferSpaceSeparated = BuildAdditionalLibrariesToTransfer() + " " + additionalInputFiles,
             };
-            NewJobSubmitter.SubmitNewJob();
         }
 
         public JobDescriptor Submit()
@@ -47,12 +46,12 @@ namespace Shapp
             return System.Reflection.Assembly.GetExecutingAssembly().Location;
         }
 
-        public bool AmIRootProcess()
+        public static bool AmIRootProcess()
         {
             return JobEnvVariables.GetNestLevel() == 0;
         }
 
-        public bool AmIChildProcess()
+        public static bool AmIChildProcess()
         {
             return !AmIRootProcess();
         }

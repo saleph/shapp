@@ -56,6 +56,11 @@ namespace Shapp
             StateListener += JobDescriptorEventLauncher;
             StateListener += JobDescriptorStateChangeLogger;
             JobStateFetcher = new JobStateFetcher(jobId);
+            SetupJobStatusPoller();
+        }
+
+        private void SetupJobStatusPoller()
+        {
             Timer.Elapsed += RefreshJobState;
             Timer.Interval = JOB_STATE_REFRESH_INTERVAL_MS;
             Timer.Enabled = true;
@@ -70,11 +75,18 @@ namespace Shapp
                     break;
                 case JobState.COMPLETED:
                     JobCompleted.Set();
+                    DisableProbingJobState();
                     break;
                 case JobState.REMOVED:
                     JobRemoved.Set();
+                    DisableProbingJobState();
                     break;
             }
+        }
+
+        private void DisableProbingJobState()
+        {
+            Timer.Enabled = false;
         }
 
         private void JobDescriptorStateChangeLogger(JobState previous, JobState current)
@@ -85,7 +97,7 @@ namespace Shapp
         private void RefreshJobState(object sender, System.Timers.ElapsedEventArgs e)
         {
             JobState readState = JobStateFetcher.GetJobState();
-            if (readState == state)
+            if (readState == State)
                 return;
             State = readState;
         }
