@@ -62,7 +62,7 @@
     </Compile>
     <Compile Include="PythonScriptsExecutor.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="SelfSubmitterHelper.cs" />
+    <Compile Include="SelfSubmitter.cs" />
     <Compile Include="ShappException.cs" />
     <Compile Include="TargetOperatingSystem.cs" />
   </ItemGroup>

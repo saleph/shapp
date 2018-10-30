@@ -8,22 +8,27 @@ using System.Threading.Tasks;
 
 namespace Shapp
 {
-    public class SelfSubmitterHelper
+    public class SelfSubmitter
     {
         private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
         private NewJobSubmitter NewJobSubmitter;
 
-        public SelfSubmitterHelper()
+        public SelfSubmitter(string additionalInputFiles = "")
         {
             NewJobSubmitter = new NewJobSubmitter()
             {
                 Command = Path.GetFileName(GetExecutableLocation()),
-                InputFilesToTransferSpaceSeparated = BuildAdditionalLibrariesToTransfer()
+                InputFilesToTransferSpaceSeparated = BuildAdditionalLibrariesToTransfer() + " " + additionalInputFiles,
             };
             NewJobSubmitter.SubmitNewJob();
         }
 
-        private string BuildAdditionalLibrariesToTransfer()
+        public JobDescriptor Submit()
+        {
+            return NewJobSubmitter.SubmitNewJob();
+        }
+
+        private static string BuildAdditionalLibrariesToTransfer()
         {
             string directory = Path.GetDirectoryName(GetExecutableLocation());
             string[] dlls = Directory.GetFiles(directory, "*.dll", SearchOption.TopDirectoryOnly);
