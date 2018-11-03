@@ -9,11 +9,22 @@ using System.Threading.Tasks;
 
 namespace Shapp
 {
+    /// <summary>
+    /// Helper class for recursive self submitting.
+    /// 
+    /// This class can be further expanded by some additional parameters defined in class NewJobSubmitter.
+    /// Feel free to extend!
+    /// </summary>
     public class SelfSubmitter
     {
         private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
         private NewJobSubmitter NewJobSubmitter;
 
+        /// <summary>
+        /// Default constructor of self submitter. It supports also the debug builds (all the content of your current executable
+        /// directory will be transfered automatically such as dlls, pdbs, xmls etc.).
+        /// </summary>
+        /// <param name="additionalInputFiles">additional files with input data to transfer</param>
         public SelfSubmitter(string additionalInputFiles = "")
         {
             NewJobSubmitter = new NewJobSubmitter()
@@ -23,9 +34,49 @@ namespace Shapp
             };
         }
 
+        /// <summary>
+        /// Submits new instance of currently executing applicaiton.
+        /// </summary>
+        /// <returns>job descriptor bound to newly created job</returns>
         public JobDescriptor Submit()
         {
             return NewJobSubmitter.SubmitNewJob();
+        }
+
+        /// <summary>
+        /// Acquires IP address of parent submitter.
+        /// </summary>
+        /// <returns>IPAddress of the parent</returns>
+        public static IPAddress GetMyParentIpAddress()
+        {
+            return JobEnvVariables.GetParentSubmitterIp();
+        }
+
+        /// <summary>
+        /// Checks if currently executing application is a root process.
+        /// </summary>
+        /// <returns>true if currently executing app is root process; false otherwise</returns>
+        public static bool AmIRootProcess()
+        {
+            return JobEnvVariables.GetNestLevel() == 0;
+        }
+
+        /// <summary>
+        /// Checks if currently executing application is a child process.
+        /// </summary>
+        /// <returns>true if currently executing app is child process; false otherwise</returns>
+        public static bool AmIChildProcess()
+        {
+            return !AmIRootProcess();
+        }
+
+        /// <summary>
+        /// Checks for nest level of currently executing application.
+        /// </summary>
+        /// <returns>nest level of currently executing application (0 for root process, 1 for first level one etc.)</returns>
+        public static int GetMyNestLevel()
+        {
+            return JobEnvVariables.GetNestLevel();
         }
 
         private static string BuildAdditionalLibrariesToTransfer()
@@ -42,29 +93,9 @@ namespace Shapp
             return additionalLibrariesToTransfer;
         }
 
-        public static IPAddress GetMyParentIpAddress()
-        {
-            return JobEnvVariables.GetParentSubmitterIp();
-        }
-
         private static string GetExecutableLocation()
         {
             return System.Reflection.Assembly.GetExecutingAssembly().Location;
-        }
-
-        public static bool AmIRootProcess()
-        {
-            return JobEnvVariables.GetNestLevel() == 0;
-        }
-
-        public static bool AmIChildProcess()
-        {
-            return !AmIRootProcess();
-        }
-
-        public static int GetMyNestLevel()
-        {
-            return JobEnvVariables.GetNestLevel();
         }
     }
 }
