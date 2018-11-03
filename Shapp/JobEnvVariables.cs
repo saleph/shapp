@@ -10,15 +10,32 @@ namespace Shapp
 {
     class JobEnvVariables
     {
-        public const string NEST_LEVEL_NAME = "CONDOR_SHAPP_NEST_LEVEL";
-        public const string PARENT_SUBMITTER_IP_NAME = "PARENT_SUBMITTER_IP";
+        private const string SHAPP_ENV_VAR_NAMESPACE = "SHAPP_CONDOR_";
+        /// <summary>
+        /// Nest level environmental variable name.
+        /// </summary>
+        public const string NEST_LEVEL_NAME = SHAPP_ENV_VAR_NAMESPACE + "NEST_LEVEL";
+        /// <summary>
+        /// Parent submitter IP address variable name.
+        /// </summary>
+        public const string PARENT_SUBMITTER_IP_NAME = SHAPP_ENV_VAR_NAMESPACE + "PARENT_SUBMITTER_IP";
 
+        /// <summary>
+        /// Acquires nest level of currently executing app instance. It's describes how deep in tree structure
+        /// the current instance is executing. Root app instance has nest level equals 0. It's childred has 1 etc.
+        /// </summary>
+        /// <returns>Nest level.</returns>
         public static int GetNestLevel()
         {
             string nestLevel = Environment.GetEnvironmentVariable(NEST_LEVEL_NAME);
             return ParseNumericalEnvVariable(nestLevel);
         }
 
+        /// <summary>
+        /// Acquires IP address of parent submitter. 
+        /// If such address is not available the ShappException is being thrown.
+        /// </summary>
+        /// <returns>IPAddress of parent submitter</returns>
         public static IPAddress GetParentSubmitterIp()
         {
             string iPAddressAsString = Environment.GetEnvironmentVariable(PARENT_SUBMITTER_IP_NAME);
