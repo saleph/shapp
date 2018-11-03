@@ -14,6 +14,9 @@ namespace Shapp
     /// </summary>
     public class JobDescriptor
     {
+        /// <summary>
+        /// Default state refresh rate. Describes how often job state is being polled.
+        /// </summary>
         private const int JOB_STATE_REFRESH_INTERVAL_MS = 1000;
         private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
