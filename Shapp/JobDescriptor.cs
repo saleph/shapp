@@ -8,6 +8,10 @@ using System.Threading.Tasks;
 
 namespace Shapp
 {
+    /// <summary>
+    /// Descriptor for a job with specified ID. Provides asynchronic interface for
+    /// job state analysis.
+    /// </summary>
     public class JobDescriptor
     {
         private const int JOB_STATE_REFRESH_INTERVAL_MS = 1000;

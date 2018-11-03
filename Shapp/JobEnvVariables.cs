@@ -8,6 +8,9 @@ using System.Threading.Tasks;
 
 namespace Shapp
 {
+    /// <summary>
+    /// Static class agregating access to environmental variables in scope of remote job monitoring.
+    /// </summary>
     class JobEnvVariables
     {
         private const string SHAPP_ENV_VAR_NAMESPACE = "SHAPP_CONDOR_";
