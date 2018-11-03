@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -41,6 +42,11 @@ namespace Shapp
             return additionalLibrariesToTransfer;
         }
 
+        public static IPAddress GetMyParentIpAddress()
+        {
+            return JobEnvVariables.GetParentSubmitterIp();
+        }
+
         private static string GetExecutableLocation()
         {
             return System.Reflection.Assembly.GetExecutingAssembly().Location;
@@ -54,6 +60,11 @@ namespace Shapp
         public static bool AmIChildProcess()
         {
             return !AmIRootProcess();
+        }
+
+        public static int GetMyNestLevel()
+        {
+            return JobEnvVariables.GetNestLevel();
         }
     }
 }
