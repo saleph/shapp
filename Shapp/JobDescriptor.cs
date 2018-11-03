@@ -14,7 +14,13 @@ namespace Shapp
         private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
         #region PublicProperties
+        /// <summary>
+        /// JobId to which this descriptor is being bound.
+        /// </summary>
         public readonly JobId JobId;
+        /// <summary>
+        /// State of submitted job. Thread-safe.
+        /// </summary>
         public JobState State
         {
             get
@@ -37,10 +43,24 @@ namespace Shapp
                 StateListener?.Invoke(previous, current);
             }
         }
-        public ManualResetEvent JobStarted = new ManualResetEvent(false);
-        public ManualResetEvent JobCompleted = new ManualResetEvent(false);
-        public ManualResetEvent JobRemoved = new ManualResetEvent(false);
-        public IPAddress WorkerIpAddress = null;
+        /// <summary>
+        /// Event launched on job start (after being considered by matchmaker).
+        /// NOTE! State changes are discrete (are being polled periodically).
+        /// Stays in state true forever after being set.
+        /// </summary>
+        public ManualResetEvent JobStartedEvent = new ManualResetEvent(false);
+        /// <summary>
+        /// Event launched when the job is properly ended.
+        /// NOTE! State changes are discrete (are being polled periodically).
+        /// Stays in state true forever after being set.
+        /// </summary>
+        public ManualResetEvent JobCompletedEvent = new ManualResetEvent(false);
+        /// <summary>
+        /// Event launched when the job was removed (e.g. $ condor_rm -all).
+        /// NOTE! State changes are discrete (are being polled periodically).
+        /// Stays in state true forever after being set.
+        /// </summary>
+        public ManualResetEvent JobRemovedEvent = new ManualResetEvent(false);
         #endregion
 
         private readonly object stateLock = new object();
@@ -50,6 +70,12 @@ namespace Shapp
         private readonly JobStateFetcher JobStateFetcher;
         private System.Timers.Timer Timer = new System.Timers.Timer(JOB_STATE_REFRESH_INTERVAL_MS);
 
+        /// <summary>
+        /// Initializes job's descriptor with its jobId. It is being used mostly by internals of
+        /// the library, but JobDescriptor may be created for an arbitrary job id (e.g. the one
+        /// saved in some file before the program shutdown).
+        /// </summary>
+        /// <param name="jobId">job's id to bound into descriptor</param>
         public JobDescriptor(JobId jobId)
         {
             JobId = jobId;
@@ -71,14 +97,16 @@ namespace Shapp
             switch (current)
             {
                 case JobState.RUNNING:
-                    JobStarted.Set();
+                    JobStartedEvent.Set();
                     break;
                 case JobState.COMPLETED:
-                    JobCompleted.Set();
+                    JobStartedEvent.Set();
+                    JobCompletedEvent.Set();
                     DisableProbingJobState();
                     break;
                 case JobState.REMOVED:
-                    JobRemoved.Set();
+                    JobStartedEvent.Set();
+                    JobRemovedEvent.Set();
                     DisableProbingJobState();
                     break;
             }
