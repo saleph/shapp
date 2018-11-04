@@ -81,7 +81,17 @@ namespace Shapp
 
         private string GetExecutableName()
         {
-            return AppDomain.CurrentDomain.FriendlyName;
+            const string EXECUTABLE_FILENAME_ENV_VAR_NAME = "CONDOR_SHAPP_EXECUTABLE_NAME";
+            if (AmIRootProcess())
+            {
+                // It's a dirty workaround for a way that HTCondor executes commands
+                // After submission (when the app is running as a job on remote machine)
+                // AppDomain.CurrentDomain.FriendlyName will return "condor_exec.exe". This can't
+                // be used for further submission of the jobs. This Env variable will be preserved for every
+                // further instance of this app.
+                Environment.SetEnvironmentVariable(EXECUTABLE_FILENAME_ENV_VAR_NAME, AppDomain.CurrentDomain.FriendlyName, EnvironmentVariableTarget.Process);
+            }
+            return Environment.GetEnvironmentVariable(EXECUTABLE_FILENAME_ENV_VAR_NAME);
         }
 
         private static string BuildAdditionalLibrariesToTransfer()

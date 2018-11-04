@@ -30,10 +30,11 @@ namespace ExampleProject
             }
             if (SelfSubmitter.GetMyNestLevel() == 1)
             {
+                // great, I was invoked on remote worker by another remote worker
                 Console.Out.WriteLine("Hello from 1nd nest level");
+                // submit 1 level more
                 SubmitNewCopyOfMyselfAndWaitForStart();
                 WaitForCopiesToComplete();
-                // great, I was invoked on remote worker by another remote worker
                 // do some job
             }
             if (SelfSubmitter.GetMyNestLevel() == 2)
@@ -41,17 +42,6 @@ namespace ExampleProject
                 // great, I was invoked on remote worker by another remote worker
                 Console.Out.WriteLine("Hello from 2nd nest level");
                 // do some job
-            }
-
-            if (SelfSubmitter.AmIRootProcess())
-            {
-                // Open a IPSocket as a server
-            }
-
-            if (SelfSubmitter.AmIChildProcess())
-            {
-                IPAddress iPAddress = SelfSubmitter.GetMyParentIpAddress();
-                // connect to a socket at ipAddress
             }
         }
 
