@@ -21,9 +21,9 @@ namespace Shapp
     /// For fields like: LogFileName, UserStaandardOutputFileName, StandardErrorFileName, 
     /// UserStandardInputFileName, InputFilesToTransferSpaceSeparated some additional
     /// parameters can be used as a part of its name:
-    /// $(Cluster) - it would be evaluated into cluster number after job submission.
+    /// $(ClusterId) - it would be evaluated into cluster number after job submission.
     ///     For job "123.0" it would be "123".
-    /// $(Process) - it would be evaluated into cluster number after job submission.
+    /// $(ProcId) - it would be evaluated into cluster number after job submission.
     ///     For job "123.0" it would be "0".
     /// </summary>
     public class NewJobSubmitter
@@ -61,7 +61,7 @@ namespace Shapp
         /// This can be freely changed or removed (assiging empty string would casue the
         /// log not to appear at all).
         /// </summary>
-        public string LogFileName = "logs_$(Cluster).$(Process).log";
+        public string LogFileName = "x_$(ClusterId).$(ProcId)_logs.log";
         /// <summary>
         /// Filename for standard output file for this job.
         /// 
@@ -71,7 +71,7 @@ namespace Shapp
         /// This can be freely changed or removed (assiging empty string would casue the
         /// output file not to appear at all).
         /// </summary>
-        public string UserStandardOutputFileName = "stdout_$(Cluster).$(Process).out";
+        public string UserStandardOutputFileName = "x_$(ClusterId).$(ProcId)_stdout.out";
         /// <summary>
         /// Filename for standard error file for this job.
         /// 
@@ -81,7 +81,7 @@ namespace Shapp
         /// This can be freely changed or removed (assiging empty string would casue the
         /// error file not to appear at all).
         /// </summary>
-        public string StandardErrorFileName = "stderr_$(Cluster).$(Process).err";
+        public string StandardErrorFileName = "x_$(ClusterId).$(ProcId)_stderr.err";
         /// <summary>
         /// Filename for standard input file for this job.
         /// 
@@ -174,10 +174,12 @@ namespace Shapp
 
         private string BuildEnvironmentalVariables()
         {
-            return string.Format("{0}={1} {2}={3} {4}",
-                JobEnvVariables.NEST_LEVEL_NAME, JobEnvVariables.GetNestLevel() + 1,
-                JobEnvVariables.PARENT_SUBMITTER_IP_NAME, GetThisNodeIpAddress(),
-                AdditionalJobEnvironmentalVariables);
+            //return string.Format("{0}={1};{2}={3};{4}",
+            //    JobEnvVariables.NEST_LEVEL_NAME, JobEnvVariables.GetNestLevel() + 1,
+            //    JobEnvVariables.PARENT_SUBMITTER_IP_NAME, GetThisNodeIpAddress(),
+            //    AdditionalJobEnvironmentalVariables);
+            return string.Format("{0}={1}",
+            JobEnvVariables.NEST_LEVEL_NAME, JobEnvVariables.GetNestLevel() + 1);
         }
 
         private static IPAddress GetThisNodeIpAddress()

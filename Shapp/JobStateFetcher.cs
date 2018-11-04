@@ -9,6 +9,7 @@ namespace Shapp
 {
     /// <summary>
     /// Class responsible for prepareing python script for fetching info about a job.
+    /// 
     /// It uses base script from Properties.Resources.GetJobStatusScript.
     /// Essencialy it puts job's clusterId and processNo into the string, which will be
     /// interpreted as python script.

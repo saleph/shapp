@@ -29,7 +29,7 @@ namespace Shapp
         {
             NewJobSubmitter = new NewJobSubmitter()
             {
-                Command = Path.GetFileName(GetExecutableLocation()),
+                Command = GetExecutableName(),
                 InputFilesToTransferSpaceSeparated = BuildAdditionalLibrariesToTransfer() + " " + additionalInputFiles,
             };
         }
@@ -79,6 +79,11 @@ namespace Shapp
             return JobEnvVariables.GetNestLevel();
         }
 
+        private string GetExecutableName()
+        {
+            return AppDomain.CurrentDomain.FriendlyName;
+        }
+
         private static string BuildAdditionalLibrariesToTransfer()
         {
             string directory = Path.GetDirectoryName(GetExecutableLocation());
@@ -86,9 +91,10 @@ namespace Shapp
             string[] configs = Directory.GetFiles(directory, "*.config", SearchOption.TopDirectoryOnly);
             string[] xmls = Directory.GetFiles(directory, "*.xml", SearchOption.TopDirectoryOnly);
             string[] pdbs = Directory.GetFiles(directory, "*.pdb", SearchOption.TopDirectoryOnly);
-            string[] filesListWithoutPaths = dlls.Concat(configs).Concat(xmls).Concat(pdbs).Select(s => Path.GetFileName(s)).ToArray();
+            string[] filesListWithoutPaths = new string[0];
+            filesListWithoutPaths = filesListWithoutPaths.Concat(dlls).Concat(configs).Concat(xmls).Concat(pdbs).Select(s => Path.GetFileName(s)).ToArray();
 
-            string additionalLibrariesToTransfer = string.Join(" ", filesListWithoutPaths);
+            string additionalLibrariesToTransfer = string.Join(", ", filesListWithoutPaths);
             log.DebugFormat("Files to transfer: {0}", additionalLibrariesToTransfer);
             return additionalLibrariesToTransfer;
         }

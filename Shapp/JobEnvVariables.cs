@@ -31,7 +31,7 @@ namespace Shapp
         public static int GetNestLevel()
         {
             string nestLevel = Environment.GetEnvironmentVariable(NEST_LEVEL_NAME);
-            return ParseNumericalEnvVariable(nestLevel);
+            return ParseNumericalEnvVariable(nestLevel, 0);
         }
 
         /// <summary>
@@ -63,9 +63,21 @@ namespace Shapp
             }
         }
 
-        private static int ParseNumericalEnvVariable(string nestLevel)
+        private static int ParseNumericalEnvVariable(string nestLevel, int defaultValue)
         {
-            return string.IsNullOrEmpty(nestLevel) ? 0 : int.Parse(nestLevel);
+            try
+            {
+                return int.Parse(nestLevel);
+            }
+            catch (ArgumentNullException)
+            {
+                return defaultValue;
+            }
+            catch (FormatException)
+            {
+                throw new ShappException(string.Format("{0} env variable value: {1} can't be interpreted as int",
+                    NEST_LEVEL_NAME, nestLevel));
+            }
         }
     }
 }
