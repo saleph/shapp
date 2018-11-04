@@ -30,6 +30,14 @@ namespace ExampleProject
             }
             if (SelfSubmitter.GetMyNestLevel() == 1)
             {
+                Console.Out.WriteLine("Hello from 1nd nest level");
+                SubmitNewCopyOfMyselfAndWaitForStart();
+                WaitForCopiesToComplete();
+                // great, I was invoked on remote worker by another remote worker
+                // do some job
+            }
+            if (SelfSubmitter.GetMyNestLevel() == 2)
+            {
                 // great, I was invoked on remote worker by another remote worker
                 Console.Out.WriteLine("Hello from 2nd nest level");
                 // do some job
