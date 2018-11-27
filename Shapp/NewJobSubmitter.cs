@@ -98,12 +98,6 @@ namespace Shapp
         /// </summary>
         public string CommandCliArguments = "";
         /// <summary>
-        /// Additional environmental vairables to inject into application environment.
-        /// 
-        /// E.g. 'ITERATIONS_NUMBER=45 ENTRY_NAME=""some str with spaces""'
-        /// </summary>
-        public string AdditionalJobEnvironmentalVariables = "";
-        /// <summary>
         /// Target operating system for the job. For more info refer to enum TargetOperatingSystem.
         /// </summary>
         public TargetOperatingSystem TargetOperatingSystem = TargetOperatingSystem.SAME_AS_CURRENT;
@@ -174,12 +168,14 @@ namespace Shapp
 
         private string BuildEnvironmentalVariables()
         {
-            //return string.Format("{0}={1};{2}={3};{4}",
-            //    JobEnvVariables.NEST_LEVEL_NAME, JobEnvVariables.GetNestLevel() + 1,
-            //    JobEnvVariables.PARENT_SUBMITTER_IP_NAME, GetThisNodeIpAddress(),
-            //    AdditionalJobEnvironmentalVariables);
-            return string.Format("{0}={1}",
-            JobEnvVariables.NEST_LEVEL_NAME, JobEnvVariables.GetNestLevel() + 1);
+            var envVarsList = new JobEnvVariables.EnvVarsList()
+            {
+                IPAddress = GetThisNodeIpAddress(),
+                NestLevel = JobEnvVariables.GetNestLevel() + 1
+            };
+            const string ENV_VAR_FORMAT = "{0}={1}";
+            return string.Format(ENV_VAR_FORMAT,
+                JobEnvVariables.SHAPP_ALL_ENV_VARS, envVarsList);
         }
 
         private static IPAddress GetThisNodeIpAddress()

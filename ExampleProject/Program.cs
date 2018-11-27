@@ -24,6 +24,18 @@ namespace ExampleProject
         {
             if (SelfSubmitter.AmIRootProcess())
             {
+                // open TCP Server and start listening
+            }
+            if (SelfSubmitter.AmIChildProcess())
+            {
+                IPAddress iPAddress = SelfSubmitter.GetMyParentIpAddress();
+                // connect to TCP server at ipAddress
+            }
+
+
+
+            if (SelfSubmitter.AmIRootProcess())
+            {
                 SubmitNewCopyOfMyselfAndWaitForStart();
                 SubmitNewCopyOfMyselfAndWaitForStart();
                 WaitForCopiesToComplete();
@@ -47,7 +59,7 @@ namespace ExampleProject
 
         private void SubmitNewCopyOfMyselfAndWaitForStart()
         {
-            SelfSubmitter selfSubmitter = new SelfSubmitter();
+            SelfSubmitter selfSubmitter = new SelfSubmitter("file_with_input.txt");
             var remoteProcessDescriptor = selfSubmitter.Submit();
             remoteProcessDescriptor.JobStartedEvent.WaitOne();
             RemoteDescriptors.Add(remoteProcessDescriptor);
@@ -66,8 +78,8 @@ namespace ExampleProject
             NewJobSubmitter newJobSubmitter = new NewJobSubmitter
             {
                 Command = "batch.py",
-                LogFileName = "logjob.log",
-                UserStandardOutputFileName = "output.out"
+                UserStandardOutputFileName = "stdout.txt",
+                TargetOperatingSystem = TargetOperatingSystem.ANY
             };
             JobDescriptor jobDescriptor = newJobSubmitter.SubmitNewJob();
             Console.Out.WriteLine("Job submitted");

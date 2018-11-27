@@ -79,9 +79,9 @@ namespace Shapp
             return JobEnvVariables.GetNestLevel();
         }
 
-        private string GetExecutableName()
+        private static string GetExecutableName()
         {
-            const string EXECUTABLE_FILENAME_ENV_VAR_NAME = "CONDOR_SHAPP_EXECUTABLE_NAME";
+            const string EXECUTABLE_FILENAME_ENV_VAR_NAME = JobEnvVariables.SHAPP_ENV_VAR_NAMESPACE + "EXECUTABLE_NAME";
             if (AmIRootProcess())
             {
                 // It's a dirty workaround for a way that HTCondor executes commands
@@ -89,7 +89,8 @@ namespace Shapp
                 // AppDomain.CurrentDomain.FriendlyName will return "condor_exec.exe". This can't
                 // be used for further submission of the jobs. This Env variable will be preserved for every
                 // further instance of this app.
-                Environment.SetEnvironmentVariable(EXECUTABLE_FILENAME_ENV_VAR_NAME, AppDomain.CurrentDomain.FriendlyName, EnvironmentVariableTarget.Process);
+                Environment.SetEnvironmentVariable(EXECUTABLE_FILENAME_ENV_VAR_NAME, 
+                    AppDomain.CurrentDomain.FriendlyName, EnvironmentVariableTarget.Process);
             }
             return Environment.GetEnvironmentVariable(EXECUTABLE_FILENAME_ENV_VAR_NAME);
         }
@@ -102,7 +103,9 @@ namespace Shapp
             string[] xmls = Directory.GetFiles(directory, "*.xml", SearchOption.TopDirectoryOnly);
             string[] pdbs = Directory.GetFiles(directory, "*.pdb", SearchOption.TopDirectoryOnly);
             string[] filesListWithoutPaths = new string[0];
-            filesListWithoutPaths = filesListWithoutPaths.Concat(dlls).Concat(configs).Concat(xmls).Concat(pdbs).Select(s => Path.GetFileName(s)).ToArray();
+            filesListWithoutPaths = filesListWithoutPaths
+                .Concat(dlls).Concat(configs).Concat(xmls).Concat(pdbs)
+                .Select(s => Path.GetFileName(s)).ToArray();
 
             string additionalLibrariesToTransfer = string.Join(", ", filesListWithoutPaths);
             log.DebugFormat("Files to transfer: {0}", additionalLibrariesToTransfer);
