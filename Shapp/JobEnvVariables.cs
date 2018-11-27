@@ -21,7 +21,7 @@ namespace Shapp
         /// <summary>
         /// EnvVarsList env variable name.
         /// </summary>
-        public const string SHAPP_ALL_ENV_VARS = SHAPP_ENV_VAR_NAMESPACE + "SHAPP_ALL_ENV_VARS";
+        public const string SHAPP_ALL_ENV_VARS = SHAPP_ENV_VAR_NAMESPACE + "ALL_ENV_VARS";
 
         /// <summary>
         /// Workaround for a bug in HTCondor python API. ENV field does not recognize different
