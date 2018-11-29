@@ -50,6 +50,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="EnvVarsList.cs" />
     <Compile Include="JobDescriptor.cs" />
     <Compile Include="JobEnvVariables.cs" />
     <Compile Include="JobId.cs" />

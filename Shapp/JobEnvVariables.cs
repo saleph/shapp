@@ -22,54 +22,7 @@ namespace Shapp
         /// EnvVarsList env variable name.
         /// </summary>
         public const string SHAPP_ALL_ENV_VARS = SHAPP_ENV_VAR_NAMESPACE + "ALL_ENV_VARS";
-
-        /// <summary>
-        /// Workaround for a bug in HTCondor python API. ENV field does not recognize different
-        /// variables, so I've prepared a list of such variables to be parsed as a XML and put as
-        /// a whole into one env variable.
-        /// </summary>
-        [DataContract]
-        public class EnvVarsList
-        {
-            [DataMember]
-            public IPAddress IPAddress;
-            [DataMember]
-            public int NestLevel;
-
-            public override string ToString()
-            {
-                return Serialize();
-            }
-
-            public string Serialize()
-            {
-                var xmlserializer = new XmlSerializer(typeof(EnvVarsList));
-                var stringWriter = new StringWriter();
-                using (var writer = XmlWriter.Create(stringWriter))
-                {
-                    xmlserializer.Serialize(writer, this);
-                    return stringWriter.ToString();
-                }
-            }
-
-            public static EnvVarsList Deserialize(string xml)
-            {
-                if (xml.Length == 0)
-                {
-                    return new EnvVarsList()
-                    {
-                        IPAddress = IPAddress.Parse("127.0.0.1"),
-                        NestLevel = 0
-                    };
-                }
-                using (var stream = new StringReader(xml))
-                {
-                    var serializer = new XmlSerializer(typeof(EnvVarsList));
-                    return serializer.Deserialize(stream) as EnvVarsList;
-                }
-            }
-        }
-
+        
         private static readonly EnvVarsList JobVariables 
             = EnvVarsList.Deserialize(Environment.GetEnvironmentVariable(SHAPP_ALL_ENV_VARS));
 

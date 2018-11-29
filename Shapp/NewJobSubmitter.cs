@@ -141,7 +141,7 @@ namespace Shapp
                 UserStandardInputFileName,
                 InputFilesToTransferSpaceSeparated,
                 CommandCliArguments,
-                BuildEnvironmentalVariables(),
+                BuildEnvironmentalVariables().Replace("\"", "\\\""),
                 BuildRequirements());
         }
 
@@ -168,7 +168,7 @@ namespace Shapp
 
         private string BuildEnvironmentalVariables()
         {
-            var envVarsList = new JobEnvVariables.EnvVarsList()
+            var envVarsList = new EnvVarsList()
             {
                 IPAddress = GetThisNodeIpAddress(),
                 NestLevel = JobEnvVariables.GetNestLevel() + 1

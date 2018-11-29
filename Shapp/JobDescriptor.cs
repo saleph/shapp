@@ -17,7 +17,8 @@ namespace Shapp
         /// <summary>
         /// Default state refresh rate. Describes how often job state is being polled.
         /// </summary>
-        private const int JOB_STATE_REFRESH_INTERVAL_MS = 1000;
+        private const int DEFAULT_JOB_STATE_REFRESH_INTERVAL_MS = 1000;
+        private const int LOWEST_POSSIBLE_REFRESH_RATE_MS = 100;
         private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
         #region PublicProperties
@@ -47,7 +48,7 @@ namespace Shapp
                     current = value;
                     state = current;
                 }
-                StateListener?.Invoke(previous, current);
+                StateListener?.Invoke(previous, current, JobId);
             }
         }
         /// <summary>
@@ -68,14 +69,20 @@ namespace Shapp
         /// Stays in state true forever after being set.
         /// </summary>
         public ManualResetEvent JobRemovedEvent = new ManualResetEvent(false);
+        /// <summary>
+        /// Delegate definition used in StateListener.
+        /// </summary>
+        /// <param name="previous">Previous state of the job.</param>
+        /// <param name="current">New state of the job.</param>
+        /// <param name="jobId">JobId that was affected by this change.</param>
+        public delegate void JobStateChanged(JobState previous, JobState current, JobId jobId);
         #endregion
 
+        private event JobStateChanged StateListener;
         private readonly object stateLock = new object();
         private JobState state = JobState.IDLE;
-        private delegate void JobStateChanged(JobState previous, JobState current);
-        private event JobStateChanged StateListener;
         private readonly JobStateFetcher JobStateFetcher;
-        private System.Timers.Timer Timer = new System.Timers.Timer(JOB_STATE_REFRESH_INTERVAL_MS);
+        private System.Timers.Timer Timer = new System.Timers.Timer(DEFAULT_JOB_STATE_REFRESH_INTERVAL_MS);
 
         /// <summary>
         /// Initializes job's descriptor with its jobId. It is being used mostly by internals of
@@ -92,14 +99,38 @@ namespace Shapp
             SetupJobStatusPoller();
         }
 
+        /// <summary>
+        /// Adds custom object state observer
+        /// </summary>
+        /// <param name="jobStateChangedListener"></param>
+        public void AddCustomStateListener(JobStateChanged jobStateChangedListener)
+        {
+            StateListener += jobStateChangedListener;
+        }
+
         private void SetupJobStatusPoller()
         {
             Timer.Elapsed += RefreshJobState;
-            Timer.Interval = JOB_STATE_REFRESH_INTERVAL_MS;
+            SetPollingInterval(DEFAULT_JOB_STATE_REFRESH_INTERVAL_MS);
             Timer.Enabled = true;
         }
 
-        private void JobDescriptorEventLauncher(JobState previous, JobState current)
+        /// <summary>
+        /// Overwrites default polling interval.
+        /// </summary>
+        /// <param name="intervalInMs">Polling interval in ms from range [100; +inf)</param>
+        private void SetPollingInterval(int intervalInMs)
+        {
+            if (intervalInMs < LOWEST_POSSIBLE_REFRESH_RATE_MS)
+            {
+                throw new ArgumentException(
+                    "Polling interval cannot be lower than " + LOWEST_POSSIBLE_REFRESH_RATE_MS + "ms");
+            }
+
+            Timer.Interval = intervalInMs;
+        }
+
+        private void JobDescriptorEventLauncher(JobState previous, JobState current, JobId jobId)
         {
             switch (current)
             {
@@ -124,9 +155,9 @@ namespace Shapp
             Timer.Enabled = false;
         }
 
-        private void JobDescriptorStateChangeLogger(JobState previous, JobState current)
+        private void JobDescriptorStateChangeLogger(JobState previous, JobState current, JobId jobId)
         {
-            log.InfoFormat("Job {0} state has changed from {1} to {2}", JobId, previous, current);
+            log.InfoFormat("Job {0} state has changed from {1} to {2}", jobId, previous, current);
         }
 
         private void RefreshJobState(object sender, System.Timers.ElapsedEventArgs e)
