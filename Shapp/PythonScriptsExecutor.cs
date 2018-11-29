@@ -65,7 +65,7 @@ namespace Shapp
             ProcessStartInfo processStartInfo = BuildProcessStartInfo();
             LaunchScriptAndGatherResponse(processStartInfo);
             if (Errors.Length != 0)
-                throw new ShappException("Error during python script execution");
+                throw new ShappException("Error during python script execution: \n" + Errors);
         }
 
         private void LaunchScriptAndGatherResponse(ProcessStartInfo processStartInfo)
