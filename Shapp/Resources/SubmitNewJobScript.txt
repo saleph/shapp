@@ -7,17 +7,17 @@ import random
 
 
 work = dict(
-    Cmd=r"{0}",
-    Iwd=r"{1}",
-    UserLog=r"{2}",
-    Output=r"{3}",
-    Error=r"{4}",
-    Input=r"{5}",
-    TransferInputFiles=r"{6}",
-    Arguments=r"{7}",
-    Env=r"{8}",
-    Requirements=r"{9}",
-    GetEnv=r"True"
+    Cmd="{0}",
+    Iwd="{1}",
+    UserLog="{2}",
+    Output="{3}",
+    Error="{4}",
+    Input="{5}",
+    TransferInputFiles="{6}",
+    Arguments="{7}",
+    Env="{8}",
+    Requirements="{9}",
+    GetEnv="True"
 )
 work = dict((k, v) for k, v in work.iteritems() if v)
 sub = htcondor.Submit(work)

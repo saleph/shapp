@@ -30,7 +30,7 @@ namespace Shapp
             NewJobSubmitter = new NewJobSubmitter()
             {
                 Command = GetExecutableName(),
-                InputFilesToTransferSpaceSeparated = BuildAdditionalLibrariesToTransfer() + " " + additionalInputFiles,
+                InputFilesToTransferCommaSeparated = BuildAdditionalLibrariesToTransfer() + ", " + additionalInputFiles,
             };
         }
 
@@ -97,19 +97,25 @@ namespace Shapp
 
         private static string BuildAdditionalLibrariesToTransfer()
         {
-            string directory = Path.GetDirectoryName(GetExecutableLocation());
-            string[] dlls = Directory.GetFiles(directory, "*.dll", SearchOption.TopDirectoryOnly);
-            string[] configs = Directory.GetFiles(directory, "*.config", SearchOption.TopDirectoryOnly);
-            string[] xmls = Directory.GetFiles(directory, "*.xml", SearchOption.TopDirectoryOnly);
-            string[] pdbs = Directory.GetFiles(directory, "*.pdb", SearchOption.TopDirectoryOnly);
+            string[] dlls = GetFilesWithExtension("dll");
+            string[] configs = GetFilesWithExtension("config");
+            string[] xmls = GetFilesWithExtension("xml");
+            string[] pdbs = GetFilesWithExtension("pdb");
+            string[] exes = GetFilesWithExtension("exe");
             string[] filesListWithoutPaths = new string[0];
             filesListWithoutPaths = filesListWithoutPaths
-                .Concat(dlls).Concat(configs).Concat(xmls).Concat(pdbs)
+                .Concat(dlls).Concat(configs).Concat(xmls).Concat(pdbs).Concat(exes)
                 .Select(s => Path.GetFileName(s)).ToArray();
 
             string additionalLibrariesToTransfer = string.Join(", ", filesListWithoutPaths);
             log.DebugFormat("Files to transfer: {0}", additionalLibrariesToTransfer);
             return additionalLibrariesToTransfer;
+        }
+
+        private static string[] GetFilesWithExtension(string pattern)
+        {
+            string directory = Path.GetDirectoryName(GetExecutableLocation());
+            return Directory.GetFiles(directory, "*." + pattern, SearchOption.TopDirectoryOnly);
         }
 
         private static string GetExecutableLocation()

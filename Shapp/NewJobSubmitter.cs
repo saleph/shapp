@@ -90,9 +90,9 @@ namespace Shapp
         /// </summary>
         public string UserStandardInputFileName = "";
         /// <summary>
-        /// Additional files to transfer. Each file should be space separated.
+        /// Additional files to transfer. Each file should be comma separated.
         /// </summary>
-        public string InputFilesToTransferSpaceSeparated = "";
+        public string InputFilesToTransferCommaSeparated = "";
         /// <summary>
         /// Command line arguments for the application. E.g. "-g", "-skip src.cpp -m -O1".
         /// </summary>
@@ -139,7 +139,7 @@ namespace Shapp
                 UserStandardOutputFileName,
                 StandardErrorFileName,
                 UserStandardInputFileName,
-                InputFilesToTransferSpaceSeparated,
+                InputFilesToTransferCommaSeparated,
                 CommandCliArguments,
                 BuildEnvironmentalVariables().Replace("\"", "\\\""),
                 BuildRequirements());
