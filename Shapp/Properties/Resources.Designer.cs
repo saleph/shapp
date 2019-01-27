@@ -63,17 +63,17 @@ namespace Shapp.Properties {
         /// <summary>
         ///   Looks up a localized string similar to #!/usr/bin/env python2
         ///# -*- coding: utf-8 -*-
-        ///import classad
         ///import htcondor
-        ///import os
-        ///import random
+        ///import json
         ///
-        ///
+        ///job_status = dict()
         ///schedd = htcondor.Schedd()
-        ///for job in schedd.xquery(projection=[&apos;ClusterId&apos;, &apos;ProcId&apos;, &apos;JobStatus&apos;]):
-        ///    print job.__repr__()
+        ///for job in schedd.xquery(requirements = &apos;ClusterId == {0} &amp;&amp; ProcId == {1}&apos;,projection=[&apos;ClusterId&apos;, &apos;ProcId&apos;, &apos;JobStatus&apos;]):
+        ///    if job.get(&apos;ClusterId&apos;) != {0} or job.get(&apos;ProcId&apos;) != {1}:
+        ///        raise ValueError(&apos;Invalid collection - requested for job {0}.{1}, got different one&apos;)
+        ///    job_status[&apos;JobStatus&apos;] = job.get(&apos;JobStatus&apos;)
         ///
-        ///.
+        ///for job in schedd.history(&apos;ClusterId == { [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string GetJobStatusScript {
             get {
@@ -132,6 +132,22 @@ namespace Shapp.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to #!/usr/bin/env python2
+        ///# -*- coding: utf-8 -*-
+        ///import classad
+        ///import htcondor
+        ///
+        ///schedd = htcondor.Schedd()
+        ///sched.act(htcondor.JobAction.Remove, &quot;{0}&quot;)
+        ///.
+        /// </summary>
+        internal static string RemoveJobScript {
+            get {
+                return ResourceManager.GetString("RemoveJobScript", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized resource of type System.Byte[].
         /// </summary>
         internal static byte[] submit {
@@ -151,22 +167,23 @@ namespace Shapp.Properties {
         ///
         ///
         ///work = dict(
-        ///    Cmd=r&quot;{0}&quot;,
-        ///    Iwd=r&quot;{1}&quot;,
-        ///    UserLog=r&quot;{2}&quot;,
-        ///    Output=r&quot;{3}&quot;,
-        ///    Err=r&quot;{4}&quot;,
-        ///    Input=r&quot;{5}&quot;,
-        ///    TransferInput=r&quot;{6}&quot;,
-        ///    Arguments=r&quot;{7}&quot;,
-        ///    ShouldTransferFiles=r&quot;{8}&quot;,
-        ///    Env=r&quot;{9}&quot;
+        ///    Cmd=&quot;{0}&quot;,
+        ///    Iwd=&quot;{1}&quot;,
+        ///    UserLog=&quot;{2}&quot;,
+        ///    Output=&quot;{3}&quot;,
+        ///    Error=&quot;{4}&quot;,
+        ///    Input=&quot;{5}&quot;,
+        ///    TransferInputFiles=&quot;{6}&quot;,
+        ///    Arguments=&quot;{7}&quot;,
+        ///    Env=&quot;{8}&quot;,
+        ///    Requirements=&quot;{9}&quot;,
+        ///    GetEnv=&quot;True&quot;
         ///)
         ///work = dict((k, v) for k, v in work.iteritems() if v)
         ///sub = htcondor.Submit(work)
         ///schedd = htcondor.Schedd()
         ///with schedd.transaction() as txn:
-        ///    cluster_id = sub.queue [rest of string was truncated]&quot;;.
+        ///    cluster_id = [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string SubmitNewJobScript {
             get {

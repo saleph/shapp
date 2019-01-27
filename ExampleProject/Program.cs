@@ -13,27 +13,23 @@ namespace ExampleProject
     {
         static void Main(string[] args)
         {
-            //SubmitNewJob();
+            SubmitAndRemoveExample();
             Program main = new Program();
             main.Execute();
         }
 
         private List<JobDescriptor> RemoteDescriptors = new List<JobDescriptor>();
 
+        private static void SubmitAndRemoveExample()
+        {
+            SelfSubmitter newJobSubmitter = new SelfSubmitter();
+            JobDescriptor jobDescriptor = newJobSubmitter.Submit();
+            JobRemover jobRemover = new JobRemover(jobDescriptor.JobId);
+            jobRemover.Remove();
+        }
+
         public void Execute()
         {
-            if (SelfSubmitter.AmIRootProcess())
-            {
-                // open TCP Server and start listening
-            }
-            if (SelfSubmitter.AmIChildProcess())
-            {
-                IPAddress iPAddress = SelfSubmitter.GetMyParentIpAddress();
-                // connect to TCP server at ipAddress
-            }
-
-
-
             if (SelfSubmitter.AmIRootProcess())
             {
                 SubmitNewCopyOfMyselfAndWaitForStart();

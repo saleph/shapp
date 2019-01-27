@@ -55,6 +55,7 @@
     <Compile Include="JobEnvVariables.cs" />
     <Compile Include="JobId.cs" />
     <Compile Include="JobState.cs" />
+    <Compile Include="JobRemover.cs" />
     <Compile Include="JobStateFetcher.cs" />
     <Compile Include="NewJobSubmitter.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
@@ -84,6 +85,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Resources\GetJobStatusScript.txt" />
+    <Content Include="Resources\RemoveJobScript.txt" />
     <Content Include="Resources\SubmitNewJobScript.txt" />
     <Content Include="Resources\testscript.txt" />
     <Content Include="Resources\main.txt" />
