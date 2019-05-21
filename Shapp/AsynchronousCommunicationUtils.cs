@@ -1,18 +1,14 @@
-// Asynchronous Server Socket Example
-// http://msdn.microsoft.com/en-us/library/fx6588te.aspx
-
-using System;
+﻿using System;
 using System.IO;
-using System.Net;
+using System.Linq;
 using System.Net.Sockets;
 using System.Runtime.Serialization.Formatters.Binary;
-using System.Text;
 using System.Threading;
-using System.Linq;
 
 namespace Shapp
 {
-    public class AsynchronousSocketListener
+
+    internal class AsynchronousCommunicationUtils
     {
         public class StateObject
         {
@@ -20,60 +16,33 @@ namespace Shapp
             public int bytesRead = 0;
             // Receive buffer. At first it will receive 4 bytes with size of the payload
             public byte[] buffer = new byte[sizeof(int)];
+            public ManualResetEvent processingDone = new ManualResetEvent(false);
         }
-        private const int PORT = 11000;
-        private const int SERVER_BACKLOG_SIZE = 100;
-        private ManualResetEvent connectionEstablished = new ManualResetEvent(false);
-        private readonly Thread listener;
 
         /// <summary>
-        /// Delegate for new messages received by the server.
+        /// Delegate for new messages received by the socket.
         /// </summary>
         /// <param name="classInstance">received object; cast it for your favourite type</param>
         public delegate void NewMessageReceived(object classInstance, Socket client);
         public event NewMessageReceived NewMessageReceivedEvent;
 
-        public AsynchronousSocketListener()
+        public void ListenForMessages(Socket handler)
         {
-            listener = new Thread(new ThreadStart(StartListening));
-            listener.Start();
-        }
-
-        public void StartListening()
-        {
-            IPHostEntry ipHostInfo = Dns.GetHostEntry(Dns.GetHostName());
-            IPAddress ipAddress = ipHostInfo.AddressList[0];
-            IPEndPoint localEndPoint = new IPEndPoint(ipAddress, PORT);
-
-            Socket listener = new Socket(AddressFamily.InterNetwork,
-                SocketType.Stream, ProtocolType.Tcp);
-            
-            listener.Bind(localEndPoint);
-            listener.Listen(SERVER_BACKLOG_SIZE);
-            while (true)
-            {
-                connectionEstablished.Reset();
-                listener.BeginAccept(new AsyncCallback(AcceptCallback), listener);
-                connectionEstablished.WaitOne();
-            }
-        }
-
-        public void AcceptCallback(IAsyncResult ar)
-        {
-            connectionEstablished.Set();
-            Socket listener = (Socket)ar.AsyncState;
-            Socket handler = listener.EndAccept(ar);
             StateObject state = new StateObject
             {
                 workSocket = handler
             };
+            state.processingDone.Reset();
             handler.BeginReceive(state.buffer, 0, sizeof(int), SocketFlags.None,
                 new AsyncCallback(ReadPayloadSizeCallback), state);
+            state.processingDone.WaitOne(ShappSettins.Default.EventWaitTime);
         }
 
-        public void ReadPayloadSizeCallback(IAsyncResult ar)
+        private void ReadPayloadSizeCallback(IAsyncResult ar)
         {
             StateObject state = (StateObject)ar.AsyncState;
+            // continue the listener thread
+            state.processingDone.Set();
             Socket handler = state.workSocket;
             int bytesRead = handler.EndReceive(ar);
 
@@ -88,7 +57,7 @@ namespace Shapp
                 new AsyncCallback(ReadPayloadSizeCallback), state);
             }
             else
-            { 
+            {
                 int payloadSize = BitConverter.ToInt32(state.buffer, 0);
                 StateObject newState = new StateObject
                 {
@@ -97,7 +66,7 @@ namespace Shapp
                     buffer = new byte[payloadSize]
                 };
                 handler.BeginReceive(newState.buffer, 0, newState.buffer.Length, 0,
-                 new AsyncCallback(ReadPayloadCallback), newState);
+                    new AsyncCallback(ReadPayloadCallback), newState);
             }
         }
 
@@ -112,6 +81,7 @@ namespace Shapp
                 return;
             }
             state.bytesRead += bytesRead;
+            Console.WriteLine("bytes read: {0}, state.bytesRead: {1}", bytesRead, state.bytesRead);
             if (state.bytesRead < state.buffer.Length)
             {
                 handler.BeginReceive(state.buffer, 0, sizeof(int) - state.bytesRead, 0,
@@ -138,10 +108,7 @@ namespace Shapp
             byte[] serializedObject = stream.GetBuffer();
             byte[] messageHeader = BitConverter.GetBytes(serializedObject.Length);
 
-            // Convert the string data to byte data using ASCII encoding.
             byte[] byteData = messageHeader.Concat(serializedObject).ToArray();
-
-            // Begin sending the data to the remote device.
             handler.BeginSend(byteData, 0, byteData.Length, 0,
                 new AsyncCallback(SendCallback), handler);
         }
