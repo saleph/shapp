@@ -82,6 +82,7 @@ namespace Shapp
         private readonly object stateLock = new object();
         private JobState state = JobState.IDLE;
         private readonly JobStateFetcher JobStateFetcher;
+        private readonly JobRemover JobRemover;
         private System.Timers.Timer Timer = new System.Timers.Timer(DEFAULT_JOB_STATE_REFRESH_INTERVAL_MS);
 
         /// <summary>
@@ -96,6 +97,7 @@ namespace Shapp
             StateListener += JobDescriptorEventLauncher;
             StateListener += JobDescriptorStateChangeLogger;
             JobStateFetcher = new JobStateFetcher(jobId);
+            JobRemover = new JobRemover(jobId);
             SetupJobStatusPoller();
         }
 
@@ -106,6 +108,15 @@ namespace Shapp
         public void AddCustomStateListener(JobStateChanged jobStateChangedListener)
         {
             StateListener += jobStateChangedListener;
+        }
+
+        /// <summary>
+        /// Removes in the job in the hard way (using HTCondor mechanisms). It terminates
+        /// the task rightaway, without any time to perform cleanup.
+        /// </summary>
+        public void HardRemove()
+        {
+            JobRemover.Remove();
         }
 
         private void SetupJobStatusPoller()

@@ -1,6 +1,5 @@
 #!/usr/bin/env python2
 # -*- coding: utf-8 -*-
-import classad
 import htcondor
 import os
 import random
@@ -20,10 +19,9 @@ work = dict(
     GetEnv="True"
 )
 work = dict((k, v) for k, v in work.iteritems() if v)
-sub = htcondor.Submit(work)
 schedd = htcondor.Schedd()
+sub = schedd.Submit(work)
 with schedd.transaction() as txn:
     cluster_id = sub.queue(txn, 1)
     # first submitted job has process number as 0 (as CLUSTER.PROC_NO)
     print(str(cluster_id) + ".0")
-
