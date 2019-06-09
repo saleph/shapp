@@ -33,6 +33,8 @@ namespace Shapp
         }
         [DataMember]
         public int NestLevel;
+        [DataMember]
+        public int CommunicationPort;
 
         public override string ToString() => Serialize();
 
@@ -53,8 +55,9 @@ namespace Shapp
             {
                 return new EnvVarsList()
                 {
-                    IPAddress = IPAddress.Parse("127.0.0.1"),
-                    NestLevel = 0
+                    IPAddress = IPAddress.Parse(C.DEFAULT_IP_ADDRESS),
+                    NestLevel = 0,
+                    CommunicationPort = C.DEFAULT_PORT
                 };
             }
             using (var stream = new StringReader(xml))

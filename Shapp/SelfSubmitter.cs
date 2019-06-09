@@ -25,13 +25,23 @@ namespace Shapp
         /// directory will be transfered automatically such as dlls, pdbs, xmls etc.).
         /// </summary>
         /// <param name="additionalInputFiles">additional files with input data to transfer</param>
-        public SelfSubmitter(string additionalInputFiles = "")
+        public SelfSubmitter(string[] additionalInputFiles = null)
         {
+            string filesToTransfer = BuildAdditionalLibrariesToTransfer() + generateAdditionalInputFilesFromList(additionalInputFiles);
             NewJobSubmitter = new NewJobSubmitter()
             {
                 Command = GetExecutableName(),
-                InputFilesToTransferCommaSeparated = BuildAdditionalLibrariesToTransfer() + ", " + additionalInputFiles,
+                InputFilesToTransferCommaSeparated = filesToTransfer,
             };
+        }
+
+        private string generateAdditionalInputFilesFromList(string[] additionalInputFiles)
+        {
+            if (additionalInputFiles == null)
+            {
+                return "";
+            }
+            return ", " + string.Join(",", additionalInputFiles);
         }
 
         /// <summary>

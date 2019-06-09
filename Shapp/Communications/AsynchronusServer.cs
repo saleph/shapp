@@ -10,11 +10,11 @@ namespace Shapp
 {
     public class AsynchronousServer
     {
-        private static readonly int PORT = ShappSettins.Default.CommunicationPort;
-        private const int SERVER_BACKLOG_SIZE = 100;
         private ManualResetEvent connectionEstablished = new ManualResetEvent(false);
         private readonly object isListeningLock = new object();
         private bool isListening;
+        private readonly int port;
+
         public bool IsListening { get { lock (isListeningLock) { return isListening; } } set { lock (isListeningLock) { isListening = value; } } }
         private readonly Thread listener;
         private readonly AsynchronousCommunicationUtils asynchronousCommunicationUtils = new AsynchronousCommunicationUtils();
@@ -26,8 +26,9 @@ namespace Shapp
         public delegate void NewMessageReceived(object classInstance, Socket client);
         public event NewMessageReceived NewMessageReceivedEvent;
 
-        public AsynchronousServer()
+        public AsynchronousServer(int port = C.DEFAULT_PORT)
         {
+            this.port = port;
             asynchronousCommunicationUtils.NewMessageReceivedEvent += OnMessageReceive;
             listener = new Thread(new ThreadStart(ListenForNewConnections));
         }
@@ -58,13 +59,13 @@ namespace Shapp
         private void ListenForNewConnections()
         {
             IPAddress ipAddress = GetLocalIPAddress();
-            IPEndPoint localEndPoint = new IPEndPoint(ipAddress, PORT);
+            IPEndPoint localEndPoint = new IPEndPoint(ipAddress, port);
 
             Socket listener = new Socket(AddressFamily.InterNetwork,
                 SocketType.Stream, ProtocolType.Tcp);
 
             listener.Bind(localEndPoint);
-            listener.Listen(SERVER_BACKLOG_SIZE);
+            listener.Listen(C.SERVER_BACKLOG_SIZE);
             while (IsListening)
             {
                 connectionEstablished.Reset();

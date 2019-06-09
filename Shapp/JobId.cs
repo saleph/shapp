@@ -6,6 +6,7 @@ namespace Shapp
     /// <summary>
     /// Job's id reprezentation.
     /// </summary>
+    [Serializable]
     [DataContract]
     public class JobId
     {

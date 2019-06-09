@@ -13,9 +13,6 @@ namespace Shapp
 {
     public class AsynchronousClient
     {
-        // The port number for the remote device.
-        private static readonly int port = ShappSettins.Default.CommunicationPort;
-
         // ManualResetEvent instances signal completion.
         private static ManualResetEvent connectDone =
             new ManualResetEvent(false);
@@ -45,7 +42,7 @@ namespace Shapp
             NewMessageReceivedEvent?.Invoke(classInstance, client);
         }
 
-        public void Connect(IPAddress ipAddress)
+        public void Connect(IPAddress ipAddress, int port = C.DEFAULT_PORT)
         {
             IPEndPoint remoteEP = new IPEndPoint(ipAddress, port);
             client = new Socket(AddressFamily.InterNetwork,
@@ -53,7 +50,6 @@ namespace Shapp
             IsListening = true;
             client.BeginConnect(remoteEP,
                 new AsyncCallback(ConnectCallback), client);
-            connectDone.WaitOne();
         }
 
         public void Stop()
@@ -65,7 +61,6 @@ namespace Shapp
         {
             Socket client = (Socket)ar.AsyncState;
             client.EndConnect(ar);
-            Console.WriteLine("Socket connected to {0}", client.RemoteEndPoint.ToString());
             connectDone.Set();
             while (IsListening)
             {
@@ -75,6 +70,7 @@ namespace Shapp
 
         public void Send(object objectToSend)
         {
+            connectDone.WaitOne();
             AsynchronousCommunicationUtils.Send(client, objectToSend);
         }
     }

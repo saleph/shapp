@@ -50,9 +50,13 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AsynchronousClient.cs" />
-    <Compile Include="AsynchronousCommunicationUtils.cs" />
-    <Compile Include="AsynchronusServer.cs" />
+    <Compile Include="Communications\AsynchronousClient.cs" />
+    <Compile Include="Communications\AsynchronousCommunicationUtils.cs" />
+    <Compile Include="Communications\AsynchronusServer.cs" />
+    <Compile Include="C.cs" />
+    <Compile Include="Communications\Command.cs" />
+    <Compile Include="Communications\Protocol\HelloFromParent.cs" />
+    <Compile Include="Communications\Protocol\HelloFromChild.cs" />
     <Compile Include="EnvVarsList.cs" />
     <Compile Include="JobDescriptor.cs" />
     <Compile Include="JobEnvVariables.cs" />
@@ -61,6 +65,7 @@
     <Compile Include="JobRemover.cs" />
     <Compile Include="JobStateFetcher.cs" />
     <Compile Include="NewJobSubmitter.cs" />
+    <Compile Include="Communications\ParentCommunicator.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -75,6 +80,7 @@
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
       <DependentUpon>ShappSettins.settings</DependentUpon>
     </Compile>
+    <Compile Include="Communications\Protocol\SystemMessage.cs" />
     <Compile Include="TargetOperatingSystem.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -106,5 +112,6 @@
   <ItemGroup>
     <None Include="Resources\parameters.txt" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

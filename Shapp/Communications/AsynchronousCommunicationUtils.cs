@@ -80,11 +80,10 @@ namespace Shapp
                 return;
             }
             state.bytesRead += bytesRead;
-            Console.WriteLine("bytes read: {0}, state.bytesRead: {1}", bytesRead, state.bytesRead);
             if (state.bytesRead < state.buffer.Length)
             {
-                handler.BeginReceive(state.buffer, 0, sizeof(int) - state.bytesRead, 0,
-                    new AsyncCallback(ReadPayloadSizeCallback), state);
+                handler.BeginReceive(state.buffer, 0, state.buffer.Length - state.bytesRead, 0,
+                    new AsyncCallback(ReadPayloadCallback), state);
             }
             else
             {

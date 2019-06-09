@@ -14,11 +14,6 @@ namespace Shapp
     /// </summary>
     public class JobDescriptor
     {
-        /// <summary>
-        /// Default state refresh rate. Describes how often job state is being polled.
-        /// </summary>
-        private const int DEFAULT_JOB_STATE_REFRESH_INTERVAL_MS = 1000;
-        private const int LOWEST_POSSIBLE_REFRESH_RATE_MS = 100;
         private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
         #region PublicProperties
@@ -83,7 +78,8 @@ namespace Shapp
         private JobState state = JobState.IDLE;
         private readonly JobStateFetcher JobStateFetcher;
         private readonly JobRemover JobRemover;
-        private System.Timers.Timer Timer = new System.Timers.Timer(DEFAULT_JOB_STATE_REFRESH_INTERVAL_MS);
+        private readonly AsynchronousServer AsynchronousServer;
+        private System.Timers.Timer Timer = new System.Timers.Timer(C.DEFAULT_JOB_STATE_REFRESH_INTERVAL_MS);
 
         /// <summary>
         /// Initializes job's descriptor with its jobId. It is being used mostly by internals of
@@ -99,6 +95,8 @@ namespace Shapp
             JobStateFetcher = new JobStateFetcher(jobId);
             JobRemover = new JobRemover(jobId);
             SetupJobStatusPoller();
+            AsynchronousServer = new AsynchronousServer(12345);
+            AsynchronousServer.Start();
         }
 
         /// <summary>
@@ -119,26 +117,31 @@ namespace Shapp
             JobRemover.Remove();
         }
 
-        private void SetupJobStatusPoller()
+        public void SoftRemove()
         {
-            Timer.Elapsed += RefreshJobState;
-            SetPollingInterval(DEFAULT_JOB_STATE_REFRESH_INTERVAL_MS);
-            Timer.Enabled = true;
+
         }
 
         /// <summary>
         /// Overwrites default polling interval.
         /// </summary>
         /// <param name="intervalInMs">Polling interval in ms from range [100; +inf)</param>
-        private void SetPollingInterval(int intervalInMs)
+        public void SetPollingInterval(int intervalInMs)
         {
-            if (intervalInMs < LOWEST_POSSIBLE_REFRESH_RATE_MS)
+            if (intervalInMs < C.LOWEST_POSSIBLE_REFRESH_RATE_MS)
             {
                 throw new ArgumentException(
-                    "Polling interval cannot be lower than " + LOWEST_POSSIBLE_REFRESH_RATE_MS + "ms");
+                    "Polling interval cannot be lower than " + C.LOWEST_POSSIBLE_REFRESH_RATE_MS + "ms");
             }
 
             Timer.Interval = intervalInMs;
+        }
+
+        private void SetupJobStatusPoller()
+        {
+            Timer.Elapsed += RefreshJobState;
+            SetPollingInterval(C.DEFAULT_JOB_STATE_REFRESH_INTERVAL_MS);
+            Timer.Enabled = true;
         }
 
         private void JobDescriptorEventLauncher(JobState previous, JobState current, JobId jobId)
