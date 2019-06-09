@@ -7,7 +7,6 @@ using System.Threading;
 
 namespace Shapp
 {
-
     internal class AsynchronousCommunicationUtils
     {
         public class StateObject
