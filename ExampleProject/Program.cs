@@ -33,16 +33,13 @@ namespace ExampleProject
             AutoResetEvent receivedDone = new AutoResetEvent(false);
             server.NewMessageReceivedEvent += (objectRecv, sock) =>
             {
+                if (objectRecv is ISystemMessage hello)
+                    hello.Dispatch(sock);
+
                 if (objectRecv is string s)
                 {
-                    Console.Out.Write("recv something: ");
                     Console.Out.WriteLine(s);
                     receivedDone.Set();
-                }
-                if (objectRecv is HelloFromChild hello)
-                {
-                    Console.Out.WriteLine("Received HelloFromChild! Send back HelloFromParent...");
-                    server.Send(sock, new HelloFromParent());
                 }
             };
             server.Start();
@@ -52,7 +49,6 @@ namespace ExampleProject
                 Thread.Sleep(1000);
                 Console.Out.Write(".");
             }
-            //server.Stop();
         }
 
         private static void ClientExample()
@@ -60,33 +56,19 @@ namespace ExampleProject
             ParentCommunicator.Initialize();
             ParentCommunicator.Send(new HelloFromChild()
             {
-                MyJobId = "i m your child"
+                MyJobId = "123.456"
             });
-            ParentCommunicator.Send("second TX, as string");
+            ParentCommunicator.Send("some string from child");
+
+
+
+
+
             while(true)
             {
                 Thread.Sleep(1000);
                 Console.Out.Write(".");
             }
-
-            //AsynchronousClient client = new AsynchronousClient();
-            //AutoResetEvent receivedDone = new AutoResetEvent(false);
-            //client.NewMessageReceivedEvent += (objectRecv, sock) =>
-            //{
-            //    Console.Out.Write("recv: ");
-            //    if (objectRecv is string s)
-            //    {
-            //        Console.Out.WriteLine(s);
-            //    }
-            //    string res = "elo response from serv";
-            //    client.Send(res);
-            //    receivedDone.Set();
-            //};
-            //client.Connect(IPAddress.Parse("192.168.56.1"));
-            //string msg = "elo from client";
-            //client.Send(msg);
-            //receivedDone.WaitOne();
-            //client.Stop();
         }
 
         private List<JobDescriptor> RemoteDescriptors = new List<JobDescriptor>();

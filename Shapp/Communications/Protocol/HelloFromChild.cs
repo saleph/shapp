@@ -15,6 +15,7 @@ namespace Shapp.Communications.Protocol
         public void Dispatch(Socket sender)
         {
             Console.Out.WriteLine("HelloFromChild received from " + MyJobId);
+            Console.Out.WriteLine("Sending HelloFromParent...");
             AsynchronousCommunicationUtils.Send(sender, new HelloFromParent());
         }
     }
