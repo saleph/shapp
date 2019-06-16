@@ -20,7 +20,7 @@ work = dict(
 )
 work = dict((k, v) for k, v in work.iteritems() if v)
 schedd = htcondor.Schedd()
-sub = schedd.Submit(work)
+sub = htcondor.Submit(work)
 with schedd.transaction() as txn:
     cluster_id = sub.queue(txn, 1)
     # first submitted job has process number as 0 (as CLUSTER.PROC_NO)
