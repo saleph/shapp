@@ -17,7 +17,7 @@ namespace Shapp
         #region Internal parameters
         public const int SERVER_BACKLOG_SIZE = 100;
         public const int LOWEST_POSSIBLE_REFRESH_RATE_MS = 100;
-        public const string DEFAULT_IP_ADDRESS = "192.168.56.1";
+        public const string DEFAULT_IP_ADDRESS = "192.168.64.1";
         #endregion
     }
 }

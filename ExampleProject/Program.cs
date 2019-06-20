@@ -58,10 +58,7 @@ namespace ExampleProject
             {
                 MyJobId = "123.456"
             });
-            ParentCommunicator.Send("some string from child");
-
-
-
+            //ParentCommunicator.Send("some string from child
 
 
             while(true)

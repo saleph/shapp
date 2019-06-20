@@ -60,6 +60,7 @@ namespace Shapp
         {
             IPAddress ipAddress = GetLocalIPAddress();
             IPEndPoint localEndPoint = new IPEndPoint(ipAddress, port);
+            System.Console.WriteLine("Listening on {0}", localEndPoint.ToString());
 
             Socket listener = new Socket(AddressFamily.InterNetwork,
                 SocketType.Stream, ProtocolType.Tcp);

@@ -29,10 +29,11 @@ namespace Shapp
         {
             StateObject state = new StateObject
             {
+                bytesRead = 0,
                 workSocket = handler
             };
             state.processingDone.Reset();
-            handler.BeginReceive(state.buffer, 0, sizeof(int), SocketFlags.None,
+            handler.BeginReceive(state.buffer, state.bytesRead, sizeof(int), SocketFlags.None,
                 new AsyncCallback(ReadPayloadSizeCallback), state);
             state.processingDone.WaitOne(ShappSettins.Default.EventWaitTime);
         }
@@ -41,7 +42,6 @@ namespace Shapp
         {
             StateObject state = (StateObject)ar.AsyncState;
             // continue the listener thread
-            state.processingDone.Set();
             Socket handler = state.workSocket;
             int bytesRead = handler.EndReceive(ar);
 
@@ -52,26 +52,24 @@ namespace Shapp
             state.bytesRead += bytesRead;
             if (state.bytesRead < sizeof(int))
             {
-                handler.BeginReceive(state.buffer, 0, sizeof(int) - state.bytesRead, 0,
+                handler.BeginReceive(state.buffer, state.bytesRead, sizeof(int) - state.bytesRead, 0,
                 new AsyncCallback(ReadPayloadSizeCallback), state);
             }
             else
             {
                 int payloadSize = BitConverter.ToInt32(state.buffer, 0);
-                StateObject newState = new StateObject
-                {
-                    workSocket = handler,
-                    bytesRead = 0,
-                    buffer = new byte[payloadSize]
-                };
-                handler.BeginReceive(newState.buffer, 0, newState.buffer.Length, 0,
-                    new AsyncCallback(ReadPayloadCallback), newState);
+                state.workSocket = handler;
+                state.bytesRead = 0;
+                state.buffer = new byte[payloadSize];
+                handler.BeginReceive(state.buffer, state.bytesRead, state.buffer.Length, 0,
+                    new AsyncCallback(ReadPayloadCallback), state);
             }
         }
 
         private void ReadPayloadCallback(IAsyncResult ar)
         {
             StateObject state = (StateObject)ar.AsyncState;
+            state.processingDone.Set();
             Socket handler = state.workSocket;
             int bytesRead = handler.EndReceive(ar);
 
@@ -82,7 +80,7 @@ namespace Shapp
             state.bytesRead += bytesRead;
             if (state.bytesRead < state.buffer.Length)
             {
-                handler.BeginReceive(state.buffer, 0, state.buffer.Length - state.bytesRead, 0,
+                handler.BeginReceive(state.buffer, state.bytesRead, state.buffer.Length - state.bytesRead, 0,
                     new AsyncCallback(ReadPayloadCallback), state);
             }
             else
