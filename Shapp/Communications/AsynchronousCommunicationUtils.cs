@@ -7,7 +7,7 @@ using System.Threading;
 
 namespace Shapp
 {
-    internal class AsynchronousCommunicationUtils
+    public class AsynchronousCommunicationUtils
     {
         public class StateObject
         {
@@ -90,10 +90,13 @@ namespace Shapp
                     var formatter = new BinaryFormatter();
                     stream.Seek(0, SeekOrigin.Begin);
                     object receivedObject = formatter.Deserialize(stream);
+                    Interlocked.Increment(ref reception);
                     NewMessageReceivedEvent?.Invoke(receivedObject, handler);
                 }
             }
         }
+
+        public static long reception = 0;
 
         public static void Send(Socket handler, object objectToSend)
         {

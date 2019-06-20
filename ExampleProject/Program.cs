@@ -43,11 +43,11 @@ namespace ExampleProject
                 }
             };
             server.Start();
-            receivedDone.WaitOne();
+            //receivedDone.WaitOne();
             while (true)
             {
                 Thread.Sleep(1000);
-                Console.Out.Write(".");
+                Console.Out.WriteLine("Received msgs so far: {0}", AsynchronousCommunicationUtils.reception);
             }
         }
 
@@ -64,7 +64,7 @@ namespace ExampleProject
             while(true)
             {
                 Thread.Sleep(1000);
-                Console.Out.Write(".");
+                Console.Out.WriteLine("Received msgs so far: {0}", AsynchronousCommunicationUtils.reception);
             }
         }
 

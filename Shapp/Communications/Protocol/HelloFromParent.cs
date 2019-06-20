@@ -12,8 +12,8 @@ namespace Shapp.Communications.Protocol
     {
         public void Dispatch(Socket sender)
         {
-            Console.Out.WriteLine("HelloFromParent received from " + sender.LocalEndPoint);
-            Console.Out.WriteLine("Sending HelloFromChild...");
+            //Console.Out.WriteLine("HelloFromParent received from " + sender.LocalEndPoint);
+            //Console.Out.WriteLine("Sending HelloFromChild...");
             AsynchronousCommunicationUtils.Send(sender, new HelloFromChild());
             //System.Threading.Thread.Sleep(100);
             //ParentCommunicator.Stop();
