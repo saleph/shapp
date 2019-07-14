@@ -17,8 +17,8 @@ namespace Shapp
     /// </summary>
     public class SelfSubmitter
     {
-        private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
-        private NewJobSubmitter NewJobSubmitter;
+        private readonly NewJobSubmitter NewJobSubmitter;
+        private static readonly List<JobDescriptor> activeGlobalJobDescriptors = new List<JobDescriptor>();
 
         /// <summary>
         /// Default constructor of self submitter. It supports also the debug builds (all the content of your current executable
@@ -27,7 +27,7 @@ namespace Shapp
         /// <param name="additionalInputFiles">additional files with input data to transfer</param>
         public SelfSubmitter(string[] additionalInputFiles = null)
         {
-            string filesToTransfer = BuildAdditionalLibrariesToTransfer() + generateAdditionalInputFilesFromList(additionalInputFiles);
+            string filesToTransfer = BuildAdditionalLibrariesToTransfer() + GenerateAdditionalInputFilesFromList(additionalInputFiles);
             NewJobSubmitter = new NewJobSubmitter()
             {
                 Command = GetExecutableName(),
@@ -35,7 +35,7 @@ namespace Shapp
             };
         }
 
-        private string generateAdditionalInputFilesFromList(string[] additionalInputFiles)
+        private string GenerateAdditionalInputFilesFromList(string[] additionalInputFiles)
         {
             if (additionalInputFiles == null)
             {
@@ -50,7 +50,20 @@ namespace Shapp
         /// <returns>job descriptor bound to newly created job</returns>
         public JobDescriptor Submit()
         {
-            return NewJobSubmitter.SubmitNewJob();
+            var descriptor = NewJobSubmitter.SubmitNewJob();
+            activeGlobalJobDescriptors.Add(descriptor);
+            descriptor.AddCustomStateListener((previous, current, jobId) =>
+            {
+                switch (current)
+                {
+                    case JobState.REMOVED:
+                    case JobState.COMPLETED:
+                    case JobState.HELD:
+                        activeGlobalJobDescriptors?.Remove(descriptor);
+                        break;
+                }
+            });
+            return descriptor;
         }
 
         /// <summary>
@@ -89,6 +102,15 @@ namespace Shapp
             return JobEnvVariables.GetNestLevel();
         }
 
+        /// <summary>
+        /// Checks whether the current proces has some running children.
+        /// </summary>
+        /// <returns>whether the current runnining job has has some active children</returns>
+        public static bool DoIHaveAnyChildren()
+        {
+            return activeGlobalJobDescriptors.Count > 0;
+        }
+
         private static string GetExecutableName()
         {
             const string EXECUTABLE_FILENAME_ENV_VAR_NAME = JobEnvVariables.SHAPP_ENV_VAR_NAMESPACE + "EXECUTABLE_NAME";
@@ -118,7 +140,7 @@ namespace Shapp
                 .Select(s => Path.GetFileName(s)).ToArray();
 
             string additionalLibrariesToTransfer = string.Join(", ", filesListWithoutPaths);
-            log.DebugFormat("Files to transfer: {0}", additionalLibrariesToTransfer);
+            C.log.DebugFormat("Files to transfer: {0}", additionalLibrariesToTransfer);
             return additionalLibrariesToTransfer;
         }
 

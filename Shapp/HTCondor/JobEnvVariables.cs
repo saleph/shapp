@@ -49,5 +49,10 @@ namespace Shapp
         {
             return JobVariables.CommunicationPort;
         }
+
+        public static int GetMyDestinationPortForChildren()
+        {
+            return JobVariables.CommunicationPort + 1;
+        }
     }
 }

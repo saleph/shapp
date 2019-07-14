@@ -27,7 +27,6 @@ namespace Shapp
     /// </summary>
     class PythonScriptsExecutor
     {
-        private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
         private readonly string ScriptToExecute;
 
         /// <summary>
@@ -100,7 +99,7 @@ namespace Shapp
         {
             using (StreamWriter writer = process.StandardInput)
             {
-                log.DebugFormat("Python script about to execute:\n{0}", ScriptToExecute);
+                C.log.DebugFormat("Python script about to execute:\n{0}", ScriptToExecute);
                 writer.Write(ScriptToExecute);
             }
         }
@@ -110,7 +109,7 @@ namespace Shapp
             using (StreamReader reader = process.StandardOutput)
             {
                 Response = reader.ReadToEnd();
-                log.DebugFormat("Python script result:\n{0}", Response);
+                C.log.DebugFormat("Python script result:\n{0}", Response);
             }
         }
 
@@ -119,7 +118,7 @@ namespace Shapp
             using (StreamReader reader = process.StandardError)
             {
                 Errors = reader.ReadToEnd();
-                log.DebugFormat("Python script errors:\n{0}", Errors);
+                C.log.DebugFormat("Python script errors:\n{0}", Errors);
             }
         }
     }

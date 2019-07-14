@@ -25,6 +25,8 @@ namespace ExampleProject
             //SubmitAndRemoveExample();
             //Program main = new Program();
             //main.Execute();
+            Program main = new Program();
+            main.ExecuteWithCommunication();
         }
 
         private static void ServerExample()
@@ -44,7 +46,8 @@ namespace ExampleProject
             };
             server.Start();
             //receivedDone.WaitOne();
-            while (true)
+            int k = 30;
+            while (--k > 0)
             {
                 Thread.Sleep(1000);
                 Console.Out.WriteLine("Received msgs so far: {0}", AsynchronousCommunicationUtils.reception);
@@ -58,14 +61,15 @@ namespace ExampleProject
             {
                 MyJobId = "123.456"
             });
-            //ParentCommunicator.Send("some string from child
 
 
-            while(true)
+            int k = 30;
+            while (--k > 0)
             {
                 Thread.Sleep(1000);
                 Console.Out.WriteLine("Received msgs so far: {0}", AsynchronousCommunicationUtils.reception);
             }
+            ParentCommunicator.Stop();
         }
 
         private List<JobDescriptor> RemoteDescriptors = new List<JobDescriptor>();
@@ -76,6 +80,38 @@ namespace ExampleProject
             JobDescriptor jobDescriptor = newJobSubmitter.Submit();
             JobRemover jobRemover = new JobRemover(jobDescriptor.JobId);
             jobRemover.Remove();
+        }
+
+        public void ExecuteWithCommunication()
+        {
+            if (SelfSubmitter.AmIRootProcess())
+            {
+                AsynchronousServer server = new AsynchronousServer();
+                AutoResetEvent receivedDone = new AutoResetEvent(false);
+                server.NewMessageReceivedEvent += (objectRecv, sock) =>
+                {
+                    if (objectRecv is ISystemMessage hello)
+                        hello.Dispatch(sock);
+
+                    if (objectRecv is string s)
+                    {
+                        Console.Out.WriteLine(s);
+                        receivedDone.Set();
+                    }
+                };
+                server.Start();
+                //receivedDone.WaitOne();
+                SubmitNewCopyOfMyselfAndWaitForStart();
+                while (true)
+                {
+                    Thread.Sleep(1000);
+                    Console.Out.WriteLine("Received msgs so far: {0}", AsynchronousCommunicationUtils.reception);
+                }
+            }
+            else if (SelfSubmitter.GetMyNestLevel() == 1)
+            {
+                ClientExample();
+            }
         }
 
         public void Execute()

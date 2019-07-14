@@ -20,7 +20,6 @@ namespace Shapp
     class JobStateFetcher
     {
         private const string JOB_STATUS_PROPERTY_LABEL = "JobStatus";
-        private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
         
         private readonly JobId JobId;
         private readonly string PythonScriptWithFetcher;
@@ -48,7 +47,7 @@ namespace Shapp
             Dictionary<string, string> jobStatesCache = JsonConvert.DeserializeObject<Dictionary<string, string>>(jobProperties);
             int jobStateId = GetJobStateId(jobStatesCache);
             JobState jobState = (JobState)jobStateId;
-            log.InfoFormat("Got job state info about job {0}: {1}", JobId, jobState);
+            C.log.InfoFormat("Got job state info about job {0}: {1}", JobId, jobState);
             return jobState;
         }
 

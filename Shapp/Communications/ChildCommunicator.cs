@@ -4,26 +4,25 @@ using System.Linq;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
-using Shapp.Communications.Protocol;
 
-namespace Shapp
+namespace Shapp.Communications
 {
-    public static class ParentCommunicator
+    class ChildCommunicator
     {
-        private static AsynchronousClient client;
+        private static AsynchronousServer server;
         private static bool isInitialized = false;
 
         public static void Initialize()
         {
             if (isInitialized)
                 return;
-            client = new AsynchronousClient();
-            client.NewMessageReceivedEvent += (classInstance, server) =>
+            server = new AsynchronousServer(JobEnvVariables.GetMyDestinationPortForChildren());
+            server.NewMessageReceivedEvent += (classInstance, server) =>
             {
                 if (classInstance is ISystemMessage systemMessage)
                     systemMessage.Dispatch(server);
             };
-            client.Connect(JobEnvVariables.GetParentSubmitterIp(), JobEnvVariables.GetParentSubmitterDestinationPort());
+            server.Start();
             isInitialized = true;
         }
 
@@ -31,15 +30,15 @@ namespace Shapp
         {
             if (!isInitialized)
                 return;
-            client.Stop();
+            server.Stop();
             isInitialized = false;
         }
 
-        public static void Send(object message)
+        public static void Send(Socket target, object message)
         {
             if (!isInitialized)
-                throw new ShappException("before sending a message you have to initialize the ParentCommunicator");
-            client.Send(message);
+                throw new ShappException("before sending a message you have to initialize the ChildCommunicator");
+            server.Send(target, message);
         }
     }
 }

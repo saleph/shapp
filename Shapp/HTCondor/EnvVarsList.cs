@@ -22,7 +22,10 @@ namespace Shapp
         [XmlIgnore]
         public IPAddress IPAddress;
         [XmlElement("IPAddress")]
+#pragma warning disable IDE0051 // Remove unused private members
+        // workaround for serialization of the IPAddress class
         private string IPAddressForXml
+#pragma warning restore IDE0051 // Remove unused private members
         {
             get { return IPAddress.ToString(); }
             set
@@ -40,13 +43,7 @@ namespace Shapp
 
         public string Serialize()
         {
-            var xmlserializer = new XmlSerializer(typeof(EnvVarsList));
-            var stringWriter = new StringWriter();
-            using (var writer = XmlWriter.Create(stringWriter))
-            {
-                xmlserializer.Serialize(writer, this);
-                return stringWriter.ToString();
-            }
+            return this.SerializeToXml();
         }
 
         public static EnvVarsList Deserialize(string xml)

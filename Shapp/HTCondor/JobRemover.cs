@@ -13,9 +13,7 @@ namespace Shapp
     /// It uses base script from Properties.Resources.GetJobStatusScript.
     /// </summary>
     public class JobRemover
-    {
-        private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
-        
+    {       
         private readonly JobId JobId;
         private readonly string PythonScriptWithRemover;
         private readonly PythonScriptsExecutor pythonScriptExecutor;
@@ -37,7 +35,7 @@ namespace Shapp
         public void Remove()
         {
             pythonScriptExecutor.Execute();
-            log.InfoFormat("Removed job from queue with id: {0}", JobId);
+            C.log.InfoFormat("Removed job from queue with id: {0}", JobId);
         }
 
         private string ConstructPythonScript(JobId jobId)

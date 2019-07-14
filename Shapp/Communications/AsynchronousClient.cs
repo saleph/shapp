@@ -14,7 +14,7 @@ namespace Shapp
     public class AsynchronousClient
     {
         // ManualResetEvent instances signal completion.
-        private static ManualResetEvent connectDone =
+        private static readonly ManualResetEvent connectDone =
             new ManualResetEvent(false);
 
         private readonly AsynchronousCommunicationUtils asynchronousCommunicationUtils = new AsynchronousCommunicationUtils();

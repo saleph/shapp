@@ -8,16 +8,15 @@ using System.Net.Sockets;
 namespace Shapp.Communications.Protocol
 {
     [Serializable]
-    public class HelloFromChild : ISystemMessage
-    {
-        public string MyJobId;
+    public class HelloFromChild : ProtocolSerializer, ISystemMessage {
+        public delegate void Callback(Socket client, HelloFromChild helloFromChild);
+        public static event Callback OnReceive;
 
-        public void Dispatch(Socket sender)
-        {
-            //Console.Out.WriteLine("HelloFromChild received from " + MyJobId);
-            //Console.Out.WriteLine("Sending HelloFromParent...");
-            AsynchronousCommunicationUtils.Send(sender, new HelloFromParent());
-            //System.Threading.Thread.Sleep(100);
+        public JobId MyJobId;
+
+        public void Dispatch(Socket sender) {
+            C.log.Debug(Serialize());
+            OnReceive?.Invoke(sender, this);
         }
     }
 }

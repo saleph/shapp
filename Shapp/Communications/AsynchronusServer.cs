@@ -10,7 +10,7 @@ namespace Shapp
 {
     public class AsynchronousServer
     {
-        private ManualResetEvent connectionEstablished = new ManualResetEvent(false);
+        private readonly ManualResetEvent connectionEstablished = new ManualResetEvent(false);
         private readonly object isListeningLock = new object();
         private bool isListening;
         private readonly int port;
@@ -26,7 +26,7 @@ namespace Shapp
         public delegate void NewMessageReceived(object classInstance, Socket client);
         public event NewMessageReceived NewMessageReceivedEvent;
 
-        public AsynchronousServer(int port = C.DEFAULT_PORT)
+        public AsynchronousServer(int port)
         {
             this.port = port;
             asynchronousCommunicationUtils.NewMessageReceivedEvent += OnMessageReceive;
