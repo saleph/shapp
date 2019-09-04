@@ -1,7 +1,7 @@
 #!/usr/bin/env python2
 # -*- coding: utf-8 -*-
 import htcondor
-import json
+from dicttoxml import dicttoxml
 
 job_status = dict()
 schedd = htcondor.Schedd()
@@ -15,4 +15,4 @@ for job in schedd.history('ClusterId == {0} && ProcId == {1}', ['ProcId', 'Clust
         raise ValueError('Invalid collection - requested for job {0}.{1}, got different one')
     job_status['JobStatus'] = job.get('JobStatus')
 
-print json.dumps(job_status)
+print (dicttoxml(job_status, attr_type=False))

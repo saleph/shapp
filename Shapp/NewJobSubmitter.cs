@@ -28,7 +28,6 @@ namespace Shapp
     /// </summary>
     public class NewJobSubmitter
     {
-        private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
         private const string LINUX_TARGET_OPERATING_SYSTEM = "target.OpSys == \"LINUX\"";
         private const string WINDOWS_TARGET_OPERATING_SYSTEM = "target.OpSys == \"WINDOWS\"";
 
@@ -125,7 +124,7 @@ namespace Shapp
             if (Command.Length == 0)
                 throw new ShappException("Newly submitting job cannot have empty Command");
             if (LogFileName.Length == 0)
-                log.Warn("You skipped a definion of LogFileName parameter for newly submitted job. " +
+                C.log.Warning("You skipped a definion of LogFileName parameter for newly submitted job. " +
                     "You won't be able to watch on it's state.");
         }
 
@@ -195,7 +194,7 @@ namespace Shapp
             {
                 logEntry += field.Name + " = " + field.GetValue(this) + "\n";
             }
-            log.Info(logEntry);
+            C.log.Info(logEntry);
         }
     }
 }

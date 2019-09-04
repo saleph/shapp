@@ -14,7 +14,7 @@ namespace ExampleProject
     class Program
     {
         private const string inputFile = "input.txt";
-        private List<JobDescriptor> RemoteDescriptors = new List<JobDescriptor>();
+        private readonly List<JobDescriptor> RemoteDescriptors = new List<JobDescriptor>();
 
         static void Main(string[] args)
         {

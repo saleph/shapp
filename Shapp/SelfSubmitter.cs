@@ -17,8 +17,7 @@ namespace Shapp
     /// </summary>
     public class SelfSubmitter
     {
-        private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
-        private NewJobSubmitter NewJobSubmitter;
+        private readonly NewJobSubmitter NewJobSubmitter;
 
         /// <summary>
         /// Default constructor of self submitter. It supports also the debug builds (all the content of your current executable
@@ -126,7 +125,7 @@ namespace Shapp
                 .Select(s => Path.GetFileName(s)).ToArray();
 
             string additionalLibrariesToTransfer = string.Join(", ", filesListWithoutPaths);
-            log.DebugFormat("Files to transfer: {0}", additionalLibrariesToTransfer);
+            C.log.Debug(string.Format("Files to transfer: {0}", additionalLibrariesToTransfer));
             return additionalLibrariesToTransfer;
         }
 

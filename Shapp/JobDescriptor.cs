@@ -19,7 +19,6 @@ namespace Shapp
         /// </summary>
         private const int DEFAULT_JOB_STATE_REFRESH_INTERVAL_MS = 1000;
         private const int LOWEST_POSSIBLE_REFRESH_RATE_MS = 100;
-        private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
         #region PublicProperties
         /// <summary>
@@ -168,7 +167,7 @@ namespace Shapp
 
         private void JobDescriptorStateChangeLogger(JobState previous, JobState current, JobId jobId)
         {
-            log.InfoFormat("Job {0} state has changed from {1} to {2}", jobId, previous, current);
+            C.log.Info(string.Format("Job {0} state has changed from {1} to {2}", jobId, previous, current));
         }
 
         private void RefreshJobState(object sender, System.Timers.ElapsedEventArgs e)
