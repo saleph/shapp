@@ -25,114 +25,64 @@ namespace ExampleProject
         private const int WORKERS_POOL_SIZE = 10;
         static void Main(string[] args)
         {
-            //if (args[0].Equals("s"))
-            //{
-            //    ServerExample();
-            //} else
-            //{
-            //    ClientExample();
-            //}
-            //SubmitAndRemoveExample();
             Program main = new Program();
             main.Execute(args);
         }
 
-        //private static void ServerExample()
-        //{
-        //    AsynchronousServer server = new AsynchronousServer();
-        //    AutoResetEvent receivedDone = new AutoResetEvent(false);
-        //    server.NewMessageReceivedEvent += (objectRecv, sock) =>
-        //    {
-        //        Console.Out.Write("recv: ");
-        //        if (objectRecv is string s)
-        //        {
-        //            Console.Out.WriteLine(s);
-        //        }
-        //        string res = "elo response from serv";
-        //        server.Send(sock, res);
-        //        receivedDone.Set();
-        //    };
-        //    server.Start();
-        //    receivedDone.WaitOne();
-        //    server.Stop();
-        //}
-
-        //private static void ClientExample()
-        //{
-        //    AsynchronousClient client = new AsynchronousClient();
-        //    AutoResetEvent receivedDone = new AutoResetEvent(false);
-        //    client.NewMessageReceivedEvent += (objectRecv, sock) =>
-        //    {
-        //        Console.Out.Write("recv: ");
-        //        if (objectRecv is string s)
-        //        {
-        //            Console.Out.WriteLine(s);
-        //        }
-        //        string res = "elo response from serv";
-        //        client.Send(res);
-        //        receivedDone.Set();
-        //    };
-        //    client.Connect(IPAddress.Parse("192.168.56.1"));
-        //    string msg = "elo from client";
-        //    client.Send(msg);
-        //    receivedDone.WaitOne();
-        //    client.Stop();
-        //}
-
-        //private static void SubmitAndRemoveExample()
-        //{
-        //    SelfSubmitter newJobSubmitter = new SelfSubmitter();
-        //    JobDescriptor jobDescriptor = newJobSubmitter.Submit();
-        //    JobRemover jobRemover = new JobRemover(jobDescriptor.JobId);
-        //    jobRemover.Remove();
-        //}
-
         public int Execute(string[] args)
         {
             if (SelfSubmitter.AmIRootProcess()) {
-                var descriptors = new List<JobDescriptor>();
-                int i = 0;
-                for (; i < WORKERS_POOL_SIZE; ++i) {
-                    // just an examle, same model also can be used
-                    string[] modelFilesForTask = { "model" + i + ".xml" };
+                return DoTheParentJob();
+            } else if (SelfSubmitter.GetMyNestLevel() == 1) {
+                DoTheChildJob();
+            }
+            return 0;
+        }
+
+        private int DoTheParentJob() {
+            var descriptors = new List<JobDescriptor>();
+            int i = 0;
+            for (; i < WORKERS_POOL_SIZE; ++i) {
+                // just an examle, same model also can be used
+                string[] modelFilesForTask = { "model" + i + ".xml" };
+                var descriptor = SubmitNewCopyOfMyselfAndWaitForStart(modelFilesForTask);
+                descriptors.Add(descriptor);
+            }
+
+            while (true) {
+                var descriptorEvents = descriptors.Select(descriptor => descriptor.JobCompletedEvent).ToArray();
+                // wait for some child to complete
+                var indexOfCompetedEvent = WaitHandle.WaitAny(descriptorEvents);
+                // get completed task's descriptor
+                var completedEvent = descriptorEvents[indexOfCompetedEvent];
+                var completedTaskDescriptor = descriptors.Find(descriptor => descriptor.JobCompletedEvent == completedEvent);
+                // cleanup the active descriptors removing the completed one
+                descriptors.Remove(completedTaskDescriptor);
+                // gather results
+                var jobId = completedTaskDescriptor.JobId;
+                var exitCode = GetExitCode(jobId);
+                if (exitCode == 0) {
+                    // everything is done, tearing down everything
+                    descriptors.ForEach(descriptor => descriptor.HardRemove());
+                    var startPathContent = GetStartPath(jobId);
+                    // processing of the start path
+                    return 0;
+                } else {
+                    string[] modelFilesForTask = { "model" + ++i + ".xml" };
                     var descriptor = SubmitNewCopyOfMyselfAndWaitForStart(modelFilesForTask);
                     descriptors.Add(descriptor);
                 }
-                
-                while (true) {
-                    var descriptorEvents = descriptors.Select(descriptor => descriptor.JobCompletedEvent).ToArray();
-                    // wait for some child to complete
-                    var indexOfCompetedEvent = WaitHandle.WaitAny(descriptorEvents);
-                    // get completed task's descriptor
-                    var completedEvent = descriptorEvents[indexOfCompetedEvent];
-                    var completedTaskDescriptor = descriptors.Find(descriptor => descriptor.JobCompletedEvent == completedEvent);
-                    // cleanup the active descriptors removing the completed one
-                    descriptors.Remove(completedTaskDescriptor);
-                    // gather results
-                    var jobId = completedTaskDescriptor.JobId;
-                    var exitCode = GetExitCode(jobId);
-                    if (exitCode == 0) {
-                        // everything is done, tearing down everything
-                        descriptors.ForEach(descriptor => descriptor.HardRemove());
-                        var startPathContent = GetStartPath(jobId);
-                        // processing of the start path
-                        return 0;
-                    } else {
-                        string[] modelFilesForTask = { "model" + ++i + ".xml" };
-                        var descriptor = SubmitNewCopyOfMyselfAndWaitForStart(modelFilesForTask);
-                        descriptors.Add(descriptor);
-                    }
-                }
-            } else if (SelfSubmitter.GetMyNestLevel() == 1) {
-                Console.Out.WriteLine("Hello from 1nd nest level");
-                // do some job, the main task
-
-                // after that, build the files to transfer:
-                int exitCode = 443;
-                string startPathContent = "startPath content";
-                SaveChildOutputToFiles(exitCode, startPathContent);
             }
-            return 0;
+        }
+
+        private static void DoTheChildJob() {
+            Console.Out.WriteLine("Hello from 1nd nest level");
+            // do some job, the main task
+
+            // after that, build the files to transfer:
+            int exitCode = 443;
+            string startPathContent = "startPath content";
+            SaveChildOutputToFiles(exitCode, startPathContent);
         }
 
         private static void SaveChildOutputToFiles(int exitCode, string startPathContent)
@@ -161,24 +111,6 @@ namespace ExampleProject
             return startPath;
         }
 
-        private void BasicTree(string[] args) {
-            if (SelfSubmitter.AmIRootProcess()) {
-                var firstDesc = SubmitNewCopyOfMyselfAndWaitForStart();
-                var secondDesc = SubmitNewCopyOfMyselfAndWaitForStart();
-                WaitForAllCopiesToComplete();
-            } else if (SelfSubmitter.GetMyNestLevel() == 1) {
-                Console.Out.WriteLine("Hello from 1nd nest level");
-                args.ToList().ForEach(s => Console.WriteLine(s));
-                Console.WriteLine(File.ReadAllText(inputFile));
-                SubmitNewCopyOfMyselfAndWaitForStart();
-                WaitForAllCopiesToComplete();
-            } else if (SelfSubmitter.GetMyNestLevel() == 2) {
-                Console.Out.WriteLine("Hello from 2nd nest level");
-                args.ToList().ForEach(s => Console.WriteLine(s));
-                Console.WriteLine(File.ReadAllText(inputFile));
-            }
-        }
-
         private JobDescriptor SubmitNewCopyOfMyselfAndWaitForStart(string[] inputFiles = null)
         {
             string[] arguments = { "-s", "123", "--set-sth", "'new value'" };
@@ -188,32 +120,6 @@ namespace ExampleProject
             RemoteDescriptors.Add(remoteProcessDescriptor);
             return remoteProcessDescriptor;
         }
-
-        private void WaitForAllCopiesToComplete()
-        {
-            foreach (var descriptor in RemoteDescriptors)
-            {
-                descriptor.JobCompletedEvent.WaitOne();
-            }
-        }
-
-        private static void SubmitNewJob()
-        {
-            NewJobSubmitter newJobSubmitter = new NewJobSubmitter
-            {
-                Command = "batch.py",
-                UserStandardOutputFileName = "stdout.txt",
-                TargetOperatingSystem = TargetOperatingSystem.ANY
-            };
-            JobDescriptor jobDescriptor = newJobSubmitter.SubmitNewJob();
-            Console.Out.WriteLine("Job submitted");
-            jobDescriptor.JobStartedEvent.WaitOne();
-            Console.Out.WriteLine("Job started");
-            jobDescriptor.JobCompletedEvent.WaitOne();
-            Console.Out.WriteLine("Job completed");
-        }
-
-        
 
         private static Dictionary<String, String> ReadFilenameMapping(JobId jid)
         {
