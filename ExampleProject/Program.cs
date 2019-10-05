@@ -19,9 +19,10 @@ namespace ExampleProject
         private static readonly int FILENAME_LENGTH = 15;
         private static readonly string FILENAMES_MAPPING_FORMAT = "[SHAPP] Filename mapping: '{0}':'{1}'";
         private const string FILENAMES_MAPPING_FORMAT_REGEX = "^\\[SHAPP\\] Filename mapping: '(.+)':'(.+)'$";
-        private const string EXIT_PATH_FILE = "exit_path";
+        private const string EXIT_CODE_FILE = "exit_path";
         private const string START_PATH_FILE = "start_path";
-        private static Random random = new Random();
+        private static readonly Random random = new Random();
+        private const int WORKERS_POOL_SIZE = 10;
         static void Main(string[] args)
         {
             //if (args[0].Equals("s"))
@@ -86,19 +87,42 @@ namespace ExampleProject
         //    jobRemover.Remove();
         //}
 
-        public void Execute(string[] args)
+        public int Execute(string[] args)
         {
             if (SelfSubmitter.AmIRootProcess()) {
                 var descriptors = new List<JobDescriptor>();
-                var firstDesc = SubmitNewCopyOfMyselfAndWaitForStart();
-                descriptors.Add(firstDesc);
-                var secondDesc = SubmitNewCopyOfMyselfAndWaitForStart();
-                descriptors.Add(secondDesc);
+                int i = 0;
+                for (; i < WORKERS_POOL_SIZE; ++i) {
+                    // just an examle, same model also can be used
+                    string[] modelFilesForTask = { "model" + i + ".xml" };
+                    var descriptor = SubmitNewCopyOfMyselfAndWaitForStart(modelFilesForTask);
+                    descriptors.Add(descriptor);
+                }
                 
-                // wait for children to complete
-                descriptors.ForEach(descriptor => descriptor.JobCompletedEvent.WaitOne());
-                ExtractInfoFromOutputFiles(firstDesc.JobId);
-                ExtractInfoFromOutputFiles(secondDesc.JobId);
+                while (true) {
+                    var descriptorEvents = descriptors.Select(descriptor => descriptor.JobCompletedEvent).ToArray();
+                    // wait for some child to complete
+                    var indexOfCompetedEvent = WaitHandle.WaitAny(descriptorEvents);
+                    // get completed task's descriptor
+                    var completedEvent = descriptorEvents[indexOfCompetedEvent];
+                    var completedTaskDescriptor = descriptors.Find(descriptor => descriptor.JobCompletedEvent == completedEvent);
+                    // cleanup the active descriptors removing the completed one
+                    descriptors.Remove(completedTaskDescriptor);
+                    // gather results
+                    var jobId = completedTaskDescriptor.JobId;
+                    var exitCode = GetExitCode(jobId);
+                    if (exitCode == 0) {
+                        // everything is done, tearing down everything
+                        descriptors.ForEach(descriptor => descriptor.HardRemove());
+                        var startPathContent = GetStartPath(jobId);
+                        // processing of the start path
+                        return 0;
+                    } else {
+                        string[] modelFilesForTask = { "model" + ++i + ".xml" };
+                        var descriptor = SubmitNewCopyOfMyselfAndWaitForStart(modelFilesForTask);
+                        descriptors.Add(descriptor);
+                    }
+                }
             } else if (SelfSubmitter.GetMyNestLevel() == 1) {
                 Console.Out.WriteLine("Hello from 1nd nest level");
                 // do some job, the main task
@@ -108,34 +132,33 @@ namespace ExampleProject
                 string startPathContent = "startPath content";
                 SaveChildOutputToFiles(exitCode, startPathContent);
             }
+            return 0;
         }
 
         private static void SaveChildOutputToFiles(int exitCode, string startPathContent)
         {
             var filenamesMap = new Dictionary<string, string>();
-            string exitPathFilename = GetEffectiveFilename(EXIT_PATH_FILE, filenamesMap);
+            string exitPathFilename = GetEffectiveFilename(EXIT_CODE_FILE, filenamesMap);
             File.WriteAllText(exitPathFilename, exitCode.ToString());
 
             string startPathFilename = GetEffectiveFilename(START_PATH_FILE, filenamesMap);
             File.WriteAllText(startPathFilename, startPathContent);
-
-            // can be used again, the name is preserved
-            string exitPathFilename2 = GetEffectiveFilename(EXIT_PATH_FILE, filenamesMap);
-            Debug.Assert(exitPathFilename == exitPathFilename2);
         }
 
-        private void ExtractInfoFromOutputFiles(JobId jid)
+        private int GetExitCode(JobId jid) {
+            var childFilenamesMap = ReadFilenameMapping(jid); // loads the mapping from the child, can be done only after the child completes
+            // from now, using the files is exaclty mirrored as in the child
+            string exitCodeFilename = GetEffectiveFilename(EXIT_CODE_FILE, childFilenamesMap);
+            int exitCode = int.Parse(File.ReadAllText(exitCodeFilename));
+            return exitCode;
+        }
+
+        private string GetStartPath(JobId jid)
         {
             var childFilenamesMap = ReadFilenameMapping(jid); // loads the mapping from the child, can be done only after the child completes
-            
-            // from now, using the files is exaclty mirrored as in the child
-            string exitPathFilename = GetEffectiveFilename(EXIT_PATH_FILE, childFilenamesMap);
-            int exitCode = int.Parse(File.ReadAllText(exitPathFilename));
-            Console.Out.WriteLine(string.Format("{0}: exitCode={1}", jid, exitCode));
-
             string startPathFilename = GetEffectiveFilename(START_PATH_FILE, childFilenamesMap);
             string startPath = File.ReadAllText(startPathFilename);
-            Console.Out.WriteLine(string.Format("{0}: startPath={1}", jid, startPath));
+            return startPath;
         }
 
         private void BasicTree(string[] args) {
@@ -156,9 +179,8 @@ namespace ExampleProject
             }
         }
 
-        private JobDescriptor SubmitNewCopyOfMyselfAndWaitForStart()
+        private JobDescriptor SubmitNewCopyOfMyselfAndWaitForStart(string[] inputFiles = null)
         {
-            string[] inputFiles = { inputFile };
             string[] arguments = { "-s", "123", "--set-sth", "'new value'" };
             SelfSubmitter selfSubmitter = new SelfSubmitter(inputFiles, arguments);
             var remoteProcessDescriptor = selfSubmitter.Submit();
