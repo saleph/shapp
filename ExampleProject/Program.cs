@@ -20,7 +20,7 @@ namespace ExampleProject
         private static readonly string FILENAMES_MAPPING_FORMAT = "[SHAPP] Filename mapping: '{0}':'{1}'";
         private const string FILENAMES_MAPPING_FORMAT_REGEX = "^\\[SHAPP\\] Filename mapping: '(.+)':'(.+)'$";
         private const string EXIT_CODE_FILE = "exit_path";
-        private const string START_PATH_FILE = "start_path";
+        private const string COUNTER_EXAMPLE_FILE = "start_path";
         private static readonly Random random = new Random();
         private const int WORKERS_POOL_SIZE = 10;
         static void Main(string[] args)
@@ -34,7 +34,12 @@ namespace ExampleProject
             if (SelfSubmitter.AmIRootProcess()) {
                 return DoTheParentJob();
             } else if (SelfSubmitter.GetMyNestLevel() == 1) {
-                DoTheChildJob();
+                // WARNING! I assume here that args are like follows:
+                // string[] arguments = { "--model", modelFilesForTask[0], "--startpath", modelFilesForTask[1] };
+                // if this changes, modify those values
+                string modelFilename = args[1];
+                string startPathFilename = args[3];
+                DoTheChildJob(modelFilename, startPathFilename);
             }
             return 0;
         }
@@ -43,9 +48,8 @@ namespace ExampleProject
             var descriptors = new List<JobDescriptor>();
             int i = 0;
             for (; i < WORKERS_POOL_SIZE; ++i) {
-                // just an examle, same model also can be used
-                string[] modelFilesForTask = { "model.xml", "model" + i + ".xml" };
-                string[] arguments = { "-arg1", modelFilesForTask[0], "-arg2", modelFilesForTask[1] };
+                string[] modelFilesForTask = { "model.xml", "startpath" + i + ".xml" };
+                string[] arguments = { "--model", modelFilesForTask[0], "--startpath", modelFilesForTask[1] };
                 var descriptor = SubmitNewCopyOfMyselfAndWaitForStart(modelFilesForTask, arguments);
                 descriptors.Add(descriptor);
             }
@@ -65,35 +69,46 @@ namespace ExampleProject
                 if (exitCode == 0) {
                     // everything is done, tearing down everything
                     descriptors.ForEach(descriptor => descriptor.HardRemove());
-                    var startPathContent = GetStartPath(jobId);
-                    // processing of the start path
+                    var counterExampleContent = GetCounterExample(jobId);
+                    // processing of the counterExample
                     return 0;
                 } else {
-                    string[] modelFilesForTask = { "model" + ++i + ".xml" };
-                    var descriptor = SubmitNewCopyOfMyselfAndWaitForStart(modelFilesForTask);
+                    string[] modelFilesForTask = { "model.xml", "startpath" + ++i + ".xml" };
+                    string[] arguments = { "--model", modelFilesForTask[0], "--startpath", modelFilesForTask[1] };
+                    var descriptor = SubmitNewCopyOfMyselfAndWaitForStart(modelFilesForTask, arguments);
                     descriptors.Add(descriptor);
                 }
             }
         }
 
-        private static void DoTheChildJob() {
-            Console.Out.WriteLine("Hello from 1nd nest level");
+        private static void DoTheChildJob(string modelFilename, string startPath) {
             // do some job, the main task
+            Tuple<int, string> exitCodeAndCounterExample = PerformComputation(modelFilename, startPath);
 
             // after that, build the files to transfer:
-            int exitCode = 443;
-            string startPathContent = "startPath content";
-            SaveChildOutputToFiles(exitCode, startPathContent);
+            int exitCode = exitCodeAndCounterExample.Item1;
+            string counterExample = exitCodeAndCounterExample.Item2;
+            SaveChildOutputToFiles(exitCode, counterExample);
         }
 
-        private static void SaveChildOutputToFiles(int exitCode, string startPathContent)
-        {
-            var filenamesMap = new Dictionary<string, string>();
-            string exitPathFilename = GetEffectiveFilename(EXIT_CODE_FILE, filenamesMap);
-            File.WriteAllText(exitPathFilename, exitCode.ToString());
+        private static Tuple<int, string> PerformComputation(string modelFilename, string startPath) {
+            // do the task
 
-            string startPathFilename = GetEffectiveFilename(START_PATH_FILE, filenamesMap);
-            File.WriteAllText(startPathFilename, startPathContent);
+
+            int exitCode = 1;
+            string counterExample = null; // empty if not found
+            return Tuple.Create(exitCode, counterExample);
+        }
+
+        private static void SaveChildOutputToFiles(int exitCode, string counterExampleContent) {
+            var filenamesMap = new Dictionary<string, string>();
+            string exitCodeFilename = GetEffectiveFilename(EXIT_CODE_FILE, filenamesMap);
+            File.WriteAllText(exitCodeFilename, exitCode.ToString());
+
+            if (counterExampleContent != null) {
+                string counterExampleFilename = GetEffectiveFilename(COUNTER_EXAMPLE_FILE, filenamesMap);
+                File.WriteAllText(counterExampleFilename, counterExampleContent);
+            }
         }
 
         private int GetExitCode(JobId jid) {
@@ -104,16 +119,14 @@ namespace ExampleProject
             return exitCode;
         }
 
-        private string GetStartPath(JobId jid)
-        {
+        private string GetCounterExample(JobId jid) {
             var childFilenamesMap = ReadFilenameMapping(jid); // loads the mapping from the child, can be done only after the child completes
-            string startPathFilename = GetEffectiveFilename(START_PATH_FILE, childFilenamesMap);
-            string startPath = File.ReadAllText(startPathFilename);
-            return startPath;
+            string counterExampleFilename = GetEffectiveFilename(COUNTER_EXAMPLE_FILE, childFilenamesMap);
+            string counterExample = File.ReadAllText(counterExampleFilename);
+            return counterExample;
         }
 
-        private JobDescriptor SubmitNewCopyOfMyselfAndWaitForStart(string[] inputFiles = null, string[] arguments = null)
-        {
+        private JobDescriptor SubmitNewCopyOfMyselfAndWaitForStart(string[] inputFiles = null, string[] arguments = null) {
             SelfSubmitter selfSubmitter = new SelfSubmitter(inputFiles, arguments);
             var remoteProcessDescriptor = selfSubmitter.Submit();
             remoteProcessDescriptor.JobStartedEvent.WaitOne();
@@ -121,8 +134,7 @@ namespace ExampleProject
             return remoteProcessDescriptor;
         }
 
-        private static Dictionary<String, String> ReadFilenameMapping(JobId jid)
-        {
+        private static Dictionary<String, String> ReadFilenameMapping(JobId jid) {
             Dictionary<String, String> filenamesMap = new Dictionary<string, string>();
 
             using (StreamReader sr = new StreamReader(string.Format("x_{0}_stdout.out", jid))) {
@@ -137,8 +149,7 @@ namespace ExampleProject
             }
             return filenamesMap;
         }
-        private static string GetEffectiveFilename(string v, Dictionary<String, String> map)
-        {
+        private static string GetEffectiveFilename(string v, Dictionary<String, String> map) {
             if (!map.ContainsKey(v)) {
                 map.Add(v, "x_shapp_" + RandomString(FILENAME_LENGTH) + ".txt");
                 Console.Out.WriteLine(string.Format(FILENAMES_MAPPING_FORMAT, v, map[v]));
@@ -146,8 +157,7 @@ namespace ExampleProject
             return map[v];
         }
 
-        public static string RandomString(int length)
-        {
+        public static string RandomString(int length) {
             const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
             return new string(Enumerable.Repeat(chars, length)
                 .Select(s => s[random.Next(s.Length)]).ToArray());
