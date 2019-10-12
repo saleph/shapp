@@ -50,7 +50,7 @@ namespace ExampleProject
             for (; i < WORKERS_POOL_SIZE; ++i) {
                 string[] modelFilesForTask = { "model.xml", "startpath" + i + ".xml" };
                 string[] arguments = { "--model", modelFilesForTask[0], "--startpath", modelFilesForTask[1] };
-                var descriptor = SubmitNewCopyOfMyselfAndWaitForStart(modelFilesForTask, arguments);
+                var descriptor = SubmitNewCopyOfMyself(modelFilesForTask, arguments);
                 descriptors.Add(descriptor);
             }
 
@@ -75,7 +75,7 @@ namespace ExampleProject
                 } else {
                     string[] modelFilesForTask = { "model.xml", "startpath" + ++i + ".xml" };
                     string[] arguments = { "--model", modelFilesForTask[0], "--startpath", modelFilesForTask[1] };
-                    var descriptor = SubmitNewCopyOfMyselfAndWaitForStart(modelFilesForTask, arguments);
+                    var descriptor = SubmitNewCopyOfMyself(modelFilesForTask, arguments);
                     descriptors.Add(descriptor);
                 }
             }
@@ -126,10 +126,9 @@ namespace ExampleProject
             return counterExample;
         }
 
-        private JobDescriptor SubmitNewCopyOfMyselfAndWaitForStart(string[] inputFiles = null, string[] arguments = null) {
+        private JobDescriptor SubmitNewCopyOfMyself(string[] inputFiles = null, string[] arguments = null) {
             SelfSubmitter selfSubmitter = new SelfSubmitter(inputFiles, arguments);
             var remoteProcessDescriptor = selfSubmitter.Submit();
-            remoteProcessDescriptor.JobStartedEvent.WaitOne();
             RemoteDescriptors.Add(remoteProcessDescriptor);
             return remoteProcessDescriptor;
         }
