@@ -148,12 +148,12 @@ namespace ExampleProject
             }
             return filenamesMap;
         }
-        private static string GetEffectiveFilename(string v, Dictionary<String, String> map) {
-            if (!map.ContainsKey(v)) {
-                map.Add(v, "x_shapp_" + RandomString(FILENAME_LENGTH) + ".txt");
-                Console.Out.WriteLine(string.Format(FILENAMES_MAPPING_FORMAT, v, map[v]));
+        private static string GetEffectiveFilename(string file, Dictionary<String, String> map) {
+            if (!map.ContainsKey(file)) {
+                map.Add(file, "x_shapp_" + file + "_" + RandomString(FILENAME_LENGTH) + ".txt");
+                Console.Out.WriteLine(string.Format(FILENAMES_MAPPING_FORMAT, file, map[file]));
             }
-            return map[v];
+            return map[file];
         }
 
         public static string RandomString(int length) {
