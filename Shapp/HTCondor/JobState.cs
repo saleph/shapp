@@ -1,11 +1,9 @@
-﻿namespace Shapp
-{
+﻿namespace Shapp {
     /// <summary>
     /// Job state enumerator.
     /// Contains values taken from https://htcondor-python.readthedocs.io/en/latest/htcondor_intro.html
     /// </summary>
-    public enum JobState
-    {
+    public enum JobState {
         /// <summary>
         /// Job is waiting for matchmaking or for free resource to execute.
         /// </summary>

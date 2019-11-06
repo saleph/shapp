@@ -7,8 +7,7 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Shapp
-{
+namespace Shapp {
     /// <summary>
     /// Class responsible for preparing python script for submitting new jobs (as batch programs).
     /// 
@@ -26,8 +25,7 @@ namespace Shapp
     /// $(ProcId) - it would be evaluated into cluster number after job submission.
     ///     For job "123.0" it would be "0".
     /// </summary>
-    public class NewJobSubmitter
-    {
+    public class NewJobSubmitter {
         private const string LINUX_TARGET_OPERATING_SYSTEM = "target.OpSys == \"LINUX\"";
         private const string WINDOWS_TARGET_OPERATING_SYSTEM = "target.OpSys == \"WINDOWS\"";
 
@@ -100,15 +98,14 @@ namespace Shapp
         /// Target operating system for the job. For more info refer to enum TargetOperatingSystem.
         /// </summary>
         public TargetOperatingSystem TargetOperatingSystem = TargetOperatingSystem.SAME_AS_CURRENT;
-        
+
         /// <summary>
         /// Submits new job based on specified fields of this instance.
         /// 
         /// Can be called multiple times to submit exact copy of the task.
         /// </summary>
         /// <returns>job descriptor bound to newly submitted job</returns>
-        public JobDescriptor SubmitNewJob()
-        {
+        public JobDescriptor SubmitNewJob() {
             ValidateParameters();
             string pythonScirpt = ConstructPythonScript();
             PythonScriptsExecutor executor = new PythonScriptsExecutor(pythonScirpt);
@@ -119,8 +116,7 @@ namespace Shapp
             return new JobDescriptor(jobId);
         }
 
-        private void ValidateParameters()
-        {
+        private void ValidateParameters() {
             if (Command.Length == 0)
                 throw new ShappException("Newly submitting job cannot have empty Command");
             if (LogFileName.Length == 0)
@@ -128,8 +124,7 @@ namespace Shapp
                     "You won't be able to watch on it's state.");
         }
 
-        private string ConstructPythonScript()
-        {
+        private string ConstructPythonScript() {
             string pythonScript = Properties.Resources.SubmitNewJobScript;
             return string.Format(pythonScript,
                 Command,
@@ -144,11 +139,9 @@ namespace Shapp
                 BuildRequirements());
         }
 
-        private string BuildRequirements()
-        {
+        private string BuildRequirements() {
             string requirements = "";
-            switch (TargetOperatingSystem)
-            {
+            switch (TargetOperatingSystem) {
                 case TargetOperatingSystem.SAME_AS_CURRENT:
                     requirements = "";
                     break;
@@ -165,10 +158,8 @@ namespace Shapp
             return requirements;
         }
 
-        private string BuildEnvironmentalVariables()
-        {
-            var envVarsList = new EnvVarsList()
-            {
+        private string BuildEnvironmentalVariables() {
+            var envVarsList = new EnvVarsList() {
                 IPAddress = GetThisNodeIpAddress(),
                 NestLevel = JobEnvVariables.GetNestLevel() + 1
             };
@@ -177,21 +168,17 @@ namespace Shapp
                 JobEnvVariables.SHAPP_ALL_ENV_VARS, envVarsList);
         }
 
-        private static IPAddress GetThisNodeIpAddress()
-        {
-            using (Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, 0))
-            {
+        private static IPAddress GetThisNodeIpAddress() {
+            using (Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, 0)) {
                 socket.Connect("8.8.8.8", 65530);
                 IPEndPoint endPoint = socket.LocalEndPoint as IPEndPoint;
                 return endPoint.Address;
             }
         }
 
-        private void LogNewJobSubmission(JobId jobId)
-        {
+        private void LogNewJobSubmission(JobId jobId) {
             string logEntry = string.Format("A job with id {0} was submitted with arguments:\n", jobId);
-            foreach (var field in this.GetType().GetFields())
-            {
+            foreach (var field in this.GetType().GetFields()) {
                 logEntry += field.Name + " = " + field.GetValue(this) + "\n";
             }
             C.log.Info(logEntry);

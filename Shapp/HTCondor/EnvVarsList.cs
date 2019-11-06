@@ -9,16 +9,14 @@ using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Serialization;
 
-namespace Shapp
-{
+namespace Shapp {
     /// <summary>
     /// Workaround for a bug in HTCondor python API. ENV field does not recognize different
     /// variables, so I've prepared a list of such variables to be parsed as a XML and put as
     /// a whole into one env variable.
     /// </summary>
     [DataContract]
-    public class EnvVarsList
-    {
+    public class EnvVarsList {
         [XmlIgnore]
         public IPAddress IPAddress;
         [XmlElement("IPAddress")]
@@ -28,8 +26,7 @@ namespace Shapp
 #pragma warning restore IDE0051 // Remove unused private members
         {
             get { return IPAddress.ToString(); }
-            set
-            {
+            set {
                 IPAddress = string.IsNullOrEmpty(value) ? null :
             IPAddress.Parse(value);
             }
@@ -41,24 +38,19 @@ namespace Shapp
 
         public override string ToString() => Serialize();
 
-        public string Serialize()
-        {
+        public string Serialize() {
             return this.SerializeToXml();
         }
 
-        public static EnvVarsList Deserialize(string xml)
-        {
-            if (xml == null || xml.Length == 0)
-            {
-                return new EnvVarsList()
-                {
+        public static EnvVarsList Deserialize(string xml) {
+            if (xml == null || xml.Length == 0) {
+                return new EnvVarsList() {
                     IPAddress = IPAddress.Parse(C.DEFAULT_IP_ADDRESS),
                     NestLevel = 0,
                     CommunicationPort = C.DEFAULT_PORT
                 };
             }
-            using (var stream = new StringReader(xml))
-            {
+            using (var stream = new StringReader(xml)) {
                 var serializer = new XmlSerializer(typeof(EnvVarsList));
                 return serializer.Deserialize(stream) as EnvVarsList;
             }

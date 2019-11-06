@@ -27,8 +27,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
-public class SimpleLogger
-{
+public class SimpleLogger {
     private const string FILE_EXT = ".log";
     private readonly string datetimeFormat;
     private readonly string logFilename;
@@ -38,31 +37,27 @@ public class SimpleLogger
     /// Initiate an instance of SimpleLogger class constructor.
     /// If log file does not exist, it will be created automatically.
     /// </summary>
-    public SimpleLogger()
-    {
+    public SimpleLogger() {
         datetimeFormat = "yyyy-MM-dd HH:mm:ss.fff";
         logFilename = "x_shapp_" + GetTimeDate() + FILE_EXT;
 
         // Log file header line
         string logHeader = logFilename + " is created.";
-        if (!System.IO.File.Exists(logFilename))
-        {
+        if (!System.IO.File.Exists(logFilename)) {
             WriteLine(System.DateTime.Now.ToString(datetimeFormat) + " " + logHeader, false);
         }
     }
 
-    private static string GetTimeDate()
-    {
-        string DateTime = System.DateTime.Now.ToString("dd-MM-yyyy_HH_mm_ss");   
+    private static string GetTimeDate() {
+        string DateTime = System.DateTime.Now.ToString("dd-MM-yyyy_HH_mm_ss");
         return DateTime;
-    } 
+    }
 
     /// <summary>
     /// Log a DEBUG message
     /// </summary>
     /// <param name="text">Message</param>
-    public void Debug(string text)
-    {
+    public void Debug(string text) {
         WriteFormattedLog(LogLevel.DEBUG, text);
     }
 
@@ -70,8 +65,7 @@ public class SimpleLogger
     /// Log an ERROR message
     /// </summary>
     /// <param name="text">Message</param>
-    public void Error(string text)
-    {
+    public void Error(string text) {
         WriteFormattedLog(LogLevel.ERROR, text);
     }
 
@@ -79,8 +73,7 @@ public class SimpleLogger
     /// Log a FATAL ERROR message
     /// </summary>
     /// <param name="text">Message</param>
-    public void Fatal(string text)
-    {
+    public void Fatal(string text) {
         WriteFormattedLog(LogLevel.FATAL, text);
     }
 
@@ -88,8 +81,7 @@ public class SimpleLogger
     /// Log an INFO message
     /// </summary>
     /// <param name="text">Message</param>
-    public void Info(string text)
-    {
+    public void Info(string text) {
         WriteFormattedLog(LogLevel.INFO, text);
     }
 
@@ -97,8 +89,7 @@ public class SimpleLogger
     /// Log a TRACE message
     /// </summary>
     /// <param name="text">Message</param>
-    public void Trace(string text)
-    {
+    public void Trace(string text) {
         WriteFormattedLog(LogLevel.TRACE, text);
     }
 
@@ -106,32 +97,25 @@ public class SimpleLogger
     /// Log a WARNING message
     /// </summary>
     /// <param name="text">Message</param>
-    public void Warning(string text)
-    {
+    public void Warning(string text) {
         WriteFormattedLog(LogLevel.WARNING, text);
     }
 
-    private void WriteLine(string text, bool append = true)
-    {
-        if (string.IsNullOrEmpty(text)) 
-        {
+    private void WriteLine(string text, bool append = true) {
+        if (string.IsNullOrEmpty(text)) {
             return;
         }
-        lock (fileLock) 
-        {
-            using (System.IO.StreamWriter writer = new System.IO.StreamWriter(logFilename, append, System.Text.Encoding.UTF8))
-            {
+        lock (fileLock) {
+            using (System.IO.StreamWriter writer = new System.IO.StreamWriter(logFilename, append, System.Text.Encoding.UTF8)) {
                 writer.WriteLine(text);
             }
             Console.Out.WriteLine(text);
         }
     }
 
-    private void WriteFormattedLog(LogLevel level, string text)
-    {
+    private void WriteFormattedLog(LogLevel level, string text) {
         string pretext;
-        switch (level)
-        {
+        switch (level) {
             case LogLevel.TRACE:
                 pretext = System.DateTime.Now.ToString(datetimeFormat) + " [TRACE]   ";
                 break;
@@ -159,8 +143,7 @@ public class SimpleLogger
     }
 
     [System.Flags]
-    private enum LogLevel
-    {
+    private enum LogLevel {
         TRACE,
         INFO,
         DEBUG,

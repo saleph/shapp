@@ -10,10 +10,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using Shapp;
 
-namespace ExampleProject
-{
-    class Program
-    {
+namespace ExampleProject {
+    class Program {
         private const string inputFile = "input.txt";
         private readonly List<JobDescriptor> RemoteDescriptors = new List<JobDescriptor>();
         private static readonly int FILENAME_LENGTH = 15;
@@ -23,14 +21,12 @@ namespace ExampleProject
         private const string COUNTER_EXAMPLE_FILE = "start_path";
         private static readonly Random random = new Random();
         private const int WORKERS_POOL_SIZE = 10;
-        static void Main(string[] args)
-        {
+        static void Main(string[] args) {
             Program main = new Program();
             main.Execute(args);
         }
 
-        public int Execute(string[] args)
-        {
+        public int Execute(string[] args) {
             if (SelfSubmitter.AmIRootProcess()) {
                 return DoTheParentJob();
             } else if (SelfSubmitter.GetMyNestLevel() == 1) {
@@ -138,7 +134,7 @@ namespace ExampleProject
 
             using (StreamReader sr = new StreamReader(string.Format("x_{0}_stdout.out", jid))) {
                 string line;
-                while((line = sr.ReadLine()) != null) {  
+                while ((line = sr.ReadLine()) != null) {
                     Regex regex = new Regex(FILENAMES_MAPPING_FORMAT_REGEX);
                     Match match = regex.Match(line);
                     string filename = match.Groups[1].Value;

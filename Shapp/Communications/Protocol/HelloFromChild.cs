@@ -5,8 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Net.Sockets;
 
-namespace Shapp.Communications.Protocol
-{
+namespace Shapp.Communications.Protocol {
     [Serializable]
     public class HelloFromChild : ProtocolSerializer, ISystemMessage {
         public delegate void Callback(Socket client, HelloFromChild helloFromChild);

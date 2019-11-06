@@ -11,17 +11,12 @@ using System.Threading.Tasks;
 using Shapp;
 using Shapp.Communications.Protocol;
 
-namespace ExampleProject
-{
-    class ProgramForProtoTesting
-    {
-        public static void MainMethod(string[] args)
-        {
-            if (args[0].Equals("s"))
-            {
+namespace ExampleProject {
+    class ProgramForProtoTesting {
+        public static void MainMethod(string[] args) {
+            if (args[0].Equals("s")) {
                 ServerExample();
-            } else
-            {
+            } else {
                 ClientExample();
             }
             //SubmitAndRemoveExample();
@@ -31,17 +26,14 @@ namespace ExampleProject
             main.ExecuteWithCommunication();
         }
 
-        public int Execute(string[] args)
-        {
+        public int Execute(string[] args) {
             AsynchronousServer server = new AsynchronousServer();
             AutoResetEvent receivedDone = new AutoResetEvent(false);
-            server.NewMessageReceivedEvent += (objectRecv, sock) =>
-            {
+            server.NewMessageReceivedEvent += (objectRecv, sock) => {
                 if (objectRecv is ISystemMessage hello)
                     hello.Dispatch(sock);
 
-                if (objectRecv is string s)
-                {
+                if (objectRecv is string s) {
                     Console.Out.WriteLine(s);
                     receivedDone.Set();
                 }
@@ -49,25 +41,21 @@ namespace ExampleProject
             server.Start();
             //receivedDone.WaitOne();
             int k = 30;
-            while (--k > 0)
-            {
+            while (--k > 0) {
                 Thread.Sleep(1000);
                 Console.Out.WriteLine("Received msgs so far: {0}", AsynchronousCommunicationUtils.reception);
             }
         }
 
-        private static void ClientExample()
-        {
+        private static void ClientExample() {
             ParentCommunicator.Initialize();
-            ParentCommunicator.Send(new HelloFromChild()
-            {
+            ParentCommunicator.Send(new HelloFromChild() {
                 MyJobId = "123.456"
             });
 
 
             int k = 30;
-            while (--k > 0)
-            {
+            while (--k > 0) {
                 Thread.Sleep(1000);
                 Console.Out.WriteLine("Received msgs so far: {0}", AsynchronousCommunicationUtils.reception);
             }
@@ -84,19 +72,15 @@ namespace ExampleProject
             SaveChildOutputToFiles(exitCode, counterExample);
         }
 
-        public void ExecuteWithCommunication()
-        {
-            if (SelfSubmitter.AmIRootProcess())
-            {
+        public void ExecuteWithCommunication() {
+            if (SelfSubmitter.AmIRootProcess()) {
                 AsynchronousServer server = new AsynchronousServer();
                 AutoResetEvent receivedDone = new AutoResetEvent(false);
-                server.NewMessageReceivedEvent += (objectRecv, sock) =>
-                {
+                server.NewMessageReceivedEvent += (objectRecv, sock) => {
                     if (objectRecv is ISystemMessage hello)
                         hello.Dispatch(sock);
 
-                    if (objectRecv is string s)
-                    {
+                    if (objectRecv is string s) {
                         Console.Out.WriteLine(s);
                         receivedDone.Set();
                     }
@@ -104,20 +88,16 @@ namespace ExampleProject
                 server.Start();
                 //receivedDone.WaitOne();
                 SubmitNewCopyOfMyselfAndWaitForStart();
-                while (true)
-                {
+                while (true) {
                     Thread.Sleep(1000);
                     Console.Out.WriteLine("Received msgs so far: {0}", AsynchronousCommunicationUtils.reception);
                 }
-            }
-            else if (SelfSubmitter.GetMyNestLevel() == 1)
-            {
+            } else if (SelfSubmitter.GetMyNestLevel() == 1) {
                 ClientExample();
             }
         }
 
-        public void Execute()
-        {
+        public void Execute() {
             if (SelfSubmitter.AmIRootProcess()) {
                 SubmitNewCopyOfMyselfAndWaitForStart();
                 SubmitNewCopyOfMyselfAndWaitForStart();
@@ -131,8 +111,7 @@ namespace ExampleProject
             }
         }
 
-        private void SubmitNewCopyOfMyselfAndWaitForStart()
-        {
+        private void SubmitNewCopyOfMyselfAndWaitForStart() {
             string[] filesToAttach = { "file_with_input.txt" };
             SelfSubmitter selfSubmitter = new SelfSubmitter(filesToAttach);
             var remoteProcessDescriptor = selfSubmitter.Submit();
@@ -145,7 +124,7 @@ namespace ExampleProject
 
             using (StreamReader sr = new StreamReader(string.Format("x_{0}_stdout.out", jid))) {
                 string line;
-                while((line = sr.ReadLine()) != null) {  
+                while ((line = sr.ReadLine()) != null) {
                     Regex regex = new Regex(FILENAMES_MAPPING_FORMAT_REGEX);
                     Match match = regex.Match(line);
                     string filename = match.Groups[1].Value;
@@ -163,8 +142,7 @@ namespace ExampleProject
             return map[file];
         }
 
-        private static void SubmitNewJob()
-        {
+        private static void SubmitNewJob() {
             NewJobSubmitter newJobSubmitter = new NewJobSubmitter {
                 Command = "batch.py",
                 UserStandardOutputFileName = "stdout.txt",

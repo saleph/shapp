@@ -7,14 +7,12 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Shapp
-{
+namespace Shapp {
     /// <summary>
     /// Descriptor for a job with specified ID. Provides asynchronic interface for
     /// job state analysis.
     /// </summary>
-    public class JobDescriptor
-    {
+    public class JobDescriptor {
         /// <summary>
         /// Default state refresh rate. Describes how often job state is being polled.
         /// </summary>
@@ -29,21 +27,16 @@ namespace Shapp
         /// <summary>
         /// State of submitted job. Thread-safe.
         /// </summary>
-        public JobState State
-        {
-            get
-            {
-                lock (stateLock)
-                {
+        public JobState State {
+            get {
+                lock (stateLock) {
                     return state;
                 }
             }
-            private set
-            {
+            private set {
                 JobState previous;
                 JobState current;
-                lock (stateLock)
-                {
+                lock (stateLock) {
                     previous = state;
                     current = value;
                     state = current;
@@ -98,8 +91,7 @@ namespace Shapp
         /// saved in some file before the program shutdown).
         /// </summary>
         /// <param name="jobId">job's id to bound into descriptor</param>
-        public JobDescriptor(JobId jobId)
-        {
+        public JobDescriptor(JobId jobId) {
             JobId = jobId;
             StateListener += JobDescriptorEventLauncher;
             StateListener += JobDescriptorStateChangeLogger;
@@ -118,8 +110,7 @@ namespace Shapp
         /// Adds custom object state observer
         /// </summary>
         /// <param name="jobStateChangedListener"></param>
-        public void AddCustomStateListener(JobStateChanged jobStateChangedListener)
-        {
+        public void AddCustomStateListener(JobStateChanged jobStateChangedListener) {
             StateListener += jobStateChangedListener;
         }
 
@@ -127,13 +118,11 @@ namespace Shapp
         /// Removes in the job in the hard way (using HTCondor mechanisms). It terminates
         /// the task rightaway, without any time to perform cleanup.
         /// </summary>
-        public void HardRemove()
-        {
+        public void HardRemove() {
             jobRemover.Remove();
         }
 
-        public void SoftRemove()
-        {
+        public void SoftRemove() {
 
         }
 
@@ -141,10 +130,8 @@ namespace Shapp
         /// Overwrites default polling interval.
         /// </summary>
         /// <param name="intervalInMs">Polling interval in ms from range [100; +inf)</param>
-        public void SetPollingInterval(int intervalInMs)
-        {
-            if (intervalInMs < C.LOWEST_POSSIBLE_REFRESH_RATE_MS)
-            {
+        public void SetPollingInterval(int intervalInMs) {
+            if (intervalInMs < C.LOWEST_POSSIBLE_REFRESH_RATE_MS) {
                 throw new ArgumentException(
                     "Polling interval cannot be lower than " + C.LOWEST_POSSIBLE_REFRESH_RATE_MS + "ms");
             }
@@ -156,17 +143,14 @@ namespace Shapp
             AsynchronousCommunicationUtils.Send(jobSocket, objectToSend);
         }
 
-        private void SetupJobStatusPoller()
-        {
+        private void SetupJobStatusPoller() {
             timer.Elapsed += RefreshJobState;
             SetPollingInterval(C.DEFAULT_JOB_STATE_REFRESH_INTERVAL_MS);
             timer.Enabled = true;
         }
 
-        private void JobDescriptorEventLauncher(JobState previous, JobState current, JobId jobId)
-        {
-            switch (current)
-            {
+        private void JobDescriptorEventLauncher(JobState previous, JobState current, JobId jobId) {
+            switch (current) {
                 case JobState.RUNNING:
                     JobStartedEvent.Set();
                     break;
@@ -185,18 +169,15 @@ namespace Shapp
             }
         }
 
-        private void DisableProbingJobState()
-        {
+        private void DisableProbingJobState() {
             timer.Enabled = false;
         }
 
-        private void JobDescriptorStateChangeLogger(JobState previous, JobState current, JobId jobId)
-        {
+        private void JobDescriptorStateChangeLogger(JobState previous, JobState current, JobId jobId) {
             C.log.Info(string.Format("Job {0} state has changed from {1} to {2}", jobId, previous, current));
         }
 
-        private void RefreshJobState(object sender, System.Timers.ElapsedEventArgs e)
-        {
+        private void RefreshJobState(object sender, System.Timers.ElapsedEventArgs e) {
             JobState readState = jobStateFetcher.GetJobState();
             if (readState == State)
                 return;

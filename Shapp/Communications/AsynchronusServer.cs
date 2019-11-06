@@ -6,10 +6,8 @@ using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 
-namespace Shapp
-{
-    public class AsynchronousServer
-    {
+namespace Shapp {
+    public class AsynchronousServer {
         private readonly ManualResetEvent connectionEstablished = new ManualResetEvent(false);
         private readonly object isListeningLock = new object();
         private bool isListening;
@@ -26,38 +24,31 @@ namespace Shapp
         public delegate void NewMessageReceived(object classInstance, Socket client);
         public event NewMessageReceived NewMessageReceivedEvent;
 
-        public AsynchronousServer(int port)
-        {
+        public AsynchronousServer(int port) {
             this.port = port;
             asynchronousCommunicationUtils.NewMessageReceivedEvent += OnMessageReceive;
             listener = new Thread(new ThreadStart(ListenForNewConnections));
         }
 
-        private void OnMessageReceive(object classInstance, Socket client)
-        {
+        private void OnMessageReceive(object classInstance, Socket client) {
             NewMessageReceivedEvent?.Invoke(classInstance, client);
         }
 
-        public void Start()
-        {
-            if (!listener.IsAlive)
-            {
+        public void Start() {
+            if (!listener.IsAlive) {
                 IsListening = true;
                 listener.Start();
             }
         }
 
-        public void Stop()
-        {
-            if (listener.IsAlive)
-            {
+        public void Stop() {
+            if (listener.IsAlive) {
                 IsListening = false;
                 listener.Join();
             }
         }
 
-        private void ListenForNewConnections()
-        {
+        private void ListenForNewConnections() {
             IPAddress ipAddress = GetLocalIPAddress();
             IPEndPoint localEndPoint = new IPEndPoint(ipAddress, port);
             System.Console.WriteLine("Listening on {0}", localEndPoint.ToString());
@@ -67,40 +58,33 @@ namespace Shapp
 
             listener.Bind(localEndPoint);
             listener.Listen(C.SERVER_BACKLOG_SIZE);
-            while (IsListening)
-            {
+            while (IsListening) {
                 connectionEstablished.Reset();
                 listener.BeginAccept(new AsyncCallback(AcceptCallback), listener);
                 connectionEstablished.WaitOne(ShappSettins.Default.EventWaitTime);
             }
         }
 
-        private static IPAddress GetLocalIPAddress()
-        {
+        private static IPAddress GetLocalIPAddress() {
             var host = Dns.GetHostEntry(Dns.GetHostName());
-            foreach (var ip in host.AddressList)
-            {
-                if (ip.AddressFamily == AddressFamily.InterNetwork)
-                {
+            foreach (var ip in host.AddressList) {
+                if (ip.AddressFamily == AddressFamily.InterNetwork) {
                     return ip;
                 }
             }
             throw new Exception("No network adapters with an IPv4 address in the system!");
         }
 
-        private void AcceptCallback(IAsyncResult ar)
-        {
+        private void AcceptCallback(IAsyncResult ar) {
             connectionEstablished.Set();
             Socket listener = (Socket)ar.AsyncState;
             Socket handler = listener.EndAccept(ar);
-            while (IsListening)
-            {
+            while (IsListening) {
                 asynchronousCommunicationUtils.ListenForMessages(handler);
             }
         }
 
-        public void Send(Socket client, object objectToSend)
-        {
+        public void Send(Socket client, object objectToSend) {
             AsynchronousCommunicationUtils.Send(client, objectToSend);
         }
     }

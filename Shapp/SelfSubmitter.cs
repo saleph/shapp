@@ -7,16 +7,14 @@ using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Shapp
-{
+namespace Shapp {
     /// <summary>
     /// Helper class for recursive self submitting.
     /// 
     /// This class can be further expanded by some additional parameters defined in class NewJobSubmitter.
     /// Feel free to extend!
     /// </summary>
-    public class SelfSubmitter
-    {
+    public class SelfSubmitter {
         private readonly NewJobSubmitter NewJobSubmitter;
         private static readonly List<JobDescriptor> activeGlobalJobDescriptors = new List<JobDescriptor>();
 
@@ -27,26 +25,22 @@ namespace Shapp
         /// <param name="additionalInputFiles">additional files with input data to transfer</param>
         /// <param name="commandLineArgs">additional command line arguments</param>
         public SelfSubmitter(string[] additionalInputFiles = null,
-                             string[] commandLineArgs = null)
-        {
+                             string[] commandLineArgs = null) {
             string inputFiles = BuildAdditionalLibrariesToTransfer() + BuildAdditionalInputFiles(additionalInputFiles);
-            NewJobSubmitter = new NewJobSubmitter()
-            {
+            NewJobSubmitter = new NewJobSubmitter() {
                 Command = GetExecutableName(),
                 InputFilesToTransferCommaSeparated = inputFiles,
                 CommandCliArguments = BuildCommandLineArgs(commandLineArgs)
             };
         }
 
-        private static string BuildCommandLineArgs(string[] commandLineArgs)
-        {
+        private static string BuildCommandLineArgs(string[] commandLineArgs) {
             if (commandLineArgs == null || commandLineArgs.Length == 0)
                 return "";
             return string.Join(" ", commandLineArgs);
         }
 
-        private static string BuildAdditionalInputFiles(string[] additionalInputFiles)
-        {
+        private static string BuildAdditionalInputFiles(string[] additionalInputFiles) {
             if (additionalInputFiles == null || additionalInputFiles.Length == 0)
                 return "";
             return ", " + string.Join(", ", additionalInputFiles);
@@ -56,14 +50,11 @@ namespace Shapp
         /// Submits new instance of currently executing applicaiton.
         /// </summary>
         /// <returns>job descriptor bound to newly created job</returns>
-        public JobDescriptor Submit()
-        {
+        public JobDescriptor Submit() {
             var descriptor = NewJobSubmitter.SubmitNewJob();
             activeGlobalJobDescriptors.Add(descriptor);
-            descriptor.AddCustomStateListener((previous, current, jobId) =>
-            {
-                switch (current)
-                {
+            descriptor.AddCustomStateListener((previous, current, jobId) => {
+                switch (current) {
                     case JobState.REMOVED:
                     case JobState.COMPLETED:
                     case JobState.HELD:
@@ -78,8 +69,7 @@ namespace Shapp
         /// Acquires IP address of parent submitter.
         /// </summary>
         /// <returns>IPAddress of the parent</returns>
-        public static IPAddress GetMyParentIpAddress()
-        {
+        public static IPAddress GetMyParentIpAddress() {
             return JobEnvVariables.GetParentSubmitterIp();
         }
 
@@ -87,8 +77,7 @@ namespace Shapp
         /// Checks if currently executing application is a root process.
         /// </summary>
         /// <returns>true if currently executing app is root process; false otherwise</returns>
-        public static bool AmIRootProcess()
-        {
+        public static bool AmIRootProcess() {
             return JobEnvVariables.GetNestLevel() == 0;
         }
 
@@ -96,8 +85,7 @@ namespace Shapp
         /// Checks if currently executing application is a child process.
         /// </summary>
         /// <returns>true if currently executing app is child process; false otherwise</returns>
-        public static bool AmIChildProcess()
-        {
+        public static bool AmIChildProcess() {
             return !AmIRootProcess();
         }
 
@@ -105,8 +93,7 @@ namespace Shapp
         /// Checks for nest level of currently executing application.
         /// </summary>
         /// <returns>nest level of currently executing application (0 for root process, 1 for first level one etc.)</returns>
-        public static int GetMyNestLevel()
-        {
+        public static int GetMyNestLevel() {
             return JobEnvVariables.GetNestLevel();
         }
 
@@ -114,29 +101,25 @@ namespace Shapp
         /// Checks whether the current proces has some running children.
         /// </summary>
         /// <returns>whether the current runnining job has has some active children</returns>
-        public static bool DoIHaveAnyChildren()
-        {
+        public static bool DoIHaveAnyChildren() {
             return activeGlobalJobDescriptors.Count > 0;
         }
 
-        private static string GetExecutableName()
-        {
+        private static string GetExecutableName() {
             const string EXECUTABLE_FILENAME_ENV_VAR_NAME = JobEnvVariables.SHAPP_ENV_VAR_NAMESPACE + "EXECUTABLE_NAME";
-            if (AmIRootProcess())
-            {
+            if (AmIRootProcess()) {
                 // It's a dirty workaround for a way that HTCondor executes commands
                 // After submission (when the app is running as a job on remote machine)
                 // AppDomain.CurrentDomain.FriendlyName will return "condor_exec.exe". This can't
                 // be used for further submission of the jobs. This Env variable will be preserved for every
                 // further instance of this app.
-                Environment.SetEnvironmentVariable(EXECUTABLE_FILENAME_ENV_VAR_NAME, 
+                Environment.SetEnvironmentVariable(EXECUTABLE_FILENAME_ENV_VAR_NAME,
                     AppDomain.CurrentDomain.FriendlyName, EnvironmentVariableTarget.Process);
             }
             return Environment.GetEnvironmentVariable(EXECUTABLE_FILENAME_ENV_VAR_NAME);
         }
 
-        private static string BuildAdditionalLibrariesToTransfer()
-        {
+        private static string BuildAdditionalLibrariesToTransfer() {
             string[] dlls = GetFilesWithExtension("dll");
             string[] configs = GetFilesWithExtension("config");
             string[] xmls = GetFilesWithExtension("xml");
@@ -152,14 +135,12 @@ namespace Shapp
             return additionalLibrariesToTransfer;
         }
 
-        private static string[] GetFilesWithExtension(string pattern)
-        {
+        private static string[] GetFilesWithExtension(string pattern) {
             string directory = Path.GetDirectoryName(GetExecutableLocation());
             return Directory.GetFiles(directory, "*." + pattern, SearchOption.TopDirectoryOnly);
         }
 
-        private static string GetExecutableLocation()
-        {
+        private static string GetExecutableLocation() {
             return System.Reflection.Assembly.GetExecutingAssembly().Location;
         }
     }

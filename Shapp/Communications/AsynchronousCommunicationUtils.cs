@@ -5,12 +5,9 @@ using System.Net.Sockets;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Threading;
 
-namespace Shapp
-{
-    public class AsynchronousCommunicationUtils
-    {
-        public class StateObject
-        {
+namespace Shapp {
+    public class AsynchronousCommunicationUtils {
+        public class StateObject {
             public Socket workSocket = null;
             public int bytesRead = 0;
             // Receive buffer. At first it will receive 4 bytes with size of the payload
@@ -25,10 +22,8 @@ namespace Shapp
         public delegate void NewMessageReceived(object classInstance, Socket client);
         public event NewMessageReceived NewMessageReceivedEvent;
 
-        public void ListenForMessages(Socket handler)
-        {
-            StateObject state = new StateObject
-            {
+        public void ListenForMessages(Socket handler) {
+            StateObject state = new StateObject {
                 bytesRead = 0,
                 workSocket = handler
             };
@@ -38,25 +33,20 @@ namespace Shapp
             state.processingDone.WaitOne(ShappSettins.Default.EventWaitTime);
         }
 
-        private void ReadPayloadSizeCallback(IAsyncResult ar)
-        {
+        private void ReadPayloadSizeCallback(IAsyncResult ar) {
             StateObject state = (StateObject)ar.AsyncState;
             // continue the listener thread
             Socket handler = state.workSocket;
             int bytesRead = handler.EndReceive(ar);
 
-            if (bytesRead == 0)
-            {
+            if (bytesRead == 0) {
                 return;
             }
             state.bytesRead += bytesRead;
-            if (state.bytesRead < sizeof(int))
-            {
+            if (state.bytesRead < sizeof(int)) {
                 handler.BeginReceive(state.buffer, state.bytesRead, sizeof(int) - state.bytesRead, 0,
                 new AsyncCallback(ReadPayloadSizeCallback), state);
-            }
-            else
-            {
+            } else {
                 int payloadSize = BitConverter.ToInt32(state.buffer, 0);
                 state.workSocket = handler;
                 state.bytesRead = 0;
@@ -66,27 +56,21 @@ namespace Shapp
             }
         }
 
-        private void ReadPayloadCallback(IAsyncResult ar)
-        {
+        private void ReadPayloadCallback(IAsyncResult ar) {
             StateObject state = (StateObject)ar.AsyncState;
             state.processingDone.Set();
             Socket handler = state.workSocket;
             int bytesRead = handler.EndReceive(ar);
 
-            if (bytesRead == 0)
-            {
+            if (bytesRead == 0) {
                 return;
             }
             state.bytesRead += bytesRead;
-            if (state.bytesRead < state.buffer.Length)
-            {
+            if (state.bytesRead < state.buffer.Length) {
                 handler.BeginReceive(state.buffer, state.bytesRead, state.buffer.Length - state.bytesRead, 0,
                     new AsyncCallback(ReadPayloadCallback), state);
-            }
-            else
-            {
-                using (var stream = new MemoryStream(state.buffer))
-                {
+            } else {
+                using (var stream = new MemoryStream(state.buffer)) {
                     var formatter = new BinaryFormatter();
                     stream.Seek(0, SeekOrigin.Begin);
                     object receivedObject = formatter.Deserialize(stream);
@@ -98,8 +82,7 @@ namespace Shapp
 
         public static long reception = 0;
 
-        public static void Send(Socket handler, object objectToSend)
-        {
+        public static void Send(Socket handler, object objectToSend) {
             var stream = new MemoryStream();
             stream.Seek(0, SeekOrigin.Begin);
             var formatter = new BinaryFormatter();
@@ -112,8 +95,7 @@ namespace Shapp
                 new AsyncCallback(SendCallback), handler);
         }
 
-        private static void SendCallback(IAsyncResult ar)
-        {
+        private static void SendCallback(IAsyncResult ar) {
             Socket handler = (Socket)ar.AsyncState;
             handler.EndSend(ar);
         }
