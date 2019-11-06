@@ -79,7 +79,6 @@
     <Compile Include="Communications\Protocol\SystemMessage.cs" />
     <Compile Include="HTCondor\TargetOperatingSystem.cs" />
     <Compile Include="SimpleLogger.cs" />
-    <Compile Include="TargetOperatingSystem.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Properties\Resources.resx">
