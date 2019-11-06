@@ -148,8 +148,7 @@ namespace ExampleProject
 
         private static void SubmitNewJob()
         {
-            NewJobSubmitter newJobSubmitter = new NewJobSubmitter
-            {
+            NewJobSubmitter newJobSubmitter = new NewJobSubmitter {
                 Command = "batch.py",
                 UserStandardOutputFileName = "stdout.txt",
                 TargetOperatingSystem = TargetOperatingSystem.ANY
@@ -160,6 +159,10 @@ namespace ExampleProject
             Console.Out.WriteLine("Job started");
             jobDescriptor.JobCompletedEvent.WaitOne();
             Console.Out.WriteLine("Job completed");
+        }
+
+        private static Log(string s) {
+            Console.Out.WriteLine(s);
         }
     }
 }
