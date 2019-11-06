@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace Shapp {
-    static class C {
+    public static class C {
         static public SimpleLogger log = new SimpleLogger();
         public const int DEFAULT_PORT = 11001;
         /// <summary>

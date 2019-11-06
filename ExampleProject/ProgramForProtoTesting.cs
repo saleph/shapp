@@ -19,15 +19,12 @@ namespace ExampleProject {
             } else {
                 ClientExample();
             }
-            //SubmitAndRemoveExample();
-            //Program main = new Program();
-            //main.Execute();
-            Program main = new Program();
-            main.ExecuteWithCommunication();
+            //ProgramForProtoTesting main = new ProgramForProtoTesting();
+            //main.ExecuteWithCommunication();
         }
 
-        public int Execute(string[] args) {
-            AsynchronousServer server = new AsynchronousServer();
+        public static void ServerExample() {
+            AsynchronousServer server = new AsynchronousServer(Shapp.C.DEFAULT_PORT);
             AutoResetEvent receivedDone = new AutoResetEvent(false);
             server.NewMessageReceivedEvent += (objectRecv, sock) => {
                 if (objectRecv is ISystemMessage hello)
@@ -50,7 +47,7 @@ namespace ExampleProject {
         private static void ClientExample() {
             ParentCommunicator.Initialize();
             ParentCommunicator.Send(new HelloFromChild() {
-                MyJobId = "123.456"
+                MyJobId = new JobId("123.456")
             });
 
 
@@ -62,19 +59,46 @@ namespace ExampleProject {
             ParentCommunicator.Stop();
         }
 
-        private static void DoTheChildJob(string modelFilename, string startPath) {
-            // do some job, the main task
-            Tuple<int, string> exitCodeAndCounterExample = PerformComputation(modelFilename, startPath);
+        public void Execute() {
+            if (SelfSubmitter.AmIRootProcess()) {
+                SubmitNewCopyOfMyself();
+                SubmitNewCopyOfMyself();
+            } else if (SelfSubmitter.GetMyNestLevel() == 1) {
+                Console.Out.WriteLine("Hello from 1nd nest level");
+                SubmitNewCopyOfMyself();
+            } else if (SelfSubmitter.GetMyNestLevel() == 2) {
+                Console.Out.WriteLine("Hello from 2nd nest level");
+            }
+        }
 
-            // after that, build the files to transfer:
-            int exitCode = exitCodeAndCounterExample.Item1;
-            string counterExample = exitCodeAndCounterExample.Item2;
-            SaveChildOutputToFiles(exitCode, counterExample);
+        private JobDescriptor SubmitNewCopyOfMyself() {
+            string[] filesToAttach = { "file_with_input.txt" };
+            SelfSubmitter selfSubmitter = new SelfSubmitter(filesToAttach);
+            var remoteProcessDescriptor = selfSubmitter.Submit();
+            return remoteProcessDescriptor;
+        }
+
+        private static void SubmitNewJob() {
+            NewJobSubmitter newJobSubmitter = new NewJobSubmitter {
+                Command = "batch.py",
+                UserStandardOutputFileName = "stdout.txt",
+                TargetOperatingSystem = TargetOperatingSystem.ANY
+            };
+            JobDescriptor jobDescriptor = newJobSubmitter.SubmitNewJob();
+            Log("Job submitted");
+            jobDescriptor.JobStartedEvent.WaitOne();
+            Log("Job started");
+            jobDescriptor.JobCompletedEvent.WaitOne();
+            Log("Job completed");
+        }
+
+        private static void Log(string s) {
+            Console.Out.WriteLine(s);
         }
 
         public void ExecuteWithCommunication() {
             if (SelfSubmitter.AmIRootProcess()) {
-                AsynchronousServer server = new AsynchronousServer();
+                AsynchronousServer server = new AsynchronousServer(C.DEFAULT_PORT);
                 AutoResetEvent receivedDone = new AutoResetEvent(false);
                 server.NewMessageReceivedEvent += (objectRecv, sock) => {
                     if (objectRecv is ISystemMessage hello)
@@ -87,7 +111,7 @@ namespace ExampleProject {
                 };
                 server.Start();
                 //receivedDone.WaitOne();
-                SubmitNewCopyOfMyselfAndWaitForStart();
+                SubmitNewCopyOfMyself();
                 while (true) {
                     Thread.Sleep(1000);
                     Console.Out.WriteLine("Received msgs so far: {0}", AsynchronousCommunicationUtils.reception);
@@ -95,69 +119,6 @@ namespace ExampleProject {
             } else if (SelfSubmitter.GetMyNestLevel() == 1) {
                 ClientExample();
             }
-        }
-
-        public void Execute() {
-            if (SelfSubmitter.AmIRootProcess()) {
-                SubmitNewCopyOfMyselfAndWaitForStart();
-                SubmitNewCopyOfMyselfAndWaitForStart();
-                WaitForCopiesToComplete();
-            } else if (SelfSubmitter.GetMyNestLevel() == 1) {
-                Console.Out.WriteLine("Hello from 1nd nest level");
-                SubmitNewCopyOfMyselfAndWaitForStart();
-                WaitForCopiesToComplete();
-            } else if (SelfSubmitter.GetMyNestLevel() == 2) {
-                Console.Out.WriteLine("Hello from 2nd nest level");
-            }
-        }
-
-        private void SubmitNewCopyOfMyselfAndWaitForStart() {
-            string[] filesToAttach = { "file_with_input.txt" };
-            SelfSubmitter selfSubmitter = new SelfSubmitter(filesToAttach);
-            var remoteProcessDescriptor = selfSubmitter.Submit();
-            RemoteDescriptors.Add(remoteProcessDescriptor);
-            return remoteProcessDescriptor;
-        }
-
-        private static Dictionary<String, String> ReadFilenameMapping(JobId jid) {
-            Dictionary<String, String> filenamesMap = new Dictionary<string, string>();
-
-            using (StreamReader sr = new StreamReader(string.Format("x_{0}_stdout.out", jid))) {
-                string line;
-                while ((line = sr.ReadLine()) != null) {
-                    Regex regex = new Regex(FILENAMES_MAPPING_FORMAT_REGEX);
-                    Match match = regex.Match(line);
-                    string filename = match.Groups[1].Value;
-                    string effectiveFilename = match.Groups[2].Value;
-                    filenamesMap.Add(filename, effectiveFilename);
-                }
-            }
-            return filenamesMap;
-        }
-        private static string GetEffectiveFilename(string file, Dictionary<String, String> map) {
-            if (!map.ContainsKey(file)) {
-                map.Add(file, "x_shapp_" + file + "_" + RandomString(FILENAME_LENGTH) + ".txt");
-                Console.Out.WriteLine(string.Format(FILENAMES_MAPPING_FORMAT, file, map[file]));
-            }
-            return map[file];
-        }
-
-        private static void SubmitNewJob() {
-            NewJobSubmitter newJobSubmitter = new NewJobSubmitter {
-                Command = "batch.py",
-                UserStandardOutputFileName = "stdout.txt",
-                TargetOperatingSystem = TargetOperatingSystem.ANY
-            };
-            JobDescriptor jobDescriptor = newJobSubmitter.SubmitNewJob();
-            Console.Out.WriteLine("Job submitted");
-            jobDescriptor.JobStartedEvent.WaitOne();
-            Console.Out.WriteLine("Job started");
-            jobDescriptor.JobCompletedEvent.WaitOne();
-            Console.Out.WriteLine("Job completed");
-        }
-
-        private static Log(string s) {
-            Console.Out.WriteLine(s);
         }
     }
 }
