@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Newtonsoft.Json;
 
 namespace Shapp
 {
@@ -13,7 +12,7 @@ namespace Shapp
     /// It uses base script from Properties.Resources.GetJobStatusScript.
     /// </summary>
     public class JobRemover
-    {       
+    {        
         private readonly JobId JobId;
         private readonly string PythonScriptWithRemover;
         private readonly PythonScriptsExecutor pythonScriptExecutor;
@@ -35,7 +34,7 @@ namespace Shapp
         public void Remove()
         {
             pythonScriptExecutor.Execute();
-            C.log.InfoFormat("Removed job from queue with id: {0}", JobId);
+            C.log.Info(string.Format("Removed job from queue with id: {0}", JobId));
         }
 
         private string ConstructPythonScript(JobId jobId)

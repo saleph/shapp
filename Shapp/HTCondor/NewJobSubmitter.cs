@@ -124,7 +124,7 @@ namespace Shapp
             if (Command.Length == 0)
                 throw new ShappException("Newly submitting job cannot have empty Command");
             if (LogFileName.Length == 0)
-                C.log.Warn("You skipped a definion of LogFileName parameter for newly submitted job. " +
+                C.log.Warning("You skipped a definion of LogFileName parameter for newly submitted job. " +
                     "You won't be able to watch on it's state.");
         }
 

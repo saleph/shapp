@@ -25,23 +25,31 @@ namespace Shapp
         /// directory will be transfered automatically such as dlls, pdbs, xmls etc.).
         /// </summary>
         /// <param name="additionalInputFiles">additional files with input data to transfer</param>
-        public SelfSubmitter(string[] additionalInputFiles = null)
+        /// <param name="commandLineArgs">additional command line arguments</param>
+        public SelfSubmitter(string[] additionalInputFiles = null,
+                             string[] commandLineArgs = null)
         {
-            string filesToTransfer = BuildAdditionalLibrariesToTransfer() + GenerateAdditionalInputFilesFromList(additionalInputFiles);
+            string inputFiles = BuildAdditionalLibrariesToTransfer() + BuildAdditionalInputFiles(additionalInputFiles);
             NewJobSubmitter = new NewJobSubmitter()
             {
                 Command = GetExecutableName(),
-                InputFilesToTransferCommaSeparated = filesToTransfer,
+                InputFilesToTransferCommaSeparated = inputFiles,
+                CommandCliArguments = BuildCommandLineArgs(commandLineArgs)
             };
         }
 
-        private string GenerateAdditionalInputFilesFromList(string[] additionalInputFiles)
+        private static string BuildCommandLineArgs(string[] commandLineArgs)
         {
-            if (additionalInputFiles == null)
-            {
+            if (commandLineArgs == null || commandLineArgs.Length == 0)
                 return "";
-            }
-            return ", " + string.Join(",", additionalInputFiles);
+            return string.Join(" ", commandLineArgs);
+        }
+
+        private static string BuildAdditionalInputFiles(string[] additionalInputFiles)
+        {
+            if (additionalInputFiles == null || additionalInputFiles.Length == 0)
+                return "";
+            return ", " + string.Join(", ", additionalInputFiles);
         }
 
         /// <summary>
@@ -140,7 +148,7 @@ namespace Shapp
                 .Select(s => Path.GetFileName(s)).ToArray();
 
             string additionalLibrariesToTransfer = string.Join(", ", filesListWithoutPaths);
-            C.log.DebugFormat("Files to transfer: {0}", additionalLibrariesToTransfer);
+            C.log.Debug(string.Format("Files to transfer: {0}", additionalLibrariesToTransfer));
             return additionalLibrariesToTransfer;
         }
 

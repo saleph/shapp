@@ -1,4 +1,4 @@
-﻿using System;
+﻿﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,7 +8,7 @@ namespace Shapp
 {
     static class C
     {
-        public static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+        static public SimpleLogger log = new SimpleLogger();
         public const int DEFAULT_PORT = 11001;
         /// <summary>
         /// Default state refresh rate. Describes how often job state is being polled.

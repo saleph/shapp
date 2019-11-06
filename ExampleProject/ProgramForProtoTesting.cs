@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using Shapp;
@@ -29,7 +31,7 @@ namespace ExampleProject
             main.ExecuteWithCommunication();
         }
 
-        private static void ServerExample()
+        public int Execute(string[] args)
         {
             AsynchronousServer server = new AsynchronousServer();
             AutoResetEvent receivedDone = new AutoResetEvent(false);
@@ -72,14 +74,14 @@ namespace ExampleProject
             ParentCommunicator.Stop();
         }
 
-        private List<JobDescriptor> RemoteDescriptors = new List<JobDescriptor>();
+        private static void DoTheChildJob(string modelFilename, string startPath) {
+            // do some job, the main task
+            Tuple<int, string> exitCodeAndCounterExample = PerformComputation(modelFilename, startPath);
 
-        private static void SubmitAndRemoveExample()
-        {
-            SelfSubmitter newJobSubmitter = new SelfSubmitter();
-            JobDescriptor jobDescriptor = newJobSubmitter.Submit();
-            JobRemover jobRemover = new JobRemover(jobDescriptor.JobId);
-            jobRemover.Remove();
+            // after that, build the files to transfer:
+            int exitCode = exitCodeAndCounterExample.Item1;
+            string counterExample = exitCodeAndCounterExample.Item2;
+            SaveChildOutputToFiles(exitCode, counterExample);
         }
 
         public void ExecuteWithCommunication()
@@ -134,16 +136,31 @@ namespace ExampleProject
             string[] filesToAttach = { "file_with_input.txt" };
             SelfSubmitter selfSubmitter = new SelfSubmitter(filesToAttach);
             var remoteProcessDescriptor = selfSubmitter.Submit();
-            remoteProcessDescriptor.JobStartedEvent.WaitOne();
             RemoteDescriptors.Add(remoteProcessDescriptor);
+            return remoteProcessDescriptor;
         }
 
-        private void WaitForCopiesToComplete()
-        {
-            foreach (var descriptor in RemoteDescriptors)
-            {
-                descriptor.JobCompletedEvent.WaitOne();
+        private static Dictionary<String, String> ReadFilenameMapping(JobId jid) {
+            Dictionary<String, String> filenamesMap = new Dictionary<string, string>();
+
+            using (StreamReader sr = new StreamReader(string.Format("x_{0}_stdout.out", jid))) {
+                string line;
+                while((line = sr.ReadLine()) != null) {  
+                    Regex regex = new Regex(FILENAMES_MAPPING_FORMAT_REGEX);
+                    Match match = regex.Match(line);
+                    string filename = match.Groups[1].Value;
+                    string effectiveFilename = match.Groups[2].Value;
+                    filenamesMap.Add(filename, effectiveFilename);
+                }
             }
+            return filenamesMap;
+        }
+        private static string GetEffectiveFilename(string file, Dictionary<String, String> map) {
+            if (!map.ContainsKey(file)) {
+                map.Add(file, "x_shapp_" + file + "_" + RandomString(FILENAME_LENGTH) + ".txt");
+                Console.Out.WriteLine(string.Format(FILENAMES_MAPPING_FORMAT, file, map[file]));
+            }
+            return map[file];
         }
 
         private static void SubmitNewJob()

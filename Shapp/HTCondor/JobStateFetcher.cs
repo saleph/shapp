@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Newtonsoft.Json;
+using System.Xml;
 
 namespace Shapp
 {
@@ -40,15 +40,24 @@ namespace Shapp
         /// Polls htcondor api for the status of the job defined in constructor.
         /// </summary>
         /// <returns>current job state</returns>
-        public JobState GetJobState()
-        {
+        public JobState GetJobState() {
             pythonScriptExecutor.Execute();
             string jobProperties = pythonScriptExecutor.Response;
-            Dictionary<string, string> jobStatesCache = JsonConvert.DeserializeObject<Dictionary<string, string>>(jobProperties);
+            Dictionary<string, string> jobStatesCache = GetJobStatesCacheFromXml(jobProperties);
             int jobStateId = GetJobStateId(jobStatesCache);
             JobState jobState = (JobState)jobStateId;
-            C.log.InfoFormat("Got job state info about job {0}: {1}", JobId, jobState);
+            C.log.Info(string.Format("Got job state info about job {0}: {1}", JobId, jobState));
             return jobState;
+        }
+
+        private static Dictionary<string, string> GetJobStatesCacheFromXml(string jobProperties) {
+            XmlDocument doc = new XmlDocument();
+            doc.LoadXml(jobProperties);
+            Dictionary<string, string> jobStatesCache = new Dictionary<string, string>();
+            foreach (XmlNode n in doc.SelectNodes("/root/*")) {
+                jobStatesCache[n.Name] = n.InnerText;
+            }
+            return jobStatesCache;
         }
 
         private string ConstructPythonScript(JobId jobId)

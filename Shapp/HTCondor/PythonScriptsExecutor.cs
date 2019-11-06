@@ -99,7 +99,7 @@ namespace Shapp
         {
             using (StreamWriter writer = process.StandardInput)
             {
-                C.log.DebugFormat("Python script about to execute:\n{0}", ScriptToExecute);
+                C.log.Debug(string.Format("Python script about to execute:\n{0}", ScriptToExecute));
                 writer.Write(ScriptToExecute);
             }
         }
@@ -109,7 +109,7 @@ namespace Shapp
             using (StreamReader reader = process.StandardOutput)
             {
                 Response = reader.ReadToEnd();
-                C.log.DebugFormat("Python script result:\n{0}", Response);
+                C.log.Debug(string.Format("Python script result:\n{0}", Response));
             }
         }
 
@@ -118,7 +118,7 @@ namespace Shapp
             using (StreamReader reader = process.StandardError)
             {
                 Errors = reader.ReadToEnd();
-                C.log.DebugFormat("Python script errors:\n{0}", Errors);
+                C.log.Debug(string.Format("Python script errors:\n{0}", Errors));
             }
         }
     }

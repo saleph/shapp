@@ -15,6 +15,12 @@ namespace Shapp
     /// </summary>
     public class JobDescriptor
     {
+        /// <summary>
+        /// Default state refresh rate. Describes how often job state is being polled.
+        /// </summary>
+        private const int DEFAULT_JOB_STATE_REFRESH_INTERVAL_MS = 1000;
+        private const int LOWEST_POSSIBLE_REFRESH_RATE_MS = 100;
+
         #region PublicProperties
         /// <summary>
         /// JobId to which this descriptor is being bound.
@@ -186,7 +192,7 @@ namespace Shapp
 
         private void JobDescriptorStateChangeLogger(JobState previous, JobState current, JobId jobId)
         {
-            C.log.InfoFormat("Job {0} state has changed from {1} to {2}", jobId, previous, current);
+            C.log.Info(string.Format("Job {0} state has changed from {1} to {2}", jobId, previous, current));
         }
 
         private void RefreshJobState(object sender, System.Timers.ElapsedEventArgs e)
