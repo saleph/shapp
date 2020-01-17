@@ -12,7 +12,6 @@ using Shapp;
 
 namespace Shapp {
     public class Helper {
-        private const string inputFile = "input.txt";
         private static readonly int FILENAME_LENGTH = 15;
         private static readonly string FILENAMES_MAPPING_FORMAT = "[SHAPP] Filename mapping: '{0}':'{1}'";
         private const string FILENAMES_MAPPING_FORMAT_REGEX = "^\\[SHAPP\\] Filename mapping: '(.+)':'(.+)'$";
