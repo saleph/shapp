@@ -8,8 +8,7 @@ using System.Threading.Tasks;
 using System.Runtime.InteropServices;
 
 
-namespace Shapp
-{
+namespace Shapp {
     /// <summary>
     /// Class responsible for executing python scripts.
     /// 
@@ -25,8 +24,7 @@ namespace Shapp
     ///         into easily parsable JSON)
     ///     b) works in the same way on every platform with python installed.
     /// </summary>
-    class PythonScriptsExecutor
-    {
+    class PythonScriptsExecutor {
         private readonly string ScriptToExecute;
 
         /// <summary>
@@ -43,8 +41,7 @@ namespace Shapp
         /// Script won't be launched yet.
         /// </summary>
         /// <param name="scriptToExecute">python script to execute</param>
-        public PythonScriptsExecutor(string scriptToExecute)
-        {
+        public PythonScriptsExecutor(string scriptToExecute) {
             ScriptToExecute = scriptToExecute;
         }
 
@@ -55,8 +52,7 @@ namespace Shapp
         /// Can be called multiple times (to execute exactly same script).
         /// Previous Response and Errors won't be preserved.
         /// </summary>
-        public void Execute()
-        {
+        public void Execute() {
             Response = string.Empty;
             Errors = string.Empty;
             ProcessStartInfo processStartInfo = BuildProcessStartInfo();
@@ -65,20 +61,16 @@ namespace Shapp
                 throw new ShappException("Error during python script execution: \n" + Errors);
         }
 
-        private void LaunchScriptAndGatherResponse(ProcessStartInfo processStartInfo)
-        {
-            using (Process process = Process.Start(processStartInfo))
-            {
+        private void LaunchScriptAndGatherResponse(ProcessStartInfo processStartInfo) {
+            using (Process process = Process.Start(processStartInfo)) {
                 WriteScriptToStandardInput(process);
                 ReadFromStandarOutput(process);
                 ReadFromStandarError(process);
             }
         }
 
-        private static ProcessStartInfo BuildProcessStartInfo()
-        {
-            return new ProcessStartInfo
-            {
+        private static ProcessStartInfo BuildProcessStartInfo() {
+            return new ProcessStartInfo {
                 FileName = GetPythonInterpreterPath(),
                 UseShellExecute = false,
                 RedirectStandardOutput = true,
@@ -87,36 +79,29 @@ namespace Shapp
             };
         }
 
-        private static string GetPythonInterpreterPath()
-        {
+        private static string GetPythonInterpreterPath() {
             bool isWindows = Environment.OSVersion.ToString().Contains("Windows");
             if (isWindows)
                 return @"C:\Python27\python.exe";
             return @"/usr/bin/python2";
         }
 
-        private void WriteScriptToStandardInput(Process process)
-        {
-            using (StreamWriter writer = process.StandardInput)
-            {
+        private void WriteScriptToStandardInput(Process process) {
+            using (StreamWriter writer = process.StandardInput) {
                 C.log.Debug(string.Format("Python script about to execute:\n{0}", ScriptToExecute));
                 writer.Write(ScriptToExecute);
             }
         }
 
-        private void ReadFromStandarOutput(Process process)
-        {
-            using (StreamReader reader = process.StandardOutput)
-            {
+        private void ReadFromStandarOutput(Process process) {
+            using (StreamReader reader = process.StandardOutput) {
                 Response = reader.ReadToEnd();
                 C.log.Debug(string.Format("Python script result:\n{0}", Response));
             }
         }
 
-        private void ReadFromStandarError(Process process)
-        {
-            using (StreamReader reader = process.StandardError)
-            {
+        private void ReadFromStandarError(Process process) {
+            using (StreamReader reader = process.StandardError) {
                 Errors = reader.ReadToEnd();
                 C.log.Debug(string.Format("Python script errors:\n{0}", Errors));
             }

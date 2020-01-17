@@ -1,11 +1,9 @@
-﻿namespace Shapp
-{
+﻿namespace Shapp {
     /// <summary>
     /// Target operating system enum. Used in NewJobSubmitter for acquiring information
     /// from the user about target system.
     /// </summary>
-    public enum TargetOperatingSystem
-    {
+    public enum TargetOperatingSystem {
         /// <summary>
         /// Target operating system will be the same as current one.
         /// </summary>

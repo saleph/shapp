@@ -9,15 +9,10 @@ using System.Text;
 using static Shapp.AsynchronousServer;
 using static Shapp.AsynchronousCommunicationUtils;
 
-namespace Shapp
-{
-    public class AsynchronousClient
-    {
-        // The port number for the remote device.
-        private static readonly int port = ShappSettins.Default.CommunicationPort;
-
+namespace Shapp {
+    public class AsynchronousClient {
         // ManualResetEvent instances signal completion.
-        private static ManualResetEvent connectDone =
+        private static readonly ManualResetEvent connectDone =
             new ManualResetEvent(false);
 
         private readonly AsynchronousCommunicationUtils asynchronousCommunicationUtils = new AsynchronousCommunicationUtils();
@@ -35,46 +30,38 @@ namespace Shapp
 
         private Socket client;
 
-        public AsynchronousClient()
-        {
+        public AsynchronousClient() {
             asynchronousCommunicationUtils.NewMessageReceivedEvent += OnMessageReceive;
         }
 
-        private void OnMessageReceive(object classInstance, Socket client)
-        {
+        private void OnMessageReceive(object classInstance, Socket client) {
             NewMessageReceivedEvent?.Invoke(classInstance, client);
         }
 
-        public void Connect(IPAddress ipAddress)
-        {
+        public void Connect(IPAddress ipAddress, int port = C.DEFAULT_PORT) {
             IPEndPoint remoteEP = new IPEndPoint(ipAddress, port);
             client = new Socket(AddressFamily.InterNetwork,
                 SocketType.Stream, ProtocolType.Tcp);
             IsListening = true;
             client.BeginConnect(remoteEP,
                 new AsyncCallback(ConnectCallback), client);
-            connectDone.WaitOne();
         }
 
-        public void Stop()
-        {
+        public void Stop() {
             IsListening = false;
         }
 
-        private void ConnectCallback(IAsyncResult ar)
-        {
+        private void ConnectCallback(IAsyncResult ar) {
             Socket client = (Socket)ar.AsyncState;
             client.EndConnect(ar);
-            Console.WriteLine("Socket connected to {0}", client.RemoteEndPoint.ToString());
             connectDone.Set();
-            while (IsListening)
-            {
+            while (IsListening) {
                 asynchronousCommunicationUtils.ListenForMessages(client);
             }
         }
 
-        public void Send(object objectToSend)
-        {
+        public void Send(object objectToSend) {
+            connectDone.WaitOne();
             AsynchronousCommunicationUtils.Send(client, objectToSend);
         }
     }

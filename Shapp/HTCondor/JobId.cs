@@ -1,15 +1,14 @@
 ﻿using System;
 using System.Runtime.Serialization;
 
-namespace Shapp
-{
+namespace Shapp {
     /// <summary>
     /// Job's id reprezentation.
     /// </summary>
+    [Serializable]
     [DataContract]
-    public class JobId
-    {
-        /// <summary>
+    public class JobId {
+        /// <summary> 
         /// Cluster id is the ordinal number of submitted job (it's globaly synchronized).
         /// Increments on each new job submission.
         /// </summary>
@@ -27,8 +26,7 @@ namespace Shapp
         /// Construct job id from HTCondor format string.
         /// </summary>
         /// <param name="jobIdAsString">HTCondor formatted string ([cluster].[process])</param>
-        public JobId(string jobIdAsString)
-        {
+        public JobId(string jobIdAsString) {
             ParseJobId(jobIdAsString);
             ValidateIds();
         }
@@ -38,39 +36,32 @@ namespace Shapp
         /// </summary>
         /// <param name="clusterId">job's cluster id</param>
         /// <param name="processId">job's process id</param>
-        public JobId(int clusterId, int processId)
-        {
+        public JobId(int clusterId, int processId) {
             ClusterId = clusterId;
             ProcessId = processId;
             ValidateIds();
         }
 
-        private void ParseJobId(string jobIdAsString)
-        {
+        private void ParseJobId(string jobIdAsString) {
             string[] split = jobIdAsString.Split('.');
             if (split.Length != 2)
                 throw new ShappException(string.Format("'{0}' is not a valid JobId", jobIdAsString));
-            try
-            {
+            try {
                 ClusterId = int.Parse(split[0]);
                 ProcessId = int.Parse(split[1]);
-            }
-            catch (FormatException e)
-            {
+            } catch (FormatException e) {
                 throw new ShappException(string.Format("'{0}' parse failed: {1}", jobIdAsString, e.Message));
             }
         }
 
-        private void ValidateIds()
-        {
+        private void ValidateIds() {
             if (ClusterId < 1)
                 throw new ShappException("ClusterId of the job can't be < 1");
             if (ProcessId < 0)
                 throw new ShappException("ProcessId of the job can't be < 0");
         }
 
-        public override string ToString()
-        {
+        public override string ToString() {
             return string.Format("{0}.{1}", ClusterId, ProcessId);
         }
     }

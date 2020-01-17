@@ -44,5 +44,15 @@ namespace Shapp
         {
             return JobVariables.IPAddress;
         }
+
+        public static int GetParentSubmitterDestinationPort()
+        {
+            return JobVariables.CommunicationPort;
+        }
+
+        public static int GetMyDestinationPortForChildren()
+        {
+            return JobVariables.CommunicationPort + 1;
+        }
     }
 }

@@ -5,8 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
 
-namespace Shapp
-{
+namespace Shapp {
     /// <summary>
     /// Class responsible for prepareing python script for fetching info about a job.
     /// 
@@ -17,10 +16,9 @@ namespace Shapp
     /// And no - IronPython can't be used. HTCondor python api is precomplied int .pyd, it can't
     /// be used in IronPython environment.
     /// </summary>
-    class JobStateFetcher
-    {
+    class JobStateFetcher {
         private const string JOB_STATUS_PROPERTY_LABEL = "JobStatus";
-        
+
         private readonly JobId JobId;
         private readonly string PythonScriptWithFetcher;
         private readonly PythonScriptsExecutor pythonScriptExecutor;
@@ -29,8 +27,7 @@ namespace Shapp
         /// Constructs the status fetcher for one particular job id.
         /// </summary>
         /// <param name="jobId">job's id which state should be watched</param>
-        public JobStateFetcher(JobId jobId)
-        {
+        public JobStateFetcher(JobId jobId) {
             JobId = jobId;
             PythonScriptWithFetcher = ConstructPythonScript(jobId);
             pythonScriptExecutor = new PythonScriptsExecutor(PythonScriptWithFetcher);
@@ -60,21 +57,17 @@ namespace Shapp
             return jobStatesCache;
         }
 
-        private string ConstructPythonScript(JobId jobId)
-        {
+        private string ConstructPythonScript(JobId jobId) {
             string pythonScript = Properties.Resources.GetJobStatusScript;
-            return string.Format(pythonScript, 
-                jobId.ClusterId, 
+            return string.Format(pythonScript,
+                jobId.ClusterId,
                 jobId.ProcessId);
         }
 
-        private int GetJobStateId(Dictionary<string, string> jobProperties)
-        {
-            try
-            {
+        private int GetJobStateId(Dictionary<string, string> jobProperties) {
+            try {
                 return int.Parse(jobProperties[JOB_STATUS_PROPERTY_LABEL]);
-            } catch (KeyNotFoundException)
-            {
+            } catch (KeyNotFoundException) {
                 throw new ShappException(string.Format("Attempt to get status of the job {0} - it doesn't exists", JobId));
             }
         }
