@@ -9,6 +9,7 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using Shapp;
+using Shapp.Communications;
 using Shapp.Communications.Protocol;
 
 namespace ExampleProject {
@@ -24,19 +25,7 @@ namespace ExampleProject {
         }
 
         public static void ServerExample() {
-            AsynchronousServer server = new AsynchronousServer(Shapp.C.DEFAULT_PORT);
-            AutoResetEvent receivedDone = new AutoResetEvent(false);
-            server.NewMessageReceivedEvent += (objectRecv, sock) => {
-                if (objectRecv is ISystemMessage hello)
-                    hello.Dispatch(sock);
-
-                if (objectRecv is string s) {
-                    Console.Out.WriteLine(s);
-                    receivedDone.Set();
-                }
-            };
-            server.Start();
-            //receivedDone.WaitOne();
+            CommunicatorWithChildren.InitializeServer();
             int k = 30;
             while (--k > 0) {
                 Thread.Sleep(1000);
@@ -45,8 +34,8 @@ namespace ExampleProject {
         }
 
         private static void ClientExample() {
-            ParentCommunicator.Initialize();
-            ParentCommunicator.Send(new HelloFromChild() {
+            CommunicatorToParent.Initialize();
+            CommunicatorToParent.Send(new HelloFromChild() {
                 MyJobId = new JobId("123.456")
             });
 
@@ -56,7 +45,7 @@ namespace ExampleProject {
                 Thread.Sleep(1000);
                 Console.Out.WriteLine("Received msgs so far: {0}", AsynchronousCommunicationUtils.reception);
             }
-            ParentCommunicator.Stop();
+            CommunicatorToParent.Stop();
         }
 
         public void Execute() {
@@ -78,7 +67,9 @@ namespace ExampleProject {
             return remoteProcessDescriptor;
         }
 
+#pragma warning disable IDE0051 // Remove unused private members
         private static void SubmitNewJob() {
+#pragma warning restore IDE0051 // Remove unused private members
             NewJobSubmitter newJobSubmitter = new NewJobSubmitter {
                 Command = "batch.py",
                 UserStandardOutputFileName = "stdout.txt",

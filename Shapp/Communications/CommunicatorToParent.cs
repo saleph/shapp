@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using Shapp.Communications.Protocol;
 
 namespace Shapp {
-    public static class ParentCommunicator {
+    public static class CommunicatorToParent {
         private static AsynchronousClient client;
         private static bool isInitialized = false;
 
@@ -32,7 +32,7 @@ namespace Shapp {
 
         public static void Send(object message) {
             if (!isInitialized)
-                throw new ShappException("before sending a message you have to initialize the ParentCommunicator");
+                throw new ShappException("before sending a message you have to initialize the CommunicatorToParent");
             client.Send(message);
         }
     }

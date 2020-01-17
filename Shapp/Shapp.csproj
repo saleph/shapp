@@ -49,6 +49,7 @@
     <Compile Include="Communications\AsynchronusServer.cs" />
     <Compile Include="C.cs" />
     <Compile Include="Communications\ChildCommunicator.cs" />
+    <Compile Include="Communications\CommunicatorWithChildren.cs" />
     <Compile Include="Communications\Protocol\HelloFromParent.cs" />
     <Compile Include="Communications\Protocol\HelloFromChild.cs" />
     <Compile Include="Communications\Protocol\ProtocolSerializer.cs" />
@@ -61,7 +62,7 @@
     <Compile Include="HTCondor\JobRemover.cs" />
     <Compile Include="HTCondor\JobStateFetcher.cs" />
     <Compile Include="HTCondor\NewJobSubmitter.cs" />
-    <Compile Include="Communications\ParentCommunicator.cs" />
+    <Compile Include="Communications\CommunicatorToParent.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>

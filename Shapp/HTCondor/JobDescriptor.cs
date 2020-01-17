@@ -13,11 +13,6 @@ namespace Shapp {
     /// job state analysis.
     /// </summary>
     public class JobDescriptor {
-        /// <summary>
-        /// Default state refresh rate. Describes how often job state is being polled.
-        /// </summary>
-        private const int DEFAULT_JOB_STATE_REFRESH_INTERVAL_MS = 1000;
-        private const int LOWEST_POSSIBLE_REFRESH_RATE_MS = 100;
 
         #region PublicProperties
         /// <summary>
