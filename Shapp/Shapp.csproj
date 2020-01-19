@@ -54,6 +54,7 @@
     <Compile Include="Communications\Protocol\HelloFromChild.cs" />
     <Compile Include="Communications\Protocol\ProtocolSerializer.cs" />
     <Compile Include="Extensions.cs" />
+    <Compile Include="Helper.cs" />
     <Compile Include="HTCondor\EnvVarsList.cs" />
     <Compile Include="HTCondor\JobDescriptor.cs" />
     <Compile Include="HTCondor\JobEnvVariables.cs" />
