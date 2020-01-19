@@ -44,18 +44,11 @@ namespace ExampleProject {
         // pheromone increase factor
         private static double Q = numCities / 6;
 
-        static TimeSpan TimeAction(Action blockingAction) {
-            Stopwatch stopWatch = System.Diagnostics.Stopwatch.StartNew();
-            blockingAction();
-            stopWatch.Stop();
-            return stopWatch.Elapsed;
-        }
-
-        static IList<int[][]> ants = new SynchronizedCollection<int[][]>();
-        static IList<double[][]> pheromones = new SynchronizedCollection<double[][]>();
-        static IList<object> locks = new SynchronizedCollection<object>();
-
         public static void Run() {
+
+            IList<int[][]> ants = new SynchronizedCollection<int[][]>();
+            IList<double[][]> pheromones = new SynchronizedCollection<double[][]>();
+            IList<object> locks = new SynchronizedCollection<object>();
             try {
                 Console.WriteLine("\nBegin Ant Colony Optimization demo\n");
 
@@ -152,7 +145,7 @@ namespace ExampleProject {
 
         // --------------------------------------------------------------------------------------------
 
-        private static int[][] InitAnts(int numAnts, int numCities) {
+        public static int[][] InitAnts(int numAnts, int numCities) {
             int[][] ants = new int[numAnts][];
             for (int k = 0; k <= numAnts - 1; k++) {
                 int start = random.Next(0, numCities);
@@ -237,7 +230,7 @@ namespace ExampleProject {
 
         // --------------------------------------------------------------------------------------------
 
-        private static double[][] InitPheromones(int numCities, double initialValue = 0.01) {
+        public static double[][] InitPheromones(int numCities, double initialValue = 0.01) {
             double[][] pheromones = new double[numCities][];
             for (int i = 0; i <= numCities - 1; i++) {
                 pheromones[i] = new double[numCities];
@@ -442,7 +435,7 @@ namespace ExampleProject {
 
         // --------------------------------------------------------------------------------------------
 
-        private static void Display(int[] trail) {
+        public static void Display(int[] trail) {
             for (int i = 0; i <= trail.Length - 1; i++) {
                 Console.Write(trail[i] + " ");
                 if (i > 0 && i % 20 == 0) {

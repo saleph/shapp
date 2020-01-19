@@ -48,6 +48,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ACOExample.cs" />
+    <Compile Include="ACO\ACOUsingShappExample.cs" />
+    <Compile Include="ACO\ACOShappWorker.cs" />
+    <Compile Include="ACO\ACOShappCoordinator.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="ProgramForProtoTesting.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
