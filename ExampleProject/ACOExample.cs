@@ -12,6 +12,7 @@ namespace ExampleProject {
 
     // https://docs.microsoft.com/en-us/archive/msdn-magazine/2012/february/test-run-ant-colony-optimization
     // By James McCaffrey | February 2012
+    // Adaptation for multithreading by Tomasz Galecki (@saleph)
     // Demo of Ant Colony Optimization (ACO) solving a Traveling Salesman Problem (TSP).
     // There are many variations of ACO; this is just one approach.
     // The problem to solve has a program defined number of cities. We assume that every
