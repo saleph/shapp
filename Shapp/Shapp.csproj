@@ -48,12 +48,10 @@
     <Compile Include="Communications\AsynchronousCommunicationUtils.cs" />
     <Compile Include="Communications\AsynchronusServer.cs" />
     <Compile Include="C.cs" />
-    <Compile Include="Communications\ChildCommunicator.cs" />
-    <Compile Include="Communications\CommunicatorWithChildren.cs" />
+    <Compile Include="CommunicatorWithChildren.cs" />
     <Compile Include="Communications\Protocol\HelloFromParent.cs" />
     <Compile Include="Communications\Protocol\HelloFromChild.cs" />
-    <Compile Include="Communications\Protocol\ProtocolSerializer.cs" />
-    <Compile Include="Extensions.cs" />
+    <Compile Include="Utils\Extensions.cs" />
     <Compile Include="Helper.cs" />
     <Compile Include="HTCondor\EnvVarsList.cs" />
     <Compile Include="HTCondor\JobDescriptor.cs" />
@@ -63,7 +61,7 @@
     <Compile Include="HTCondor\JobRemover.cs" />
     <Compile Include="HTCondor\JobStateFetcher.cs" />
     <Compile Include="HTCondor\NewJobSubmitter.cs" />
-    <Compile Include="Communications\CommunicatorToParent.cs" />
+    <Compile Include="CommunicatorToParent.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -72,7 +70,7 @@
     <Compile Include="HTCondor\PythonScriptsExecutor.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SelfSubmitter.cs" />
-    <Compile Include="ShappException.cs" />
+    <Compile Include="Utils\ShappException.cs" />
     <Compile Include="ShappSettins.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
@@ -80,7 +78,7 @@
     </Compile>
     <Compile Include="Communications\Protocol\SystemMessage.cs" />
     <Compile Include="HTCondor\TargetOperatingSystem.cs" />
-    <Compile Include="SimpleLogger.cs" />
+    <Compile Include="Utils\SimpleLogger.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Properties\Resources.resx">

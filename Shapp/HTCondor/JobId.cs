@@ -7,7 +7,7 @@ namespace Shapp {
     /// </summary>
     [Serializable]
     [DataContract]
-    public class JobId {
+    public class JobId : IEquatable<JobId> {
         /// <summary> 
         /// Cluster id is the ordinal number of submitted job (it's globaly synchronized).
         /// Increments on each new job submission.
@@ -63,6 +63,20 @@ namespace Shapp {
 
         public override string ToString() {
             return string.Format("{0}.{1}", ClusterId, ProcessId);
+        }
+
+        public bool Equals(JobId other) {
+            return ClusterId == other.ClusterId && ProcessId == other.ProcessId;
+        }
+        public override int GetHashCode() {
+            unchecked // Overflow is fine, just wrap
+            {
+                int hash = 17;
+                // Suitable nullity checks etc, of course :)
+                hash = hash * 23 + ClusterId.GetHashCode();
+                hash = hash * 23 + ProcessId.GetHashCode();
+                return hash;
+            }
         }
     }
 }

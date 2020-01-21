@@ -33,18 +33,28 @@ public class SimpleLogger {
     private readonly string logFilename;
     private readonly object fileLock = new object();
 
+    public LogLevel FileLoggingLevel = LogLevel.TRACE;
+    public LogLevel ConsoleLoggingLevel = LogLevel.INFO;
+
+
     /// <summary>
     /// Initiate an instance of SimpleLogger class constructor.
     /// If log file does not exist, it will be created automatically.
     /// </summary>
     public SimpleLogger() {
         datetimeFormat = "yyyy-MM-dd HH:mm:ss.fff";
-        logFilename = "x_shapp_" + GetTimeDate() + FILE_EXT;
+        if (Shapp.JobEnvVariables.GetMyJobId() != null) {
+            logFilename = string.Format("x_shapp_{0}_{1}_{2}{3}",
+                GetTimeDate(), Shapp.JobEnvVariables.GetMyJobId().ToString(), Shapp.Helper.RandomString(5), FILE_EXT);
+        } else {
+            logFilename = string.Format("x_shapp_{0}_{1}{2}",
+                GetTimeDate(), Shapp.Helper.RandomString(5), FILE_EXT);
+        }
 
         // Log file header line
         string logHeader = logFilename + " is created.";
         if (!System.IO.File.Exists(logFilename)) {
-            WriteLine(System.DateTime.Now.ToString(datetimeFormat) + " " + logHeader, false);
+            WriteLine(System.DateTime.Now.ToString(datetimeFormat) + " " + logHeader, LogLevel.FATAL, false);
         }
     }
 
@@ -101,14 +111,18 @@ public class SimpleLogger {
         WriteFormattedLog(LogLevel.WARNING, text);
     }
 
-    private void WriteLine(string text, bool append = true) {
+    private void WriteLine(string text, LogLevel level, bool append = true) {
         if (string.IsNullOrEmpty(text)) {
             return;
         }
-        lock (fileLock) {
-            using (System.IO.StreamWriter writer = new System.IO.StreamWriter(logFilename, append, System.Text.Encoding.UTF8)) {
-                writer.WriteLine(text);
+        if (level >= FileLoggingLevel) {
+            lock (fileLock) {
+                using (System.IO.StreamWriter writer = new System.IO.StreamWriter(logFilename, append, System.Text.Encoding.UTF8)) {
+                    writer.WriteLine(text);
+                }
             }
+        }
+        if (level >= ConsoleLoggingLevel) {
             Console.Out.WriteLine(text);
         }
     }
@@ -139,14 +153,14 @@ public class SimpleLogger {
                 break;
         }
 
-        WriteLine(pretext + text);
+        WriteLine(pretext + text, level);
     }
 
     [System.Flags]
-    private enum LogLevel {
+    public enum LogLevel {
         TRACE,
-        INFO,
         DEBUG,
+        INFO,
         WARNING,
         ERROR,
         FATAL

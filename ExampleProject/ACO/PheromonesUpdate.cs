@@ -6,7 +6,8 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace ExampleProject.ACO {
-    class PheromonesUpdate : Shapp.Communications.Protocol.ProtocolSerializer, Shapp.ISystemMessage {
+    [Serializable]
+    internal class PheromonesUpdate : Shapp.ISystemMessage {
         public delegate void Callback(Socket client, PheromonesUpdate pheromonesUpdate);
         public static event Callback OnReceive;
 

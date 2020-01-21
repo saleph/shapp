@@ -40,10 +40,13 @@ namespace Shapp {
         public JobState GetJobState() {
             pythonScriptExecutor.Execute();
             string jobProperties = pythonScriptExecutor.Response;
+            if (jobProperties.Length == 0) {
+                throw new ShappException("Fetching JobState failed");
+            }
             Dictionary<string, string> jobStatesCache = GetJobStatesCacheFromXml(jobProperties);
             int jobStateId = GetJobStateId(jobStatesCache);
             JobState jobState = (JobState)jobStateId;
-            C.log.Info(string.Format("Got job state info about job {0}: {1}", JobId, jobState));
+            C.log.Debug(string.Format("Got job state info about job {0}: {1}", JobId, jobState));
             return jobState;
         }
 

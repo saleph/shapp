@@ -24,7 +24,7 @@ namespace ExampleProject {
 
     class ACOExample {
 
-        private static Random random = new Random(0);
+        public static Random random = new Random(0);
 
         private static int numCities = 500;
         private static int numAnts = numCities / 50;
@@ -35,9 +35,9 @@ namespace ExampleProject {
         private static int bestLengthCheckPeriod = 1;
 
         // influence of pheromone on direction
-        private static int alpha = 3;
+        public static int alpha = 3;
         // influence of adjacent node distance
-        private static int beta = 2;
+        public static int beta = 2;
 
         // pheromone decrease factor
         private static double rho = 0.01;
@@ -190,7 +190,7 @@ namespace ExampleProject {
             throw new Exception("Target not found in IndexOfTarget");
         }
 
-        private static double Length(int[] trail, int[][] dists) {
+        public static double Length(int[] trail, int[][] dists) {
             // total length of a trail
             double result = 0.0;
             for (int i = 0; i <= trail.Length - 2; i++) {
@@ -201,7 +201,7 @@ namespace ExampleProject {
 
         // -------------------------------------------------------------------------------------------- 
 
-        private static int[] BestTrail(IList<int[][]> antss, int[][] dists, IList<object> threadLocks) {
+        public static int[] BestTrail(IList<int[][]> antss, int[][] dists, IList<object> threadLocks) {
             // best trail has shortest total length
             double bestLength = Length(antss[0][0], dists);
             int idxBestLengthForOuter = 0;
@@ -257,7 +257,7 @@ namespace ExampleProject {
             }
         }
 
-        private static int[] BuildTrail(int k, int start, double[][] pheromones, int[][] dists) {
+        public static int[] BuildTrail(int k, int start, double[][] pheromones, int[][] dists) {
             int numCities = pheromones.Length;
             int[] trail = new int[numCities];
             bool[] visited = new bool[numCities];
@@ -384,7 +384,7 @@ namespace ExampleProject {
             }
         }
 
-        private static bool EdgeInTrail(int cityX, int cityY, int[] trail) {
+        public static bool EdgeInTrail(int cityX, int cityY, int[] trail) {
             // are cityX and cityY adjacent to each other in trail[]?
             int lastIndex = trail.Length - 1;
             int idx = IndexOfTarget(trail, cityX);
@@ -413,7 +413,7 @@ namespace ExampleProject {
 
         // --------------------------------------------------------------------------------------------
 
-        private static int[][] MakeGraphDistances(int numCities) {
+        public static int[][] MakeGraphDistances(int numCities) {
             int[][] dists = new int[numCities][];
             for (int i = 0; i <= dists.Length - 1; i++) {
                 dists[i] = new int[numCities];

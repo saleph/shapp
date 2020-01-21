@@ -17,6 +17,8 @@ namespace Shapp {
         internal const int SERVER_BACKLOG_SIZE = 100;
         internal const int LOWEST_POSSIBLE_REFRESH_RATE_MS = 100;
         internal const string DEFAULT_IP_ADDRESS = "192.168.64.1";
+        internal static readonly int eventWaitTime = 10000;
+        internal static readonly int numberOfBytesToShowFromReceivedMsg = 50;
         internal static string PROTOCOL_LOG_HEADER = "Communications.Protocol";
 
         #endregion

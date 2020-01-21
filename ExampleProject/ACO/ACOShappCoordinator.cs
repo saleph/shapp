@@ -7,15 +7,18 @@ using System.Threading.Tasks;
 using Shapp;
 
 namespace ExampleProject.ACO {
-    class ACOShappCoordinator {
+    internal class ACOShappCoordinator {
 
         private readonly List<JobDescriptor> descriptors = new List<JobDescriptor>();
         private readonly AsynchronousServer server = new AsynchronousServer(C.DEFAULT_PORT);
 
         private static readonly int maxTime = 30;
-        private readonly int numberOfWorkers = ACOUsingShappExample.numberOfWorkers;
+        private readonly int numberOfWorkers = ACOWithShappExample.numberOfWorkers;
         readonly Queue<WorkerStatus> workersStatutes = new Queue<WorkerStatus>();
         readonly object workersStatusesLock = new object();
+        private int numberOfConnectedWorkers = 0;
+        private AutoResetEvent allWorkersConnected = new AutoResetEvent(false);
+
         private int[] bestTrail = null;
         private double bestLength = double.MaxValue;
 
@@ -23,24 +26,28 @@ namespace ExampleProject.ACO {
             InjectDelegatesForMessages();
             PrepareServer();
             StartWorkers();
+            WaitForWorkersToBeAbleToCommunicate();
+            InformWorkersAboutProcessingStarted();
             DoMainProcessingLoop();
         }
 
         private void InjectDelegatesForMessages() {
             WorkerStatus.OnReceive += (socket, workerStatus) => {
-                Console.WriteLine("Received msg from " + socket.ToString());
+                C.log.Info("Received worker status from " + workerStatus.MyJobId);
                 lock (workersStatusesLock) {
                     workersStatutes.Enqueue(workerStatus);
+                }
+            };
+            Shapp.Communications.Protocol.HelloFromChild.OnReceive += (socket, helloFromChild) => {
+                ++numberOfConnectedWorkers;
+                if (numberOfConnectedWorkers == numberOfWorkers) {
+                    allWorkersConnected.Set();
                 }
             };
         }
 
         private void PrepareServer() {
-            server.NewMessageReceivedEvent += (objectRecv, sock) => {
-                if (objectRecv is ISystemMessage hello)
-                    hello.Dispatch(sock);
-            };
-            server.Start();
+            Shapp.CommunicatorWithChildren.InitializeServer();
         }
 
         private void StartWorkers() {
@@ -51,10 +58,20 @@ namespace ExampleProject.ACO {
             }
         }
 
+        private void WaitForWorkersToBeAbleToCommunicate() {
+            C.log.Info("Waiting for workers to connect");
+            allWorkersConnected.WaitOne();
+            C.log.Info("All workers connected");
+        }
+
+        private void InformWorkersAboutProcessingStarted() {
+            var startProcessing = new StartProcessing();
+            descriptors.ForEach((d) => d.Send(startProcessing));
+        }
+
         private void DoMainProcessingLoop() {
             int time = 0;
-
-            Console.WriteLine("\nEntering UpdateAnts - UpdatePheromones loop\n");
+            C.log.Info("Entering UpdateAnts - UpdatePheromones loop");
             while (time < maxTime) {
                 List<WorkerStatus> statuses = GetStatusesWaitingForProcessing();
                 if (statuses.Count >= 0) {
@@ -65,12 +82,12 @@ namespace ExampleProject.ACO {
                 time += 1;
             }
 
-            Console.WriteLine("Ending...");
+            C.log.Info("Ending...");
             KillWorkers();
-            Console.WriteLine("Best path:");
-            ACOExample.Display(bestTrail);
-            Console.WriteLine("\nBest path length: " + bestLength);
-            Console.ReadLine();
+            C.log.Info("Best path:");
+            if (bestTrail != null)
+                ACOExample.Display(bestTrail);
+            C.log.Info("Best path length: " + bestLength);
         }
 
         private List<WorkerStatus> GetStatusesWaitingForProcessing() {
@@ -86,6 +103,8 @@ namespace ExampleProject.ACO {
         }
 
         private void ProcessWorkerStatuses(List<WorkerStatus> statuses) {
+            if (statuses.Count == 0)
+                return;
             ProcessReceivedPheromones(statuses);
             ProcessReceivedTrails(statuses);
         }
@@ -115,17 +134,18 @@ namespace ExampleProject.ACO {
             descriptors.ForEach((descriptor) => {
                 descriptor.Send(pheromonesUpdate);
             });
+            C.log.Info("Pheromones update sent to all workers");
         }
 
         private void ProcessReceivedTrails(List<WorkerStatus> statuses) {
             var bestWorkerStatus = statuses.OrderBy((status) => status.bestPathLength).First();
             var bestLastLength = bestWorkerStatus.bestPathLength;
-            Console.WriteLine("> best out of last " + bestLastLength.ToString("F1"));
+            C.log.Info("> best out of last " + bestLastLength.ToString("F1"));
 
             if (bestLastLength < bestLength) {
                 bestLength = bestLastLength;
                 bestTrail = bestWorkerStatus.bestTrail;
-                Console.WriteLine("New best length of " + bestLength.ToString("F1"));
+                C.log.Info("New best length of " + bestLength.ToString("F1"));
             }
         }
 

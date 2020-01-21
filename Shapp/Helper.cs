@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -12,12 +13,35 @@ using Shapp;
 
 namespace Shapp {
     public class Helper {
+        public static class RandomNumber {
+            private static readonly RNGCryptoServiceProvider _generator = new RNGCryptoServiceProvider();
+
+            public static int Between(int minimumValue, int maximumValue) {
+                byte[] randomNumber = new byte[1];
+
+                _generator.GetBytes(randomNumber);
+
+                double asciiValueOfRandomCharacter = Convert.ToDouble(randomNumber[0]);
+
+                // We are using Math.Max, and substracting 0.00000000001, 
+                // to ensure "multiplier" will always be between 0.0 and .99999999999
+                // Otherwise, it's possible for it to be "1", which causes problems in our rounding.
+                double multiplier = Math.Max(0, (asciiValueOfRandomCharacter / 255d) - 0.00000000001d);
+
+                // We need to add one to the range, to allow for the rounding done with Math.Floor
+                int range = maximumValue - minimumValue + 1;
+
+                double randomValueInRange = Math.Floor(multiplier * range);
+
+                return (int)(minimumValue + randomValueInRange);
+            }
+        }
+
         private static readonly int FILENAME_LENGTH = 15;
         private static readonly string FILENAMES_MAPPING_FORMAT = "[SHAPP] Filename mapping: '{0}':'{1}'";
         private const string FILENAMES_MAPPING_FORMAT_REGEX = "^\\[SHAPP\\] Filename mapping: '(.+)':'(.+)'$";
         private const string EXIT_CODE_FILE = "exit_path";
         private const string COUNTER_EXAMPLE_FILE = "start_path";
-        private static readonly Random random = new Random();
         private readonly List<JobDescriptor> RemoteDescriptors = new List<JobDescriptor>();
 
         public static void SaveChildOutputToFiles(int exitCode, string counterExampleContent) {
@@ -79,7 +103,7 @@ namespace Shapp {
         public static string RandomString(int length) {
             const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
             return new string(Enumerable.Repeat(chars, length)
-                .Select(s => s[random.Next(s.Length)]).ToArray());
+                .Select(s => s[RandomNumber.Between(0, s.Length - 1)]).ToArray());
         }
         public static JobDescriptor WaitForAnyJobToEnd(List<JobDescriptor> descriptors) {
             var descriptorEvents = descriptors.Select(descriptor => descriptor.JobCompletedEvent).ToArray();

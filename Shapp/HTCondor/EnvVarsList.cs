@@ -22,7 +22,7 @@ namespace Shapp {
         [XmlElement("IPAddress")]
 #pragma warning disable IDE0051 // Remove unused private members
         // workaround for serialization of the IPAddress class
-        private string IPAddressForXml
+        public string ____zzzxxxxxdfhfjddhfuIPAddressForXml
 #pragma warning restore IDE0051 // Remove unused private members
         {
             get { return IPAddress.ToString(); }
@@ -35,6 +35,17 @@ namespace Shapp {
         public int NestLevel;
         [DataMember]
         public int CommunicationPort;
+        [XmlIgnore]
+        public JobId MyJobId {
+            get {
+                if (___xmlJobId == null) {
+                    return null;
+                }
+                return new JobId(___xmlJobId);
+            }
+        }
+        [XmlElement("MyJobId")]
+        public string ___xmlJobId;
 
         public override string ToString() => Serialize();
 

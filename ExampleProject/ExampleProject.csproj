@@ -48,9 +48,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ACOExample.cs" />
-    <Compile Include="ACO\ACOUsingShappExample.cs" />
+    <Compile Include="ACO\ACOWithShappExample.cs" />
     <Compile Include="ACO\ACOShappWorker.cs" />
     <Compile Include="ACO\ACOShappCoordinator.cs" />
+    <Compile Include="ACO\PheromonesUpdate.cs" />
+    <Compile Include="ACO\StartProcessing.cs" />
+    <Compile Include="ACO\WorkerStatus.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="ProgramForProtoTesting.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
