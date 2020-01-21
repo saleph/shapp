@@ -29,8 +29,10 @@ namespace ExampleProject.ACO {
         double bestLength = double.MaxValue;
 
         private AutoResetEvent processingCanBeStarted = new AutoResetEvent(false);
+        private Random random;
 
-        public void Run() {
+        public void Run(int randomIndex) {
+            random = ACOExample.randoms[randomIndex];
             InjectDelegateForPheromonesUpdate();
             InjectDelegateForStartProcessing();
             Shapp.CommunicatorToParent.Initialize();
@@ -70,16 +72,20 @@ namespace ExampleProject.ACO {
         private void DoMainLoop() {
             int iteration = 1;
             int timeOfLastStatus = GetTime();
+            int timeOfLastBestTrailCheck = GetTime();
             Shapp.C.log.Info("\nEntering UpdateAnts - UpdatePheromones loop\n");
             while (true) {
                 lock (pheromonesLock) {
                     UpdateAnts();
                     UpdatePheromenes();
                 }
-                CheckForPossibleNewBestTrail(iteration);
-                if (GetTime() - timeOfLastStatus > reportingPeriod) {
-                    ReportWorkerStatusToParent();
-                    timeOfLastStatus = GetTime();
+                if (GetTime() - timeOfLastBestTrailCheck > 1) {
+                    CheckForPossibleNewBestTrail(iteration);
+                    if (GetTime() - timeOfLastStatus > reportingPeriod) {
+                        ReportWorkerStatusToParent();
+                        timeOfLastStatus = GetTime();
+                    }
+                    timeOfLastBestTrailCheck = GetTime();
                 }
                 iteration++;
             }
@@ -113,8 +119,8 @@ namespace ExampleProject.ACO {
 
         private void UpdateAnts() {
             for (int k = 0; k < ants.Length; k++) {
-                int start = ACOExample.random.Next(0, numCities);
-                int[] newTrail = ACOExample.BuildTrail(k, start, pheromones, dists);
+                int start = random.Next(0, numCities);
+                int[] newTrail = ACOExample.BuildTrail(k, start, pheromones, dists, random);
                 ants[k] = newTrail;
             }
         }

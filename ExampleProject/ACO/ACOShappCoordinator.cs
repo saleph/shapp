@@ -51,8 +51,9 @@ namespace ExampleProject.ACO {
         }
 
         private void StartWorkers() {
-            var submitter = new SelfSubmitter();
             for (int i = 0; i < numberOfWorkers; ++i) {
+                string[] arguments = { i.ToString() };
+                var submitter = new SelfSubmitter(null, arguments);
                 var descriptor = submitter.Submit();
                 descriptors.Add(descriptor);
             }

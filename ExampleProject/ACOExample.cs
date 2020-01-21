@@ -7,6 +7,7 @@ using System.Collections;
 using System.Data;
 using System.Diagnostics;
 using System.Threading;
+using Shapp;
 
 namespace ExampleProject {
 
@@ -25,13 +26,18 @@ namespace ExampleProject {
     class ACOExample {
 
         public static Random random = new Random(0);
+        public static List<Random> randoms = new List<Random>() {
+            new Random(1),
+            new Random(2),
+            new Random(3)
+        };
 
         private static int numCities = 500;
-        private static int numAnts = numCities / 50;
-        private static int maxTime = 30;
+        private static int numAnts = 5;
+        private static int maxTime = 90;
         // left one core for accountability - mostly counting the best distances
-        private static int numThreads = Environment.ProcessorCount - 1;
-        private static int synchronisationPeriod = 1;
+        private static int numThreads = 3;
+        private static int synchronisationPeriod = 10;
         private static int bestLengthCheckPeriod = 1;
 
         // influence of pheromone on direction
@@ -50,27 +56,28 @@ namespace ExampleProject {
             IList<double[][]> pheromones = new SynchronizedCollection<double[][]>();
             IList<object> locks = new SynchronizedCollection<object>();
             try {
-                Console.WriteLine("\nBegin Ant Colony Optimization demo\n");
+                C.log.Info("Begin Ant Colony Optimization demo");
 
-                Console.WriteLine("Number cities in problem = " + numCities);
+                C.log.Info("Number cities in problem = " + numCities);
 
-                Console.WriteLine("\nNumber ants = " + numAnts);
-                Console.WriteLine("Maximum time = " + maxTime);
+                C.log.Info("Number ants = " + numAnts);
+                C.log.Info("Maximum time = " + maxTime);
 
-                Console.WriteLine("\nAlpha (pheromone influence) = " + alpha);
-                Console.WriteLine("Beta (local node influence) = " + beta);
-                Console.WriteLine("Rho (pheromone evaporation coefficient) = " + rho.ToString("F2"));
-                Console.WriteLine("Q (pheromone deposit factor) = " + Q.ToString("F2"));
+                C.log.Info("Alpha (pheromone influence) = " + alpha);
+                C.log.Info("Beta (local node influence) = " + beta);
+                C.log.Info("Rho (pheromone evaporation coefficient) = " + rho.ToString("F2"));
+                C.log.Info("Q (pheromone deposit factor) = " + Q.ToString("F2"));
 
-                Console.WriteLine("\nInitialing dummy graph distances");
+                C.log.Info("Initialing dummy graph distances");
                 int[][] dists = MakeGraphDistances(numCities);
 
-                Console.WriteLine("\nInitialing ants to random trails\n");
+                C.log.Info("Initialing ants to random trails");
 
                 for (int i = 0; i < numThreads; ++i) {
                     ants.Add(InitAnts(numAnts, numCities));
                     locks.Add(new object());
                 }
+
                 // initialize ants to random trails
                 ShowAnts(ants, dists);
 
@@ -79,10 +86,10 @@ namespace ExampleProject {
                 double bestLength = Length(bestTrail, dists);
                 // the length of the best trail
 
-                Console.Write("\nBest initial trail length: " + bestLength.ToString("F1") + "\n");
+                Console.Write("Best initial trail length: " + bestLength.ToString("F1") + "");
                 //Display(bestTrail);
 
-                Console.WriteLine("\nInitializing pheromones on trails");
+                C.log.Info("Initializing pheromones on trails");
                 for (int i = 0; i < numThreads; ++i) {
                     pheromones.Add(InitPheromones(numCities));
                 }
@@ -91,9 +98,9 @@ namespace ExampleProject {
                 for (int i = 0; i < numThreads; ++i) {
                     threads.Add(new Thread(new ParameterizedThreadStart((threadIdxParam) => {
                         int threadIdx = (int)threadIdxParam;
-                        Console.WriteLine("Sarting as " + threadIdx);
+                        C.log.Info("Sarting as " + threadIdx);
                         while (true) {
-                            UpdateAnts(ants[threadIdx], pheromones[threadIdx], dists, locks[threadIdx]);
+                            UpdateAnts(ants[threadIdx], pheromones[threadIdx], dists, locks[threadIdx], randoms[threadIdx]);
                             UpdatePheromones(pheromones[threadIdx], ants[threadIdx], dists, locks[threadIdx]);
                         }
                     })));
@@ -102,50 +109,57 @@ namespace ExampleProject {
                     threads[i].Start(i);
                 }
 
-                int time = 0;
-                Console.WriteLine("\nEntering UpdateAnts - UpdatePheromones loop\n");
-                while (time < maxTime) {
+                int iteration = 0;
+                int lastSynchronisation = GetTime();
+                C.log.Info("Entering UpdateAnts - UpdatePheromones loop");
+                while (iteration < maxTime) {
                     //for (int i = 0; i < numThreads; ++i)
                     //    UpdateAnts(ants[i], pheromones[i], dists, locks[i]);
                     //for (int i = 0; i < numThreads; ++i)
                     //    UpdatePheromones(pheromones[i], ants[i], dists, locks[i]);
 
-                    if (time % synchronisationPeriod == 0) {
+                    if (GetTime() - lastSynchronisation >= synchronisationPeriod) {
                         SynchronizePheromones(pheromones, locks);
                     }
 
-                    if (time % bestLengthCheckPeriod == 0) {
+                    if (GetTime() - bestLengthCheckPeriod >= 1) {
                         int[] currBestTrail = ACOExample.BestTrail(ants, dists, locks);
                         double currBestLength = Length(currBestTrail, dists);
-                        Console.WriteLine("> length + " + currBestLength.ToString("F1"));
+                        C.log.Info("> length + " + currBestLength.ToString("F1"));
 
                         if (currBestLength < bestLength) {
                             bestLength = currBestLength;
                             bestTrail = currBestTrail;
-                            Console.WriteLine("New best length of " + bestLength.ToString("F1") + " found at time " + time);
+                            C.log.Info("New best length of " + bestLength.ToString("F1") + " found at time " + iteration);
                         }
                     }
-                    Thread.Sleep(1000);
-                    time += 1;
+                    Thread.Sleep(500);
+                    iteration += 1;
                 }
 
-                Console.WriteLine("\nTime complete");
+                C.log.Info("Time complete");
 
-                Console.WriteLine("\nBest trail found:");
+                C.log.Info("Best trail found:");
                 Display(bestTrail);
-                Console.WriteLine("\nLength of best trail found: " + bestLength.ToString("F1"));
+                C.log.Info("Length of best trail found: " + bestLength.ToString("F1"));
 
-                Console.WriteLine("\nEnd Ant Colony Optimization demo\n");
+                C.log.Info("End Ant Colony Optimization demo");
                 Console.Read();
             } catch (Exception ex) {
-                Console.WriteLine(ex.Message);
+                C.log.Info(ex.Message);
             }
 
+        }
+
+        private static int GetTime() {
+            TimeSpan t = (DateTime.UtcNow - new DateTime(1970, 1, 1));
+            return (int)t.TotalSeconds;
         }
 
         // --------------------------------------------------------------------------------------------
 
         public static int[][] InitAnts(int numAnts, int numCities) {
+            random = new Random(0);
             int[][] ants = new int[numAnts][];
             for (int k = 0; k <= numAnts - 1; k++) {
                 int start = random.Next(0, numCities);
@@ -246,18 +260,18 @@ namespace ExampleProject {
 
         // --------------------------------------------------------------------------------------------
 
-        private static void UpdateAnts(int[][] ants, double[][] pheromones, int[][] dists, object threadLock) {
+        private static void UpdateAnts(int[][] ants, double[][] pheromones, int[][] dists, object threadLock, Random random) {
             lock (threadLock) {
                 int numCities = pheromones.Length;
                 for (int k = 0; k < ants.Length; k++) {
                     int start = random.Next(0, numCities);
-                    int[] newTrail = BuildTrail(k, start, pheromones, dists);
+                    int[] newTrail = BuildTrail(k, start, pheromones, dists, random);
                     ants[k] = newTrail;
                 }
             }
         }
 
-        public static int[] BuildTrail(int k, int start, double[][] pheromones, int[][] dists) {
+        public static int[] BuildTrail(int k, int start, double[][] pheromones, int[][] dists, Random random) {
             int numCities = pheromones.Length;
             int[] trail = new int[numCities];
             bool[] visited = new bool[numCities];
@@ -265,14 +279,14 @@ namespace ExampleProject {
             visited[start] = true;
             for (int i = 0; i <= numCities - 2; i++) {
                 int cityX = trail[i];
-                int next = NextCity(k, cityX, visited, pheromones, dists);
+                int next = NextCity(k, cityX, visited, pheromones, dists, random);
                 trail[i + 1] = next;
                 visited[next] = true;
             }
             return trail;
         }
 
-        private static int NextCity(int k, int cityX, bool[] visited, double[][] pheromones, int[][] dists) {
+        private static int NextCity(int k, int cityX, bool[] visited, double[][] pheromones, int[][] dists, Random random) {
             // for ant k (with visited[]), at nodeX, what is next node in trail?
             double[] probs = MoveProbs(k, cityX, visited, pheromones, dists);
 
@@ -414,6 +428,7 @@ namespace ExampleProject {
         // --------------------------------------------------------------------------------------------
 
         public static int[][] MakeGraphDistances(int numCities) {
+            random = new Random(0);
             int[][] dists = new int[numCities][];
             for (int i = 0; i <= dists.Length - 1; i++) {
                 dists[i] = new int[numCities];
@@ -436,47 +451,52 @@ namespace ExampleProject {
         // --------------------------------------------------------------------------------------------
 
         public static void Display(int[] trail) {
+            string output = "";
             for (int i = 0; i <= trail.Length - 1; i++) {
-                Console.Write(trail[i] + " ");
+                output += trail[i] + " ";
                 if (i > 0 && i % 20 == 0) {
-                    Console.WriteLine("");
+                    output += "\n";
                 }
             }
-            Console.WriteLine("");
+            output += "\n";
+            C.log.Info(output);
         }
 
 
         private static void ShowAnts(IList<int[][]> antss, int[][] dists) {
+            string output = "";
             foreach (var ants in antss)
                 for (int i = 0; i <= ants.Length - 1; i++) {
-                    Console.Write(i + ": [ ");
+                    output += (i + ": [ ");
 
                     for (int j = 0; j <= 3; j++) {
-                        Console.Write(ants[i][j] + " ");
+                        output += (ants[i][j] + " ");
                     }
 
-                    Console.Write(". . . ");
+                    output += (". . . ");
 
                     for (int j = ants[i].Length - 4; j <= ants[i].Length - 1; j++) {
-                        Console.Write(ants[i][j] + " ");
+                        output += (ants[i][j] + " ");
                     }
 
-                    Console.Write("] len = ");
+                    output += ("] len = ");
                     double len = Length(ants[i], dists);
-                    Console.Write(len.ToString("F1"));
-                    Console.WriteLine("");
+                    output += (len.ToString("F1"));
+                    output += ("\n");
                 }
+            C.log.Info(output);
         }
 
         private static void Display(double[][] pheromones) {
+            string output = "";
             for (int i = 0; i <= pheromones.Length - 1; i++) {
-                Console.Write(i + ": ");
+                output += (i + ": ");
                 for (int j = 0; j <= pheromones[i].Length - 1; j++) {
-                    Console.Write(pheromones[i][j].ToString("F4").PadLeft(8) + " ");
+                    output += (pheromones[i][j].ToString("F4").PadLeft(8) + " ");
                 }
-                Console.WriteLine("");
+                output += ("\n");
             }
-
+            C.log.Info(output);
         }
 
     }

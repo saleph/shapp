@@ -13,16 +13,16 @@ namespace ExampleProject.ACO {
         //public static readonly int numberOfWorkers = Environment.ProcessorCount - 1;
         public static readonly int numberOfWorkers = 3;
 
-        public static readonly int duration = 90;
-        public static readonly int workerStatusReportingPeriodInSeconds = 5;
+        public static readonly int duration = 240;
+        public static readonly int workerStatusReportingPeriodInSeconds = 10;
 
-        public static void Run() {
+        public static void Run(string[] argv) {
             if (SelfSubmitter.AmIRootProcess()) {
                 var coordinator = new ACOShappCoordinator();
                 coordinator.Run();
             } else {
                 var worker = new ACOShappWorker();
-                worker.Run();
+                worker.Run(int.Parse(argv[0]));
             }
         }
     }
