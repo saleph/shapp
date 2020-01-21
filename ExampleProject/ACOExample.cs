@@ -34,7 +34,7 @@ namespace ExampleProject {
 
         private static int numCities = 500;
         private static int numAnts = 5;
-        private static int maxTime = 90;
+        private static int maxTime = 240;
         // left one core for accountability - mostly counting the best distances
         private static int numThreads = 3;
         private static int synchronisationPeriod = 10;
@@ -109,10 +109,11 @@ namespace ExampleProject {
                     threads[i].Start(i);
                 }
 
+                int startTime = GetTime();
                 int iteration = 0;
                 int lastSynchronisation = GetTime();
                 C.log.Info("Entering UpdateAnts - UpdatePheromones loop");
-                while (iteration < maxTime) {
+                while (GetTime() - startTime < maxTime) {
                     //for (int i = 0; i < numThreads; ++i)
                     //    UpdateAnts(ants[i], pheromones[i], dists, locks[i]);
                     //for (int i = 0; i < numThreads; ++i)
@@ -125,7 +126,7 @@ namespace ExampleProject {
                     if (GetTime() - bestLengthCheckPeriod >= 1) {
                         int[] currBestTrail = ACOExample.BestTrail(ants, dists, locks);
                         double currBestLength = Length(currBestTrail, dists);
-                        C.log.Info("> length + " + currBestLength.ToString("F1"));
+                        C.log.Info("length " + currBestLength.ToString("F1"));
 
                         if (currBestLength < bestLength) {
                             bestLength = currBestLength;
