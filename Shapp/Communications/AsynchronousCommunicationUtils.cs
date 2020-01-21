@@ -30,19 +30,27 @@ namespace Shapp {
             state.processingDone.Reset();
             handler.BeginReceive(state.buffer, state.bytesRead, sizeof(int), SocketFlags.None,
                 new AsyncCallback(ReadPayloadSizeCallback), state);
-            state.processingDone.WaitOne(ShappSettins.Default.EventWaitTime);
+
+            state.processingDone.WaitOne();
         }
 
         private void ReadPayloadSizeCallback(IAsyncResult ar) {
             StateObject state = (StateObject)ar.AsyncState;
             // continue the listener thread
             Socket handler = state.workSocket;
-            int bytesRead = handler.EndReceive(ar);
+            int bytesRead;
+            try {
+                bytesRead = handler.EndReceive(ar);
+            } catch (SocketException) {
+                C.log.Error("Connection lost towards " + handler.ToString());
+                return;
+            }
 
             if (bytesRead == 0) {
                 return;
             }
             state.bytesRead += bytesRead;
+            C.log.Debug(string.Format("ReadPayloadSizeCallback: Received {0} bytes: {1}", bytesRead, BitConverter.ToString(state.buffer).Take(C.numberOfBytesToShowFromReceivedMsg).ToString()));
             if (state.bytesRead < sizeof(int)) {
                 handler.BeginReceive(state.buffer, state.bytesRead, sizeof(int) - state.bytesRead, 0,
                 new AsyncCallback(ReadPayloadSizeCallback), state);
@@ -58,7 +66,6 @@ namespace Shapp {
 
         private void ReadPayloadCallback(IAsyncResult ar) {
             StateObject state = (StateObject)ar.AsyncState;
-            state.processingDone.Set();
             Socket handler = state.workSocket;
             int bytesRead = handler.EndReceive(ar);
 
@@ -66,10 +73,12 @@ namespace Shapp {
                 return;
             }
             state.bytesRead += bytesRead;
+            C.log.Debug(string.Format("ReadPayloadCallback: Received {0} bytes: {1}", bytesRead, BitConverter.ToString(state.buffer).Take(C.numberOfBytesToShowFromReceivedMsg).ToString()));
             if (state.bytesRead < state.buffer.Length) {
                 handler.BeginReceive(state.buffer, state.bytesRead, state.buffer.Length - state.bytesRead, 0,
                     new AsyncCallback(ReadPayloadCallback), state);
             } else {
+                state.processingDone.Set();
                 using (var stream = new MemoryStream(state.buffer)) {
                     var formatter = new BinaryFormatter();
                     stream.Seek(0, SeekOrigin.Begin);
@@ -91,6 +100,7 @@ namespace Shapp {
             byte[] messageHeader = BitConverter.GetBytes(serializedObject.Length);
 
             byte[] byteData = messageHeader.Concat(serializedObject).ToArray();
+            C.log.Debug(string.Format("Send: Sending {0} bytes: {1}", byteData.Length, BitConverter.ToString(byteData).Take(C.numberOfBytesToShowFromReceivedMsg).ToString()));
             handler.BeginSend(byteData, 0, byteData.Length, 0,
                 new AsyncCallback(SendCallback), handler);
         }

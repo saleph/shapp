@@ -24,6 +24,14 @@ namespace Shapp {
         public delegate void NewMessageReceived(object classInstance, Socket client);
         public event NewMessageReceived NewMessageReceivedEvent;
 
+        /// <summary>
+        /// Delegate for new clients connected.
+        /// </summary>
+        /// <param name="client">just connected client</param>
+        public delegate void NewClientConnected(Socket client);
+        public event NewClientConnected NewClientConnectedEvent;
+
+
         public AsynchronousServer(int port) {
             this.port = port;
             asynchronousCommunicationUtils.NewMessageReceivedEvent += OnMessageReceive;
@@ -38,6 +46,7 @@ namespace Shapp {
             if (!listener.IsAlive) {
                 IsListening = true;
                 listener.Start();
+                C.log.Debug("Server started on port: " + port);
             }
         }
 
@@ -51,7 +60,7 @@ namespace Shapp {
         private void ListenForNewConnections() {
             IPAddress ipAddress = GetLocalIPAddress();
             IPEndPoint localEndPoint = new IPEndPoint(ipAddress, port);
-            System.Console.WriteLine("Listening on {0}", localEndPoint.ToString());
+            C.log.Debug(string.Format("Listening on {0}", localEndPoint.ToString()));
 
             Socket listener = new Socket(AddressFamily.InterNetwork,
                 SocketType.Stream, ProtocolType.Tcp);
@@ -61,7 +70,7 @@ namespace Shapp {
             while (IsListening) {
                 connectionEstablished.Reset();
                 listener.BeginAccept(new AsyncCallback(AcceptCallback), listener);
-                connectionEstablished.WaitOne(ShappSettins.Default.EventWaitTime);
+                connectionEstablished.WaitOne();
             }
         }
 
@@ -79,8 +88,14 @@ namespace Shapp {
             connectionEstablished.Set();
             Socket listener = (Socket)ar.AsyncState;
             Socket handler = listener.EndAccept(ar);
+            NewClientConnectedEvent?.Invoke(handler);
             while (IsListening) {
-                asynchronousCommunicationUtils.ListenForMessages(handler);
+                try {
+                    asynchronousCommunicationUtils.ListenForMessages(handler);
+                } catch (SocketException) {
+                    C.log.Info("Connection lost towards " + handler.ToString());
+                    return;
+                }
             }
         }
 

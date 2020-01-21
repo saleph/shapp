@@ -28,6 +28,7 @@ namespace Shapp {
     public class NewJobSubmitter {
         private const string LINUX_TARGET_OPERATING_SYSTEM = "target.OpSys == \"LINUX\"";
         private const string WINDOWS_TARGET_OPERATING_SYSTEM = "target.OpSys == \"WINDOWS\"";
+        private readonly string jobIdHtcondorQuery = "$(ClusterId).$(ProcId)";
 
         /// <summary>
         /// Command to execute. 
@@ -160,8 +161,10 @@ namespace Shapp {
 
         private string BuildEnvironmentalVariables() {
             var envVarsList = new EnvVarsList() {
-                IPAddress = GetThisNodeIpAddress(),
-                NestLevel = JobEnvVariables.GetNestLevel() + 1
+                IPAddress = GetLocalIPAddress(),
+                NestLevel = JobEnvVariables.GetNestLevel() + 1,
+                CommunicationPort = C.DEFAULT_PORT,
+                ___xmlJobId = jobIdHtcondorQuery
             };
             const string ENV_VAR_FORMAT = "{0}={1}";
             return string.Format(ENV_VAR_FORMAT,
@@ -174,6 +177,16 @@ namespace Shapp {
                 IPEndPoint endPoint = socket.LocalEndPoint as IPEndPoint;
                 return endPoint.Address;
             }
+        }
+
+        public static IPAddress GetLocalIPAddress() {
+            var host = Dns.GetHostEntry(Dns.GetHostName());
+            foreach (var ip in host.AddressList) {
+                if (ip.AddressFamily == AddressFamily.InterNetwork) {
+                    return ip;
+                }
+            }
+            throw new Exception("No network adapters with an IPv4 address in the system!");
         }
 
         private void LogNewJobSubmission(JobId jobId) {

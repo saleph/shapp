@@ -77,7 +77,6 @@ namespace Shapp {
         private JobState state = JobState.IDLE;
         private readonly JobStateFetcher jobStateFetcher;
         private readonly JobRemover jobRemover;
-        private Socket jobSocket = null;
         private readonly System.Timers.Timer timer = new System.Timers.Timer(C.DEFAULT_JOB_STATE_REFRESH_INTERVAL_MS);
 
         /// <summary>
@@ -93,12 +92,6 @@ namespace Shapp {
             jobStateFetcher = new JobStateFetcher(jobId);
             jobRemover = new JobRemover(jobId);
             SetupJobStatusPoller();
-            Communications.Protocol.HelloFromChild.OnReceive += (socket, message) => {
-                if (message.MyJobId.Equals(JobId)) {
-                    jobSocket = socket;
-                    JobReadyForCommunicationsEvent.Set();
-                }
-            };
         }
 
         /// <summary>
@@ -135,7 +128,7 @@ namespace Shapp {
         }
 
         public void Send(object objectToSend) {
-            AsynchronousCommunicationUtils.Send(jobSocket, objectToSend);
+            CommunicatorWithChildren.SendToChild(JobId, objectToSend);
         }
 
         private void SetupJobStatusPoller() {
@@ -173,10 +166,14 @@ namespace Shapp {
         }
 
         private void RefreshJobState(object sender, System.Timers.ElapsedEventArgs e) {
-            JobState readState = jobStateFetcher.GetJobState();
-            if (readState == State)
-                return;
-            State = readState;
+            try {
+                JobState readState = jobStateFetcher.GetJobState();
+                if (readState == State)
+                    return;
+                State = readState;
+            } catch (ShappException) {
+                C.log.Debug("Refreshing Job State failed");
+            }
         }
     }
 }

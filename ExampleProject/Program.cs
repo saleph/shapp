@@ -16,7 +16,9 @@ namespace ExampleProject {
 
         private const int WORKERS_POOL_SIZE = 10;
         static void Main(string[] args) {
-            ProgramForProtoTesting.MainMethod(args);
+            //ACOExample.Run();
+            ACO.ACOWithShappExample.Run();
+            //ProgramForProtoTesting.MainMethod(args);
             //Program main = new Program();
             //main.Execute(args);
         }
@@ -47,6 +49,7 @@ namespace ExampleProject {
 
             while (true) {
                 JobDescriptor completedTaskDescriptor = Helper.WaitForAnyJobToEnd(descriptors);
+                completedTaskDescriptor.HardRemove();
                 // cleanup the active descriptors removing the completed one
                 descriptors.Remove(completedTaskDescriptor);
                 // gather results

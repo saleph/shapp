@@ -19,6 +19,11 @@ namespace Shapp {
                 if (classInstance is ISystemMessage systemMessage)
                     systemMessage.Dispatch(server);
             };
+            HelloFromParent.OnReceive += (socket, helloFromParent) => {
+                client.Send(new HelloFromChild() {
+                    MyJobId = JobEnvVariables.GetMyJobId()
+                });
+            };
             client.Connect(JobEnvVariables.GetParentSubmitterIp(), JobEnvVariables.GetParentSubmitterDestinationPort());
             isInitialized = true;
         }

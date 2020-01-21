@@ -1,20 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
-using System.Net.Sockets;
 
-namespace Shapp.Communications.Protocol {
+namespace ExampleProject.ACO {
     [Serializable]
-    public class HelloFromChild : ISystemMessage {
-        public delegate void Callback(Socket client, HelloFromChild helloFromChild);
+    class StartProcessing : Shapp.ISystemMessage {
+        public delegate void Callback(Socket client, StartProcessing pheromonesUpdate);
         public static event Callback OnReceive;
 
-        public JobId MyJobId;
-
         public void Dispatch(Socket sender) {
+            Shapp.C.log.Debug("StartProcessing");
             OnReceive?.Invoke(sender, this);
         }
+
     }
 }
