@@ -45,7 +45,6 @@ namespace Shapp {
             IsListening = true;
             client.BeginConnect(remoteEP,
                 new AsyncCallback(ConnectCallback), client);
-            C.log.Debug("Connection established towards " + remoteEP.ToString());
         }
 
         public void Stop() {
@@ -56,6 +55,7 @@ namespace Shapp {
             Socket client = (Socket)ar.AsyncState;
             client.EndConnect(ar);
             connectDone.Set();
+            C.log.Info("Connection established towards " + client.ToString());
             while (IsListening) {
                 try {
                     asynchronousCommunicationUtils.ListenForMessages(client);

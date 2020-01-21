@@ -67,10 +67,14 @@ namespace Shapp {
 
             listener.Bind(localEndPoint);
             listener.Listen(C.SERVER_BACKLOG_SIZE);
+            connectionEstablished.Reset();
+            listener.BeginAccept(new AsyncCallback(AcceptCallback), listener);
             while (IsListening) {
+                if (connectionEstablished.WaitOne(C.eventWaitTime)) {
+                    // it was not a timeout - prepare new callback
+                    listener.BeginAccept(new AsyncCallback(AcceptCallback), listener);
+                }
                 connectionEstablished.Reset();
-                listener.BeginAccept(new AsyncCallback(AcceptCallback), listener);
-                connectionEstablished.WaitOne();
             }
         }
 
@@ -86,6 +90,7 @@ namespace Shapp {
 
         private void AcceptCallback(IAsyncResult ar) {
             connectionEstablished.Set();
+            C.log.Info("Connection established with a client");
             Socket listener = (Socket)ar.AsyncState;
             Socket handler = listener.EndAccept(ar);
             NewClientConnectedEvent?.Invoke(handler);

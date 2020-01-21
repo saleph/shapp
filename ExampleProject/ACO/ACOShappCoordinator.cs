@@ -12,7 +12,7 @@ namespace ExampleProject.ACO {
         private readonly List<JobDescriptor> descriptors = new List<JobDescriptor>();
         private readonly AsynchronousServer server = new AsynchronousServer(C.DEFAULT_PORT);
 
-        private static readonly int maxTime = 30;
+        private static readonly int maxTime = ACOWithShappExample.duration;
         private readonly int numberOfWorkers = ACOWithShappExample.numberOfWorkers;
         readonly Queue<WorkerStatus> workersStatutes = new Queue<WorkerStatus>();
         readonly object workersStatusesLock = new object();
@@ -83,11 +83,14 @@ namespace ExampleProject.ACO {
             }
 
             C.log.Info("Ending...");
+            CommunicatorWithChildren.Stop();
             KillWorkers();
             C.log.Info("Best path:");
             if (bestTrail != null)
                 ACOExample.Display(bestTrail);
             C.log.Info("Best path length: " + bestLength);
+            C.log.Info("Stopping. Waiting for stdin...");
+            Console.ReadKey();
         }
 
         private List<WorkerStatus> GetStatusesWaitingForProcessing() {

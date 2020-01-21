@@ -9,7 +9,7 @@ namespace ExampleProject.ACO {
     internal class ACOShappWorker {
         private static readonly int numCities = ACOWithShappExample.numCities;
         private static readonly int numAntsPerWorker = ACOWithShappExample.numAntsPerWorker;
-        private static readonly int reportingPeriod = ACOWithShappExample.workerStatusReportingPeriod;
+        private static readonly int reportingPeriod = ACOWithShappExample.workerStatusReportingPeriodInSeconds;
         // influence of pheromone on direction
         private static int alpha = 3;
         // influence of adjacent node distance
@@ -31,29 +31,34 @@ namespace ExampleProject.ACO {
         private AutoResetEvent processingCanBeStarted = new AutoResetEvent(false);
 
         public void Run() {
-            Shapp.CommunicatorToParent.Initialize();
-            SetupParametersForACO();
             InjectDelegateForPheromonesUpdate();
             InjectDelegateForStartProcessing();
+            Shapp.CommunicatorToParent.Initialize();
+            SetupParametersForACO();
             InitializeBestTrailAndLength();
 
+            Shapp.C.log.Info("Wait for start notification");
             processingCanBeStarted.WaitOne();
+            Shapp.C.log.Info("Notification received. Starting");
             DoMainLoop();
         }
 
         private void InjectDelegateForStartProcessing() {
             StartProcessing.OnReceive += (socket, startProcessing) => {
+                Shapp.C.log.Info("Received StartProcessing");
                 processingCanBeStarted.Set();
             };
         }
 
         private void SetupParametersForACO() {
+            Shapp.C.log.Info("SetupParametersForACO");
             // I know. This is just PoC
             ACOExample.alpha = alpha;
             ACOExample.beta = beta;
         }
 
         private void InjectDelegateForPheromonesUpdate() {
+            Shapp.C.log.Info("InjectDelegateForPheromonesUpdate");
             PheromonesUpdate.OnReceive += (socket, update) => {
                 Console.WriteLine("Received PheromonesUpdate from " + socket.ToString());
                 lock (pheromonesLock) {
@@ -64,18 +69,25 @@ namespace ExampleProject.ACO {
 
         private void DoMainLoop() {
             int iteration = 1;
-            Console.WriteLine("\nEntering UpdateAnts - UpdatePheromones loop\n");
+            int timeOfLastStatus = GetTime();
+            Shapp.C.log.Info("\nEntering UpdateAnts - UpdatePheromones loop\n");
             while (true) {
                 lock (pheromonesLock) {
                     UpdateAnts();
                     UpdatePheromenes();
                 }
                 CheckForPossibleNewBestTrail(iteration);
-                if (iteration % reportingPeriod == 0) {
+                if (GetTime() - timeOfLastStatus > reportingPeriod) {
                     ReportWorkerStatusToParent();
+                    timeOfLastStatus = GetTime();
                 }
                 iteration++;
             }
+        }
+
+        private int GetTime() {
+            TimeSpan t = (DateTime.UtcNow - new DateTime(1970, 1, 1));
+            return (int)t.TotalSeconds;
         }
 
         private void ReportWorkerStatusToParent() {
@@ -90,12 +102,12 @@ namespace ExampleProject.ACO {
         private void CheckForPossibleNewBestTrail(int iteration) {
             int[] currBestTrail = BestTrail();
             double currBestLength = Length(currBestTrail);
-            Console.WriteLine("> length + " + currBestLength.ToString("F1"));
+            Shapp.C.log.Info("> length + " + currBestLength.ToString("F1"));
 
             if (currBestLength < bestLength) {
                 bestLength = currBestLength;
                 bestTrail = currBestTrail;
-                Console.WriteLine("New best length of " + bestLength.ToString("F1") + " found at time " + iteration);
+                Shapp.C.log.Info("New best length of " + bestLength.ToString("F1") + " found at time " + iteration);
             }
         }
 
@@ -134,8 +146,10 @@ namespace ExampleProject.ACO {
         }
 
         private void InitializeBestTrailAndLength() {
+            Shapp.C.log.Info("InitializeBestTrailAndLength");
             bestTrail = BestTrail();
             bestLength = Length(bestTrail);
+            Shapp.C.log.Info("InitializeBestTrailAndLength done");
         }
 
         public int[] BestTrail() {

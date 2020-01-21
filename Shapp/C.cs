@@ -11,7 +11,7 @@ namespace Shapp {
         /// <summary>
         /// Default state refresh rate. Describes how often job state is being polled.
         /// </summary>
-        public const int DEFAULT_JOB_STATE_REFRESH_INTERVAL_MS = 1000;
+        public const int DEFAULT_JOB_STATE_REFRESH_INTERVAL_MS = 3000;
 
         #region Internal parameters
         internal const int SERVER_BACKLOG_SIZE = 100;

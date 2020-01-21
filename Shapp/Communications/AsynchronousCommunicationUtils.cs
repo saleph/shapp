@@ -22,7 +22,7 @@ namespace Shapp {
         public delegate void NewMessageReceived(object classInstance, Socket client);
         public event NewMessageReceived NewMessageReceivedEvent;
 
-        public void ListenForMessages(Socket handler) {
+        public bool ListenForMessages(Socket handler) {
             StateObject state = new StateObject {
                 bytesRead = 0,
                 workSocket = handler
@@ -31,7 +31,7 @@ namespace Shapp {
             handler.BeginReceive(state.buffer, state.bytesRead, sizeof(int), SocketFlags.None,
                 new AsyncCallback(ReadPayloadSizeCallback), state);
 
-            state.processingDone.WaitOne();
+            return state.processingDone.WaitOne();
         }
 
         private void ReadPayloadSizeCallback(IAsyncResult ar) {
@@ -90,19 +90,22 @@ namespace Shapp {
         }
 
         public static long reception = 0;
+        private static readonly object sendLock = new object();
 
         public static void Send(Socket handler, object objectToSend) {
-            var stream = new MemoryStream();
-            stream.Seek(0, SeekOrigin.Begin);
-            var formatter = new BinaryFormatter();
-            formatter.Serialize(stream, objectToSend);
-            byte[] serializedObject = stream.GetBuffer();
-            byte[] messageHeader = BitConverter.GetBytes(serializedObject.Length);
+            lock (sendLock) {
+                var stream = new MemoryStream();
+                stream.Seek(0, SeekOrigin.Begin);
+                var formatter = new BinaryFormatter();
+                formatter.Serialize(stream, objectToSend);
+                byte[] serializedObject = stream.GetBuffer();
+                byte[] messageHeader = BitConverter.GetBytes(serializedObject.Length);
 
-            byte[] byteData = messageHeader.Concat(serializedObject).ToArray();
-            C.log.Debug(string.Format("Send: Sending {0} bytes: {1}", byteData.Length, BitConverter.ToString(byteData).Take(C.numberOfBytesToShowFromReceivedMsg).ToString()));
-            handler.BeginSend(byteData, 0, byteData.Length, 0,
-                new AsyncCallback(SendCallback), handler);
+                byte[] byteData = messageHeader.Concat(serializedObject).ToArray();
+                C.log.Debug(string.Format("Send: Sending {0} bytes: {1}", byteData.Length, BitConverter.ToString(byteData).Take(C.numberOfBytesToShowFromReceivedMsg).ToString()));
+                handler.BeginSend(byteData, 0, byteData.Length, 0,
+                    new AsyncCallback(SendCallback), handler);
+            }
         }
 
         private static void SendCallback(IAsyncResult ar) {

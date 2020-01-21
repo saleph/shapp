@@ -14,6 +14,7 @@ namespace Shapp.Communications.Protocol {
         public JobId MyJobId;
 
         public void Dispatch(Socket sender) {
+            Shapp.C.log.Info("HelloFromChild received for " + MyJobId);
             OnReceive?.Invoke(sender, this);
         }
     }

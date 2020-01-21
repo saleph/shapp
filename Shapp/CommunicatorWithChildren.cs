@@ -29,6 +29,7 @@ namespace Shapp {
 
         private static void AddDelegateForNewChildGreeting() {
             server.NewClientConnectedEvent += (socket) => {
+                C.log.Info("Sending HelloFromParent for greeting");
                 server.Send(socket, new Communications.Protocol.HelloFromParent());
             };
         }
@@ -52,6 +53,10 @@ namespace Shapp {
             server.Send(jobIdToSocket[jobId], objectToSend);
         }
 
-
+        public static void Stop() {
+            if (!isInitialized)
+                throw new ShappException("server is already down");
+            server.Stop();
+        }
     }
 }

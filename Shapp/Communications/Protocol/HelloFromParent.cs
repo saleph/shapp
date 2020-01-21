@@ -11,6 +11,7 @@ namespace Shapp.Communications.Protocol {
         public delegate void Callback(Socket client, HelloFromParent helloFromChild);
         public static event Callback OnReceive;
         public void Dispatch(Socket sender) {
+            Shapp.C.log.Info("HelloFromParent received");
             OnReceive?.Invoke(sender, this);
         }
     }
