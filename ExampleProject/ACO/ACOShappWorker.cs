@@ -11,24 +11,25 @@ namespace ExampleProject.ACO {
         private static readonly int numAntsPerWorker = ACOWithShappExample.numAntsPerWorker;
         private static readonly int reportingPeriod = ACOWithShappExample.workerStatusReportingPeriodInSeconds;
         // influence of pheromone on direction
-        private static int alpha = 3;
+        private static readonly int alpha = 3;
         // influence of adjacent node distance
-        private static int beta = 2;
+        private static readonly int beta = 2;
         // pheromone decrease factor
-        private static double rho = 0.01;
+        private static readonly double rho = 0.01;
         // pheromone increase factor
-        private static double Q = numCities / 6;
+        private static readonly double Q = numCities / 6;
 
 
-        private int[][] dists = ACOExample.MakeGraphDistances(numCities);
-        private int[][] ants = ACOExample.InitAnts(numAntsPerWorker, numCities);
+        private readonly int[][] dists = ACOExample.MakeGraphDistances(numCities);
+        private readonly int[][] ants = ACOExample.InitAnts(numAntsPerWorker, numCities);
         private double[][] pheromones = ACOExample.InitPheromones(numCities);
-        private object pheromonesLock = new object();
+        private readonly object pheromonesLock = new object();
 
+        private int iteration = 0;
         int[] bestTrail = null;
         double bestLength = double.MaxValue;
 
-        private AutoResetEvent processingCanBeStarted = new AutoResetEvent(false);
+        private readonly AutoResetEvent processingCanBeStarted = new AutoResetEvent(false);
         private Random random;
 
         public void Run(int randomIndex) {
@@ -70,7 +71,6 @@ namespace ExampleProject.ACO {
         }
 
         private void DoMainLoop() {
-            int iteration = 1;
             int timeOfLastStatus = GetTime();
             int timeOfLastBestTrailCheck = GetTime();
             Shapp.C.log.Info("\nEntering UpdateAnts - UpdatePheromones loop\n");
@@ -100,7 +100,8 @@ namespace ExampleProject.ACO {
             var status = new WorkerStatus() {
                 bestPathLength = bestLength,
                 bestTrail = bestTrail,
-                pheromones = pheromones
+                pheromones = pheromones,
+                iterations = iteration
             };
             Shapp.CommunicatorToParent.Send(status);
         }

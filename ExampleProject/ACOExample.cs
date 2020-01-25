@@ -26,19 +26,21 @@ namespace ExampleProject {
     class ACOExample {
 
         public static Random random = new Random(0);
-        public static List<Random> randoms = new List<Random>() {
-            new Random(1),
-            new Random(2),
-            new Random(3)
-        };
+        public static List<Random> randoms = new List<Random>();
+
 
         private static int numCities = 500;
         private static int numAnts = 5;
         private static int maxTime = 240;
         // left one core for accountability - mostly counting the best distances
-        private static int numThreads = 3;
+        private static int numThreads = Environment.ProcessorCount - 1;
         private static int synchronisationPeriod = 10;
         private static int bestLengthCheckPeriod = 1;
+        static ACOExample() {
+            for (int i = 0; i < numThreads; i++) {
+                randoms.Add(new Random(i + 1));
+            }
+        }
 
         // influence of pheromone on direction
         public static int alpha = 3;
@@ -55,6 +57,7 @@ namespace ExampleProject {
             IList<int[][]> ants = new SynchronizedCollection<int[][]>();
             IList<double[][]> pheromones = new SynchronizedCollection<double[][]>();
             IList<object> locks = new SynchronizedCollection<object>();
+            IList<int> iterations = new SynchronizedCollection<int>();
             try {
                 C.log.Info("Begin Ant Colony Optimization demo");
 
@@ -76,6 +79,7 @@ namespace ExampleProject {
                 for (int i = 0; i < numThreads; ++i) {
                     ants.Add(InitAnts(numAnts, numCities));
                     locks.Add(new object());
+                    iterations.Add(0);
                 }
 
                 // initialize ants to random trails
@@ -102,6 +106,9 @@ namespace ExampleProject {
                         while (true) {
                             UpdateAnts(ants[threadIdx], pheromones[threadIdx], dists, locks[threadIdx], randoms[threadIdx]);
                             UpdatePheromones(pheromones[threadIdx], ants[threadIdx], dists, locks[threadIdx]);
+                            lock (locks[threadIdx]) {
+                                iterations[threadIdx]++;
+                            }
                         }
                     })));
                 }
@@ -127,6 +134,13 @@ namespace ExampleProject {
                         int[] currBestTrail = ACOExample.BestTrail(ants, dists, locks);
                         double currBestLength = Length(currBestTrail, dists);
                         C.log.Info("length " + currBestLength.ToString("F1"));
+                        int sumOfIterations = 0;
+                        for (int i = 0; i < numThreads; ++i) {
+                            lock (locks[i]) {
+                                sumOfIterations += iterations[i];
+                            }
+                        }
+                        C.log.Info("iterations " + sumOfIterations);
 
                         if (currBestLength < bestLength) {
                             bestLength = currBestLength;

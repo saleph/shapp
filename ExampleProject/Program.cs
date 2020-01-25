@@ -16,8 +16,8 @@ namespace ExampleProject {
 
         private const int WORKERS_POOL_SIZE = 10;
         static void Main(string[] args) {
-            ACOExample.Run();
-            //ACO.ACOWithShappExample.Run(args);
+            //ACOExample.Run();
+            ACO.ACOWithShappExample.Run(args);
             //ProgramForProtoTesting.MainMethod(args);
             //Program main = new Program();
             //main.Execute(args);

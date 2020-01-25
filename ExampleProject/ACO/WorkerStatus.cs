@@ -15,6 +15,7 @@ namespace ExampleProject.ACO {
         public double bestPathLength;
         public double[][] pheromones;
         public Shapp.JobId MyJobId = Shapp.JobEnvVariables.GetMyJobId();
+        public int iterations;
 
         public void Dispatch(Socket sender) {
             Shapp.C.log.Debug("WorkerStatus");

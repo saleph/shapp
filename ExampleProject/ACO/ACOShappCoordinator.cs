@@ -10,14 +10,13 @@ namespace ExampleProject.ACO {
     internal class ACOShappCoordinator {
 
         private readonly List<JobDescriptor> descriptors = new List<JobDescriptor>();
-        private readonly AsynchronousServer server = new AsynchronousServer(C.DEFAULT_PORT);
 
         private static readonly int maxTime = ACOWithShappExample.duration;
         private readonly int numberOfWorkers = ACOWithShappExample.numberOfWorkers;
         readonly Queue<WorkerStatus> workersStatutes = new Queue<WorkerStatus>();
         readonly object workersStatusesLock = new object();
         private int numberOfConnectedWorkers = 0;
-        private AutoResetEvent allWorkersConnected = new AutoResetEvent(false);
+        private readonly AutoResetEvent allWorkersConnected = new AutoResetEvent(false);
 
         private int[] bestTrail = null;
         private double bestLength = double.MaxValue;
@@ -111,6 +110,12 @@ namespace ExampleProject.ACO {
                 return;
             ProcessReceivedPheromones(statuses);
             ProcessReceivedTrails(statuses);
+            SumUpAndShowNumberOfIterations(statuses);
+        }
+
+        private void SumUpAndShowNumberOfIterations(List<WorkerStatus> statuses) {
+            int iterations = statuses.Select((s) => s.iterations).Sum();
+            C.log.Info("Iterations done so far: " + iterations);
         }
 
         private void ProcessReceivedPheromones(List<WorkerStatus> statuses) {
