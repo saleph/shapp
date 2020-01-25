@@ -48,9 +48,9 @@ namespace ExampleProject {
         public static int beta = 2;
 
         // pheromone decrease factor
-        private static double rho = 0.01;
+        public static double rho = 0.05;
         // pheromone increase factor
-        private static double Q = numCities / 6;
+        public static double Q = numCities / 6;
 
         public static void Run() {
 

@@ -10,15 +10,6 @@ namespace ExampleProject.ACO {
         private static readonly int numCities = ACOWithShappExample.numCities;
         private static readonly int numAntsPerWorker = ACOWithShappExample.numAntsPerWorker;
         private static readonly int reportingPeriod = ACOWithShappExample.workerStatusReportingPeriodInSeconds;
-        // influence of pheromone on direction
-        private static readonly int alpha = 3;
-        // influence of adjacent node distance
-        private static readonly int beta = 2;
-        // pheromone decrease factor
-        private static readonly double rho = 0.01;
-        // pheromone increase factor
-        private static readonly double Q = numCities / 6;
-
 
         private readonly int[][] dists = ACOExample.MakeGraphDistances(numCities);
         private readonly int[][] ants = ACOExample.InitAnts(numAntsPerWorker, numCities);
@@ -37,7 +28,6 @@ namespace ExampleProject.ACO {
             InjectDelegateForPheromonesUpdate();
             InjectDelegateForStartProcessing();
             Shapp.CommunicatorToParent.Initialize();
-            SetupParametersForACO();
             InitializeBestTrailAndLength();
 
             Shapp.C.log.Info("Wait for start notification");
@@ -51,13 +41,6 @@ namespace ExampleProject.ACO {
                 Shapp.C.log.Info("Received StartProcessing");
                 processingCanBeStarted.Set();
             };
-        }
-
-        private void SetupParametersForACO() {
-            Shapp.C.log.Info("SetupParametersForACO");
-            // I know. This is just PoC
-            ACOExample.alpha = alpha;
-            ACOExample.beta = beta;
         }
 
         private void InjectDelegateForPheromonesUpdate() {
@@ -131,11 +114,11 @@ namespace ExampleProject.ACO {
                 for (int j = i + 1; j <= pheromones[i].Length - 1; j++) {
                     for (int k = 0; k <= ants.Length - 1; k++) {
                         // length of ant k trail
-                        double decrease = (1.0 - rho) * pheromones[i][j];
+                        double decrease = (1.0 - ACOExample.rho) * pheromones[i][j];
                         double increase = 0.0;
                         if (ACOExample.EdgeInTrail(i, j, ants[k]) == true) {
                             double length = ACOExample.Length(ants[k], dists);
-                            increase = (Q / length);
+                            increase = (ACOExample.Q / length);
                         }
 
                         pheromones[i][j] = decrease + increase;
