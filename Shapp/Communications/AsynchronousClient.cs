@@ -38,13 +38,32 @@ namespace Shapp {
             NewMessageReceivedEvent?.Invoke(classInstance, client);
         }
 
-        public void Connect(IPAddress ipAddress, int port = C.DEFAULT_PORT) {
+        public IAsyncResult AsyncConnect(IPAddress ipAddress, int port = C.DEFAULT_PORT) {
             IPEndPoint remoteEP = new IPEndPoint(ipAddress, port);
             client = new Socket(AddressFamily.InterNetwork,
                 SocketType.Stream, ProtocolType.Tcp);
             IsListening = true;
-            client.BeginConnect(remoteEP,
+            return client.BeginConnect(remoteEP,
                 new AsyncCallback(ConnectCallback), client);
+        }
+
+        public void Connect(IPAddress ipAddress, int port = C.DEFAULT_PORT) {
+            var attempts = C.socketConnectAttempts;
+            IPEndPoint remoteEP = new IPEndPoint(ipAddress, port);
+            IsListening = true;
+
+            while (attempts-- > 0) {
+                client = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+                var result = client.BeginConnect(remoteEP, new AsyncCallback(ConnectCallback), client);
+                result.AsyncWaitHandle.WaitOne(C.socketConnectAttemptTimeoutMs, true);
+                if (client.Connected) {
+                    return;
+                } else {
+                    client.Close();
+                    continue;
+                }
+            }
+            throw new ShappException(string.Format("Connection towards {0} failed", remoteEP.ToString()));
         }
 
         public void Stop() {
@@ -55,12 +74,12 @@ namespace Shapp {
             Socket client = (Socket)ar.AsyncState;
             client.EndConnect(ar);
             connectDone.Set();
-            C.log.Info("Connection established towards " + client.ToString());
+            C.log.Info("Connection established towards " + client.RemoteEndPoint.ToString());
             while (IsListening) {
                 try {
                     asynchronousCommunicationUtils.ListenForMessages(client);
                 } catch (SocketException) {
-                    C.log.Info("Connection lost towards " + client.ToString());
+                    C.log.Info("Connection lost towards " + client.RemoteEndPoint.ToString());
                     return;
                 }
             }

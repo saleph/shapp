@@ -19,6 +19,8 @@ namespace Shapp {
         internal const string DEFAULT_IP_ADDRESS = "192.168.64.1";
         internal static readonly int eventWaitTime = 10000;
         internal static readonly int numberOfBytesToShowFromReceivedMsg = 50;
+        internal static readonly int socketConnectAttempts = 10;
+        internal static readonly int socketConnectAttemptTimeoutMs = 5000;
         internal static string PROTOCOL_LOG_HEADER = "Communications.Protocol";
 
         #endregion
