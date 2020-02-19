@@ -31,7 +31,10 @@ namespace ExampleProject.ACO {
             InitializeBestTrailAndLength();
 
             Shapp.C.log.Info("Wait for start notification");
-            processingCanBeStarted.WaitOne();
+            if(!processingCanBeStarted.WaitOne(60000))
+            {
+                throw new Shapp.ShappException("waiting for notification exceeded");
+            }
             Shapp.C.log.Info("Notification received. Starting");
             DoMainLoop();
         }

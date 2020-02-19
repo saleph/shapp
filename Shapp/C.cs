@@ -14,10 +14,10 @@ namespace Shapp {
         public const int DEFAULT_JOB_STATE_REFRESH_INTERVAL_MS = 3000;
 
         #region Internal parameters
-        internal const int SERVER_BACKLOG_SIZE = 100;
+        internal const int SERVER_BACKLOG_SIZE = 0;
         internal const int LOWEST_POSSIBLE_REFRESH_RATE_MS = 100;
-        internal const string DEFAULT_IP_ADDRESS = "192.168.64.1";
-        internal static readonly int eventWaitTime = 10000;
+        internal const string DEFAULT_IP_ADDRESS = "192.168.164.65";
+        internal static readonly int eventWaitTime = 100000;
         internal static readonly int numberOfBytesToShowFromReceivedMsg = 50;
         internal static readonly int socketConnectAttempts = 10;
         internal static readonly int socketConnectAttemptTimeoutMs = 5000;

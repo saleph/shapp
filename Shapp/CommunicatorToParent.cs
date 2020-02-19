@@ -20,6 +20,7 @@ namespace Shapp {
                     systemMessage.Dispatch(server);
             };
             HelloFromParent.OnReceive += (socket, helloFromParent) => {
+                C.log.Info("Sending hello from child");
                 client.Send(new HelloFromChild() {
                     MyJobId = JobEnvVariables.GetMyJobId()
                 });

@@ -33,7 +33,7 @@ namespace ExampleProject {
         private static int numAnts = 5;
         private static int maxTime = 240;
         // left one core for accountability - mostly counting the best distances
-        private static int numThreads = Environment.ProcessorCount - 1;
+        private static int numThreads = 40;
         private static int synchronisationPeriod = 10;
         private static int bestLengthCheckPeriod = 1;
         static ACOExample() {

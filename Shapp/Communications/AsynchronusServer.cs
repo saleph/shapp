@@ -11,6 +11,7 @@ namespace Shapp {
         private readonly ManualResetEvent connectionEstablished = new ManualResetEvent(false);
         private readonly object isListeningLock = new object();
         private bool isListening;
+        private Socket listenerSocket;
         private readonly int port;
 
         public bool IsListening { get { lock (isListeningLock) { return isListening; } } set { lock (isListeningLock) { isListening = value; } } }
@@ -62,17 +63,17 @@ namespace Shapp {
             IPEndPoint localEndPoint = new IPEndPoint(ipAddress, port);
             C.log.Debug(string.Format("Listening on {0}", localEndPoint.ToString()));
 
-            Socket listener = new Socket(AddressFamily.InterNetwork,
+            listenerSocket = new Socket(AddressFamily.InterNetwork,
                 SocketType.Stream, ProtocolType.Tcp);
 
-            listener.Bind(localEndPoint);
-            listener.Listen(C.SERVER_BACKLOG_SIZE);
+            listenerSocket.Bind(localEndPoint);
+            listenerSocket.Listen(C.SERVER_BACKLOG_SIZE);
             connectionEstablished.Reset();
-            listener.BeginAccept(new AsyncCallback(AcceptCallback), listener);
+            listenerSocket.BeginAccept(new AsyncCallback(AcceptCallback), listenerSocket);
             while (IsListening) {
-                if (connectionEstablished.WaitOne(C.eventWaitTime)) {
+                if (connectionEstablished.WaitOne()) {
                     // it was not a timeout - prepare new callback
-                    listener.BeginAccept(new AsyncCallback(AcceptCallback), listener);
+                    
                 }
                 connectionEstablished.Reset();
             }
@@ -89,16 +90,17 @@ namespace Shapp {
         }
 
         private void AcceptCallback(IAsyncResult ar) {
+            listenerSocket.BeginAccept(new AsyncCallback(AcceptCallback), listenerSocket);
             connectionEstablished.Set();
-            C.log.Info("Connection established with a client");
             Socket listener = (Socket)ar.AsyncState;
             Socket handler = listener.EndAccept(ar);
+            C.log.Info("Connection established with a client " + handler.RemoteEndPoint.ToString());
             NewClientConnectedEvent?.Invoke(handler);
             while (IsListening) {
                 try {
                     asynchronousCommunicationUtils.ListenForMessages(handler);
                 } catch (SocketException) {
-                    C.log.Info("Connection lost towards " + handler.ToString());
+                    C.log.Info("Connection lost towards " + handler.RemoteEndPoint.ToString());
                     return;
                 }
             }

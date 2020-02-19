@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Net.Sockets;
+using System.Threading;
 
 namespace Shapp.Communications.Protocol {
     [Serializable]
@@ -12,6 +13,7 @@ namespace Shapp.Communications.Protocol {
         public static event Callback OnReceive;
         public void Dispatch(Socket sender) {
             Shapp.C.log.Info("HelloFromParent received");
+            //Thread.Sleep(1000);
             OnReceive?.Invoke(sender, this);
         }
     }

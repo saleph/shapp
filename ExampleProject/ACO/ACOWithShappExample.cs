@@ -10,7 +10,9 @@ namespace ExampleProject.ACO {
 
         public static readonly int numCities = 500;
         public static readonly int numAntsPerWorker = 5;
-        public static readonly int numberOfWorkers = Environment.ProcessorCount - 1;
+
+
+        public static readonly int numberOfWorkers = 16;
 
         public static readonly int duration = 240;
         public static readonly int workerStatusReportingPeriodInSeconds = 10;
