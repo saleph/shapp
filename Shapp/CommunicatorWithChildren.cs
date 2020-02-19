@@ -41,9 +41,10 @@ namespace Shapp {
             };
         }
 
+        static int noOfChild = 0;
         private static void AddDelegatesForProtocolMessages() {
             Communications.Protocol.HelloFromChild.OnReceive += (socket, helloFromChild) => {
-                C.log.Info("Received HelloFromChild from " + helloFromChild.MyJobId + ", ip: " + socket.RemoteEndPoint.ToString());
+                C.log.Info("Received " + ++noOfChild + " HelloFromChild from " + helloFromChild.MyJobId + ", ip: " + socket.RemoteEndPoint.ToString());
                 jobIdToSocket.Add(helloFromChild.MyJobId, socket);
             };
         }

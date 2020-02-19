@@ -50,7 +50,7 @@ namespace Shapp {
                 new AsyncCallback(ConnectCallback), client);
         }
 
-        public void ConnectOld(IPAddress ipAddress, int port = C.DEFAULT_PORT) {
+        public void Connect(IPAddress ipAddress, int port = C.DEFAULT_PORT) {
             var attempts = C.socketConnectAttempts;
             IPEndPoint remoteEP = new IPEndPoint(ipAddress, port);
             IsListening = true;
@@ -70,7 +70,7 @@ namespace Shapp {
             throw new ShappException(string.Format("Connection towards {0} failed", remoteEP.ToString()));
         }
 
-        public void Connect(IPAddress ipAddress, int port = C.DEFAULT_PORT)
+        public void ConnectNew(IPAddress ipAddress, int port = C.DEFAULT_PORT)
         {
             var attempts = C.socketConnectAttempts;
             remoteEP = new IPEndPoint(ipAddress, port);

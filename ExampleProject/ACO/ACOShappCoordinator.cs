@@ -61,6 +61,7 @@ namespace ExampleProject.ACO {
         private void WaitForWorkersToBeAbleToCommunicate() {
             C.log.Info("Waiting for workers to connect");
             allWorkersConnected.WaitOne();
+            Thread.Sleep(1000);
             C.log.Info("All workers connected");
         }
 
