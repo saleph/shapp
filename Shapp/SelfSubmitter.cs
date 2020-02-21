@@ -15,7 +15,7 @@ namespace Shapp {
     /// Feel free to extend!
     /// </summary>
     public class SelfSubmitter {
-        private readonly NewJobSubmitter NewJobSubmitter;
+        public readonly NewJobSubmitter NewJobSubmitter;
         private static readonly List<JobDescriptor> activeGlobalJobDescriptors = new List<JobDescriptor>();
 
         /// <summary>

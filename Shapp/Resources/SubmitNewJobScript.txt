@@ -15,8 +15,9 @@ work = dict(
     TransferInputFiles=r"{6}",
     Arguments=r"{7}",
     Env="{8}",
-    Requirements="{9}",
-    GetEnv="True"
+    Requirements='{9}'
+    #,
+    #GetEnv="True"
 )
 work = dict((k, v) for k, v in work.iteritems() if v)
 schedd = htcondor.Schedd()

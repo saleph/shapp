@@ -53,6 +53,7 @@ namespace ExampleProject.ACO {
             for (int i = 0; i < numberOfWorkers; ++i) {
                 string[] arguments = { i.ToString() };
                 var submitter = new SelfSubmitter(null, arguments);
+                submitter.NewJobSubmitter.TargetOperatingSystem = TargetOperatingSystem.ANY;
                 var descriptor = submitter.Submit();
                 descriptors.Add(descriptor);
             }
