@@ -71,17 +71,25 @@ namespace ExampleProject.ACO {
             descriptors.ForEach((d) => d.Send(startProcessing));
         }
 
+        private static int GetTime()
+        {
+            TimeSpan t = (DateTime.UtcNow - new DateTime(1970, 1, 1));
+            return (int)t.TotalSeconds;
+        }
+
         private void DoMainProcessingLoop() {
-            int time = 0;
+            int startTime = GetTime();
+            int iterations = 0;
+            int lastSynchronisation = GetTime();
             C.log.Info("Entering UpdateAnts - UpdatePheromones loop");
-            while (time < maxTime) {
+            while (GetTime() - startTime < maxTime) {
                 List<WorkerStatus> statuses = GetStatusesWaitingForProcessing();
                 if (statuses.Count >= 0) {
                     ProcessWorkerStatuses(statuses);
                 }
 
                 Thread.Sleep(1000);
-                time += 1;
+                iterations += 1;
             }
 
             C.log.Info("Ending...");

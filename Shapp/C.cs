@@ -14,7 +14,7 @@ namespace Shapp {
         public const int DEFAULT_JOB_STATE_REFRESH_INTERVAL_MS = 3000;
 
         #region Internal parameters
-        internal const int SERVER_BACKLOG_SIZE = 20;
+        internal const int SERVER_BACKLOG_SIZE = 100;
         internal const int LOWEST_POSSIBLE_REFRESH_RATE_MS = 100;
         internal const string DEFAULT_IP_ADDRESS = "192.168.164.65";
         internal static readonly int eventWaitTime = 100000;
