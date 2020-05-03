@@ -33,7 +33,7 @@ public class SimpleLogger {
     private readonly string logFilename;
     private readonly object fileLock = new object();
 
-    public LogLevel FileLoggingLevel = LogLevel.INFO;
+    public LogLevel FileLoggingLevel = LogLevel.TRACE;
     public LogLevel ConsoleLoggingLevel = LogLevel.INFO;
 
 

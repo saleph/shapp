@@ -48,6 +48,11 @@
     <Compile Include="Communications\AsynchronousCommunicationUtils.cs" />
     <Compile Include="Communications\AsynchronusServer.cs" />
     <Compile Include="C.cs" />
+    <Compile Include="Communications\Protocol\QueueTaskReturnValue.cs" />
+    <Compile Include="Communications\Protocol\QueueTask.cs" />
+    <Compile Include="Communications\Protocol\RegisterWorker.cs" />
+    <Compile Include="Communications\Protocol\StopWorker.cs" />
+    <Compile Include="Communications\Protocol\RegisterWorkerConfirm.cs" />
     <Compile Include="CommunicatorWithChildren.cs" />
     <Compile Include="Communications\Protocol\HelloFromParent.cs" />
     <Compile Include="Communications\Protocol\HelloFromChild.cs" />
@@ -76,9 +81,12 @@
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
       <DependentUpon>ShappSettins.settings</DependentUpon>
     </Compile>
-    <Compile Include="Communications\Protocol\SystemMessage.cs" />
+    <Compile Include="Communications\Protocol\ISystemMessage.cs" />
     <Compile Include="HTCondor\TargetOperatingSystem.cs" />
     <Compile Include="Utils\SimpleLogger.cs" />
+    <Compile Include="Utils\WorkQueue\IData.cs" />
+    <Compile Include="Utils\WorkQueue\Worker.cs" />
+    <Compile Include="Utils\WorkQueue\WorkQueue.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Properties\Resources.resx">

@@ -16,13 +16,15 @@ namespace Shapp {
     /// a whole into one env variable.
     /// </summary>
     [DataContract]
-    public class EnvVarsList {
+    class EnvVarsList {
         [XmlIgnore]
         public IPAddress IPAddress;
         [XmlElement("IPAddress")]
 #pragma warning disable IDE0051 // Remove unused private members
+#pragma warning disable IDE1006 // Naming Styles
         // workaround for serialization of the IPAddress class
         public string ____zzzxxxxxdfhfjddhfuIPAddressForXml
+#pragma warning restore IDE1006 // Naming Styles
 #pragma warning restore IDE0051 // Remove unused private members
         {
             get { return IPAddress.ToString(); }

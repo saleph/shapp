@@ -37,7 +37,7 @@ namespace ExampleProject {
         private static int synchronisationPeriod = 10;
         private static int bestLengthCheckPeriod = 1;
         static ACOExample() {
-            for (int i = 0; i < numThreads; i++) {
+            for (int i = 0; i < 80; i++) {
                 randoms.Add(new Random(i + 1));
             }
         }

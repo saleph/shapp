@@ -7,19 +7,18 @@ using System.Threading.Tasks;
 
 namespace ExampleProject.ACO {
     [Serializable]
-    internal class WorkerStatus : Shapp.ISystemMessage {
-        public delegate void Callback(Socket client, WorkerStatus workerStatus);
-        public static event Callback OnReceive;
+internal class WorkerStatus : Shapp.ISystemMessage {
+    public delegate void Callback(Socket client, WorkerStatus workerStatus);
+    public static event Callback OnReceive;
 
-        public int[] bestTrail;
-        public double bestPathLength;
-        public double[][] pheromones;
-        public Shapp.JobId MyJobId = Shapp.JobEnvVariables.GetMyJobId();
-        public int iterations;
+    public int[] bestTrail;
+    public double bestPathLength;
+    public double[][] pheromones;
+    public Shapp.JobId MyJobId = Shapp.JobEnvVariables.GetMyJobId();
+    public int iterations;
 
-        public void Dispatch(Socket sender) {
-            Shapp.C.log.Debug("WorkerStatus");
-            OnReceive?.Invoke(sender, this);
-        }
+    public void Dispatch(Socket sender) {
+        OnReceive?.Invoke(sender, this);
     }
+}
 }

@@ -50,11 +50,7 @@ namespace Shapp {
         }
 
         public static int GetMyDestinationPortForChildren() {
-            if (JobVariables.NestLevel == 0) {
-                return JobVariables.CommunicationPort;
-            }
-            // if we are not the root, the port has already been used.
-            return JobVariables.CommunicationPort + 1;
+            return JobVariables.CommunicationPort;
         }
     }
 }

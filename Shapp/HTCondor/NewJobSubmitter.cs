@@ -161,7 +161,7 @@ namespace Shapp {
 
         private string BuildEnvironmentalVariables() {
             var envVarsList = new EnvVarsList() {
-                IPAddress = GetLocalIPAddress(),
+                IPAddress = GetThisNodeIpAddress(),
                 NestLevel = JobEnvVariables.GetNestLevel() + 1,
                 CommunicationPort = C.DEFAULT_PORT,
                 ___xmlJobId = jobIdHtcondorQuery

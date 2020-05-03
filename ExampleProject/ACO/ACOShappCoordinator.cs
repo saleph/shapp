@@ -28,15 +28,16 @@ namespace ExampleProject.ACO {
             WaitForWorkersToBeAbleToCommunicate();
             InformWorkersAboutProcessingStarted();
             DoMainProcessingLoop();
+var status = workersStatutes.Dequeue();
         }
 
         private void InjectDelegatesForMessages() {
-            WorkerStatus.OnReceive += (socket, workerStatus) => {
-                C.log.Info("Received worker status from " + workerStatus.MyJobId);
-                lock (workersStatusesLock) {
-                    workersStatutes.Enqueue(workerStatus);
-                }
-            };
+        WorkerStatus.OnReceive += (socket, workerStatus) => {
+            C.log.Info("Received worker status from " + workerStatus.MyJobId);
+            lock (workersStatusesLock) {
+                workersStatutes.Enqueue(workerStatus);
+            }
+        };
             Shapp.Communications.Protocol.HelloFromChild.OnReceive += (socket, helloFromChild) => {
                 ++numberOfConnectedWorkers;
                 if (numberOfConnectedWorkers == numberOfWorkers) {
