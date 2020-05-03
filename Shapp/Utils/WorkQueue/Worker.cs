@@ -45,6 +45,7 @@ namespace Shapp.Utils.WorkQueue {
         private void RunTask(QueueTask queueTask) {
             var returnData = queueTask.functionToRun.Invoke(queueTask.InputData);
             CommunicatorToParent.Send(new QueueTaskReturnValue() {
+                Id = queueTask.Id,
                 Name = queueTask.Name,
                 OutputData = returnData
             });

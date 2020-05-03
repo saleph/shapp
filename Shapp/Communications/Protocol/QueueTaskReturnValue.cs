@@ -13,12 +13,17 @@ namespace Shapp.Communications.Protocol {
         public delegate void Callback(Socket client, QueueTaskReturnValue queueTask);
         public static event Callback OnReceive;
 
+
+        /// <summary>
+        /// Task counter from corresponding QueueTask.
+        /// </summary>
+        public int Id;
         /// <summary>
         /// Task name. The return message will have the same name.
         /// </summary>
         public string Name = QueueTask.DEFAULT_NAME;
         /// <summary>
-        /// Input data structures to work with.
+        /// The result of the task funciton
         /// </summary>
         public IData OutputData;
 

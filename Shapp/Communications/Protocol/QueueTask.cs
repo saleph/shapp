@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Sockets;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 
@@ -13,8 +14,14 @@ namespace Shapp.Communications.Protocol {
         public delegate void Callback(Socket client, QueueTask queueTask);
         public static event Callback OnReceive;
         internal static readonly string DEFAULT_NAME = "Default task";
+        private static int COUNTER = 0;
 
         public delegate IData TaskFunction(IData input);
+
+        /// <summary>
+        /// Task counter, not meant to be changed.
+        /// </summary>
+        public readonly int Id = Interlocked.Increment(ref COUNTER);
 
         /// <summary>
         /// Task name. The return message will have the same name.
