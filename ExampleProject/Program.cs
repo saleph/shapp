@@ -8,6 +8,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
+using ExampleProject.QueueTest;
 using Shapp;
 
 namespace ExampleProject {
@@ -16,11 +17,25 @@ namespace ExampleProject {
 
         private const int WORKERS_POOL_SIZE = 10;
         static void Main(string[] args) {
-            //ACOExample.Run();
-            ACO.ACOWithShappExample.Run(args);
-            //ProgramForProtoTesting.MainMethod(args);
-            //Program main = new Program();
-            //main.Execute(args);
+            int scenario = 0;
+            switch (scenario) {
+                case 0:
+                    WorkQueueTest.Run();
+                    break;
+                case 1:
+                    ACOExample.Run();
+                    break;
+                case 2:
+                    ACO.ACOWithShappExample.Run(args);
+                    break;
+                case 3:
+                    ProgramForProtoTesting.MainMethod(args);
+                    break;
+                case 4:
+                    Program main = new Program();
+                    main.Execute(args);
+                    break;
+            }
         }
 
         public int Execute(string[] args) {

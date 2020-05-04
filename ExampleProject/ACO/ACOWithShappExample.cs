@@ -12,7 +12,7 @@ namespace ExampleProject.ACO {
         public static readonly int numAntsPerWorker = 5;
 
 
-        public static readonly int numberOfWorkers = 96;
+        public static readonly int numberOfWorkers = 3;
 
         public static readonly int duration = 10;
         public static readonly int workerStatusReportingPeriodInSeconds = 10;

@@ -16,7 +16,7 @@ namespace Shapp {
     /// a whole into one env variable.
     /// </summary>
     [DataContract]
-    class EnvVarsList {
+    public class EnvVarsList {
         [XmlIgnore]
         public IPAddress IPAddress;
         [XmlElement("IPAddress")]

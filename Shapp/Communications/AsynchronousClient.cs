@@ -62,7 +62,7 @@ namespace Shapp {
                 if (client.Connected) {
                     return;
                 } else {
-                    C.log.Info("Connection not established towards " + client.RemoteEndPoint.ToString() + "... Retrying");
+                    //C.log.Info("Connection not established towards " + client.RemoteEndPoint.ToString() + "... Retrying");
                     client.Close();
                     continue;
                 }

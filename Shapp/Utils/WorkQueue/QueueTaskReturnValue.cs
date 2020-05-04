@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 
-namespace Shapp.Communications.Protocol {
+namespace Shapp.Utils.WorkQueue {
     [Serializable]
     public class QueueTaskReturnValue : ISystemMessage {
         public delegate void Callback(Socket client, QueueTaskReturnValue queueTask);

@@ -7,20 +7,20 @@ using System.Threading.Tasks;
 using Shapp.Communications.Protocol;
 
 namespace Shapp.Utils.WorkQueue {
-    public class WorkQueue {
+    public static class WorkQueue {
 
-        private readonly Queue<QueueTask> tasksQueue = new Queue<QueueTask>();
-        private readonly Dictionary<int, TaskCompletionSource<IData>> promises = new Dictionary<int, TaskCompletionSource<IData>>();
-        private readonly Dictionary<Socket, JobId> socketToJid = new Dictionary<Socket, JobId>();
-        private readonly Dictionary<JobId, WorkerStatus> workers = new Dictionary<JobId, WorkerStatus>();
-        private readonly Queue<JobId> freeWorkersQueue = new Queue<JobId>();
+        private static readonly Queue<QueueTask> tasksQueue = new Queue<QueueTask>();
+        private static readonly Dictionary<int, TaskCompletionSource<IData>> promises = new Dictionary<int, TaskCompletionSource<IData>>();
+        private static readonly Dictionary<Socket, JobId> socketToJid = new Dictionary<Socket, JobId>();
+        private static readonly Dictionary<JobId, WorkerStatus> workers = new Dictionary<JobId, WorkerStatus>();
+        private static readonly Queue<JobId> freeWorkersQueue = new Queue<JobId>();
 
-        public void Initialize() {
+        public static void Initialize() {
             InjectCallbacks();
             CommunicatorWithChildren.InitializeServer();
         }
 
-        public void StopWorkers() {
+        public static void StopWorkers() {
             foreach (var worker in workers.Keys) {
                 CommunicatorWithChildren.SendToChild(worker, new StopWorker());
                 freeWorkersQueue.Clear();
@@ -28,16 +28,16 @@ namespace Shapp.Utils.WorkQueue {
             }
         }
 
-        public TaskCompletionSource<IData> Put(QueueTask task) {
+        public static Task<IData> Put(QueueTask task) {
             tasksQueue.Enqueue(task);
             promises[task.Id] = new TaskCompletionSource<IData>();
             if (freeWorkersQueue.Count > 0) {
                 DelegateTasksToWorkers();
             }
-            return promises[task.Id];
+            return promises[task.Id].Task;
         }
 
-        private void DelegateTasksToWorkers() {
+        private static void DelegateTasksToWorkers() {
             while (freeWorkersQueue.Count > 0) {
                 if (tasksQueue.Count == 0)
                     return;
@@ -50,7 +50,7 @@ namespace Shapp.Utils.WorkQueue {
             }
         }
 
-        private void InjectCallbacks() {
+        private static void InjectCallbacks() {
             RegisterWorker.OnReceive += (sender, registerWorker) => {
                 workers[registerWorker.JobId] = new WorkerStatus();
                 freeWorkersQueue.Enqueue(registerWorker.JobId);

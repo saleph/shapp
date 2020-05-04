@@ -48,8 +48,8 @@
     <Compile Include="Communications\AsynchronousCommunicationUtils.cs" />
     <Compile Include="Communications\AsynchronusServer.cs" />
     <Compile Include="C.cs" />
-    <Compile Include="Communications\Protocol\QueueTaskReturnValue.cs" />
-    <Compile Include="Communications\Protocol\QueueTask.cs" />
+    <Compile Include="Utils\WorkQueue\QueueTaskReturnValue.cs" />
+    <Compile Include="Utils\WorkQueue\QueueTask.cs" />
     <Compile Include="Communications\Protocol\RegisterWorker.cs" />
     <Compile Include="Communications\Protocol\StopWorker.cs" />
     <Compile Include="Communications\Protocol\RegisterWorkerConfirm.cs" />

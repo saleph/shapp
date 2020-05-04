@@ -7,19 +7,19 @@ using System.Threading.Tasks;
 using Shapp.Communications.Protocol;
 
 namespace Shapp.Utils.WorkQueue {
-    public class Worker {
-        private readonly ManualResetEvent workerRegistered = new ManualResetEvent(false);
-        private readonly ManualResetEvent killWorkerReceived = new ManualResetEvent(false);
+    public static class Worker {
+        private static readonly ManualResetEvent workerRegistered = new ManualResetEvent(false);
+        private static readonly ManualResetEvent killWorkerReceived = new ManualResetEvent(false);
 
-        private readonly List<Task> tasks = new List<Task>();
+        private static readonly List<Task> tasks = new List<Task>();
 
-        public void StartProcessingLoop() {
+        public static void StartProcessingLoop() {
             Initialize();
             // wait for termination, tasks are scheduled asynchronously
             killWorkerReceived.WaitOne();
         }
 
-        private void Initialize() {
+        private static void Initialize() {
             InjectReceptionCallbacks();
             CommunicatorToParent.Initialize();
             CommunicatorToParent.Send(new RegisterWorker() {
@@ -28,7 +28,7 @@ namespace Shapp.Utils.WorkQueue {
             workerRegistered.WaitOne();
         }
 
-        private void InjectReceptionCallbacks() {
+        private static void InjectReceptionCallbacks() {
             RegisterWorkerConfirm.OnReceive += (sender, cnf) => {
                 workerRegistered.Set();
             };
@@ -42,7 +42,7 @@ namespace Shapp.Utils.WorkQueue {
             };
         }
 
-        private void RunTask(QueueTask queueTask) {
+        private static void RunTask(QueueTask queueTask) {
             var returnData = queueTask.functionToRun.Invoke(queueTask.InputData);
             CommunicatorToParent.Send(new QueueTaskReturnValue() {
                 Id = queueTask.Id,
