@@ -27,7 +27,8 @@ namespace Shapp.Utils.WorkQueue {
         /// </summary>
         public IData OutputData;
 
-        public void Dispatch(Socket sender) {
+        public void Dispatch(Socket sender)
+        {
             OnReceive?.Invoke(sender, this);
         }
     }

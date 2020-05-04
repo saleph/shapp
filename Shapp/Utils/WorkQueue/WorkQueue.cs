@@ -23,9 +23,10 @@ namespace Shapp.Utils.WorkQueue {
         public static void StopWorkers() {
             foreach (var worker in workers.Keys) {
                 CommunicatorWithChildren.SendToChild(worker, new StopWorker());
-                freeWorkersQueue.Clear();
-                socketToJid.Clear();
             }
+            workers.Clear();
+            freeWorkersQueue.Clear();
+            socketToJid.Clear();
         }
 
         public static Task<IData> Put(QueueTask task) {
@@ -52,11 +53,16 @@ namespace Shapp.Utils.WorkQueue {
 
         private static void InjectCallbacks() {
             RegisterWorker.OnReceive += (sender, registerWorker) => {
-                workers[registerWorker.JobId] = new WorkerStatus();
-                freeWorkersQueue.Enqueue(registerWorker.JobId);
-                socketToJid[sender] = registerWorker.JobId;
+                C.log.Info("RegisterWorker received");
+                var jobId = registerWorker.JobId;
+                workers[jobId] = new WorkerStatus();
+                freeWorkersQueue.Enqueue(jobId);
+                socketToJid[sender] = jobId;
+                CommunicatorWithChildren.SendToChild(jobId, new RegisterWorkerConfirm());
+                DelegateTasksToWorkers();
             };
             QueueTaskReturnValue.OnReceive += (sender, returnValue) => {
+                C.log.Info("QueueTaskReturnValue received");
                 promises[returnValue.Id].SetResult(returnValue.OutputData);
                 var jid = socketToJid[sender];
                 freeWorkersQueue.Enqueue(jid);

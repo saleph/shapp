@@ -8,9 +8,11 @@ using Shapp.Utils.WorkQueue;
 
 namespace ExampleProject.QueueTest {
 
+    [Serializable]
     public class InputData : IData {
         public List<int> numsToMultiply = new List<int>();
     }
+    [Serializable]
     public class OutputData : IData {
         public List<int> multipliedNums = new List<int>();
         public int returnCode;
@@ -46,6 +48,7 @@ namespace ExampleProject.QueueTest {
             input.numsToMultiply.Add(15);
 
             // put QueueTast for execution
+            C.log.Info("Send to multiply by 2: " + input.numsToMultiply[0]);
             var task = WorkQueue.Put(new QueueTask() {
                 functionToRun = ExampleFunc,
                 InputData = input,
@@ -55,8 +58,9 @@ namespace ExampleProject.QueueTest {
             // asynchronously hang on task promise. Will return when the soultion is delivered
             IData result = task.Result;
             if (result is OutputData output) {
-                Console.WriteLine("Received answer: " + output.multipliedNums[0]);
+                C.log.Info("Received answer: " + output.multipliedNums[0]);
             }
+            WorkQueue.StopWorkers();
         }
 
         private static IData ExampleFunc(IData data) {

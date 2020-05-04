@@ -37,7 +37,8 @@ namespace Shapp.Utils.WorkQueue {
         public TaskFunction functionToRun;
 
 
-        public void Dispatch(Socket sender) {
+        public void Dispatch(Socket sender)
+        {
             OnReceive?.Invoke(sender, this);
         }
     }
